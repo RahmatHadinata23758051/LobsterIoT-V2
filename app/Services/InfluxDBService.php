@@ -69,6 +69,34 @@ class InfluxDBService
     }
 
     /**
+     * Query and return pivoted results as a clean associative array.
+     */
+    public function queryParsed(string $fluxQuery): array
+    {
+        $tables = $this->query($fluxQuery);
+        $results = [];
+
+        foreach ($tables as $table) {
+            foreach ($table->records as $record) {
+                $row = $record->values;
+                $cleanRow = [
+                    'time' => $record->getTime()
+                ];
+
+                foreach ($row as $key => $val) {
+                    if (!in_array($key, ['result', 'table', '_start', '_stop', '_time', '_measurement', '_field', '_value', 'iot_node_serial_number', 'cage_code'])) {
+                        $cleanRow[$key] = is_numeric($val) ? (float) $val : $val;
+                    }
+                }
+
+                $results[] = $cleanRow;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
      * Get raw client instance for advanced operations.
      */
     public function getClient(): Client

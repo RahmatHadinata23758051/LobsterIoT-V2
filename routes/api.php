@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\v2\SensorTypeController;
 use App\Http\Controllers\Api\v2\FeedingLogController;
 use App\Http\Controllers\Api\v2\WeatherController;
 use App\Http\Controllers\Api\v2\AiProxyController;
+use App\Http\Controllers\Api\v2\MonitoringController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -54,6 +55,11 @@ Route::prefix('v2')->group(function () {
 
         // AI Proxy
         Route::post('detect', [AiProxyController::class, 'detect']);
+
+        // IoT Telemetry Monitoring
+        Route::get('iot-nodes', [MonitoringController::class, 'activeNodes']);
+        Route::get('monitoring/dashboard/{serial_number}', [MonitoringController::class, 'dashboard']);
+        Route::get('monitoring/history/{serial_number}', [MonitoringController::class, 'history']);
     });
 });
 
