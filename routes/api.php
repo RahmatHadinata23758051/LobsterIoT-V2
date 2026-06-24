@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\v2\CageController;
 use App\Http\Controllers\Api\v2\CameraController;
 use App\Http\Controllers\Api\v2\OperatorController;
 use App\Http\Controllers\Api\v2\RegionController;
+use App\Http\Controllers\Api\v2\SensorTypeController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -37,8 +38,12 @@ Route::prefix('v2')->group(function () {
         // Regions (Provinces & Cities)
         Route::get('provinces', [RegionController::class, 'provinces']);
         Route::get('cities', [RegionController::class, 'cities']);
+
+        // Sensor Types
+        Route::get('sensor-types', [SensorTypeController::class, 'index']);
     });
 });
+
 
 
 
