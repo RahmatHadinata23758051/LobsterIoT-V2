@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v2\AuthController;
 use App\Http\Controllers\Api\v2\ThresholdController;
 use App\Http\Controllers\Api\v2\DeviceOperationController;
+use App\Http\Controllers\Api\v2\CageController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -20,6 +21,10 @@ Route::prefix('v2')->group(function () {
         Route::post('devices/validate-serial', [DeviceOperationController::class, 'validateSerial']);
         Route::post('devices/activate', [DeviceOperationController::class, 'activate']);
         Route::post('maintenances', [DeviceOperationController::class, 'submitMaintenance']);
+
+        // Cages (KJA)
+        Route::apiResource('cages', CageController::class);
     });
 });
+
 
