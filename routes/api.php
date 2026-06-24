@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\v2\OperatorController;
 use App\Http\Controllers\Api\v2\RegionController;
 use App\Http\Controllers\Api\v2\SensorTypeController;
 use App\Http\Controllers\Api\v2\FeedingLogController;
+use App\Http\Controllers\Api\v2\WeatherController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -46,8 +47,12 @@ Route::prefix('v2')->group(function () {
         // Feeding Logs
         Route::get('feeding-logs', [FeedingLogController::class, 'index']);
         Route::post('feeding-logs', [FeedingLogController::class, 'store']);
+
+        // Weather
+        Route::get('weather/latest', [WeatherController::class, 'latest']);
     });
 });
+
 
 
 
