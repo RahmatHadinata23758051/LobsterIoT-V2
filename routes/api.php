@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\v2\DeviceOperationController;
 use App\Http\Controllers\Api\v2\CageController;
 use App\Http\Controllers\Api\v2\CameraController;
 use App\Http\Controllers\Api\v2\OperatorController;
+use App\Http\Controllers\Api\v2\RegionController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -32,8 +33,13 @@ Route::prefix('v2')->group(function () {
 
         // Operators
         Route::apiResource('operators', OperatorController::class);
+
+        // Regions (Provinces & Cities)
+        Route::get('provinces', [RegionController::class, 'provinces']);
+        Route::get('cities', [RegionController::class, 'cities']);
     });
 });
+
 
 
 
