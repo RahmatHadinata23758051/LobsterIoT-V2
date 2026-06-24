@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\v2\ThresholdController;
 use App\Http\Controllers\Api\v2\DeviceOperationController;
 use App\Http\Controllers\Api\v2\CageController;
 use App\Http\Controllers\Api\v2\CameraController;
+use App\Http\Controllers\Api\v2\OperatorController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -28,8 +29,12 @@ Route::prefix('v2')->group(function () {
 
         // Cameras
         Route::apiResource('cameras', CameraController::class);
+
+        // Operators
+        Route::apiResource('operators', OperatorController::class);
     });
 });
+
 
 
 
