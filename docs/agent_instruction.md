@@ -32,6 +32,8 @@ Membangun frontend aplikasi web dasbor pemantauan IoT, integrasi peta dinamis, p
 *   **No Code Execution for Now**: Dilarang menulis program atau kode program fungsional frontend sampai fase perencanaan ini disetujui sepenuhnya oleh user.
 *   **Mock Availability**: Jika REST API backend belum siap, wajib menyediakan data sensor tiruan (*mock data*) dan mock bounding box agar UI/UX tetap dapat diverifikasi.
 *   **Git Integrity**: Semua file frontend wajib berada di branch `frontend` pada subfolder `Frontend`.
+*   **No AI Slop (Strict Enforcement)**: Dilarang menggunakan placeholder comments (`// TODO: implement`, `// ... rest of code unchanged`). Tulis kode fungsional secara utuh, bersih, dan aman. Hindari desain generik tanpa konsep.
+
 
 ---
 
