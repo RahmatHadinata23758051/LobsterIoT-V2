@@ -232,3 +232,19 @@ Logika pendukung yang digunakan secara universal di seluruh layer aplikasi.
 *   [ ] AI Proxy `/api/detect` berhasil meneruskan request citra Base64 ke FastAPI dan menyimpan log JSON ke SQLite WAL tanpa kegagalan lock database.
 *   [ ] Modul penarikan data historis berhasil mengekspor file PDF dan Excel yang tidak korup.
 *   [ ] Seluruh konfigurasi sensitif diletakkan di dalam file `.env`.
+
+---
+
+## 5. Anti-AI-Slop Code & Design Standards (Strict Enforcement)
+
+Untuk memastikan bahwa proyek Lobsense V2.0 dikembangkan dengan standar kualitas tertinggi, baik tim developer manusia maupun AI Agent wajib mematuhi aturan anti-slop berikut:
+
+### 5.1. Anti-Slop Brain (Kualitas Kode & Logika)
+*   **Larangan Komentar Pembuat Malas**: Dilarang keras menulis komentar placeholder seperti `// TODO: implement`, `// ... code unchanged`, atau `// logic here`. Semua file harus ditulis secara lengkap dan siap pakai.
+*   **Abstraksi & Duplikasi**: Hindari pengulangan logika. Jika kode duplikat terjadi lebih dari dua kali, logika tersebut wajib diekstraksi menjadi service/utility terpusat.
+*   **Penanganan Error Proaktif**: Semua operasi asinkron wajib dibungkus dengan blok error handling (try-catch) yang menangani kasus kegagalan (misalnya database mati, API timeout) secara anggun.
+
+### 5.2. Anti-Slop Design (Kualitas Visual & UI/UX)
+*   **Desain Unik & Berkarakter**: Ban penuh terhadap desain generik "AI Slop" (seperti font standar Inter + warna ungu/biru gradien tanpa konsep). Desain frontend wajib menggunakan palet warna harmonis custom, tipografi terencana, transisi visual yang halus, dan tata letak yang berani (Swiss brutalist, minimalist, atau soft UI).
+*   **Larangan Elemen Kosong (No Placeholders)**: Dilarang menampilkan teks/ikon placeholder, gambar dummy bawaan, atau link kosong di antarmuka produksi. Jika elemen UI ditampilkan, data di dalamnya harus berupa representasi data nyata.
+

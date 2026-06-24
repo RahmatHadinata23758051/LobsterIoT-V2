@@ -37,6 +37,8 @@ Membangun backend REST API murni, modul ingesti data telemetri MQTT privat, API 
 *   **No Code Execution for Now**: Dilarang menulis program atau kode program backend fungsional sampai fase perencanaan dan PRD ini disetujui sepenuhnya oleh user.
 *   **Freshwater Metrics**: Parameter salinitas dinonaktifkan. Gunakan threshold air tawar default (Suhu: 24-30°C, pH: 6.5-8.5, TDS: 150-400 ppm, DO: > 5 mg/L).
 *   **Git Integrity**: Semua file backend wajib berada di branch `backend` pada subfolder `Backend`.
+*   **No AI Slop (Strict Enforcement)**: Dilarang menggunakan placeholder comments (`// TODO: implement`, `// ... rest of code unchanged`). Tulis kode fungsional secara utuh, bersih, dan aman.
+
 
 ---
 
