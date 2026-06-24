@@ -39,5 +39,10 @@ return [
         'key' => env('OPENWEATHER_API_KEY'),
     ],
 
+    'yolo' => [
+        'url' => env('YOLO_INFERENCE_URL', 'http://127.0.0.1:8000/predict'),
+    ],
+
 ];
+
 

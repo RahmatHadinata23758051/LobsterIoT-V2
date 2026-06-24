@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\v2\RegionController;
 use App\Http\Controllers\Api\v2\SensorTypeController;
 use App\Http\Controllers\Api\v2\FeedingLogController;
 use App\Http\Controllers\Api\v2\WeatherController;
+use App\Http\Controllers\Api\v2\AiProxyController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -50,6 +51,9 @@ Route::prefix('v2')->group(function () {
 
         // Weather
         Route::get('weather/latest', [WeatherController::class, 'latest']);
+
+        // AI Proxy
+        Route::post('detect', [AiProxyController::class, 'detect']);
     });
 });
 
