@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v2\AuthController;
 use App\Http\Controllers\Api\v2\ThresholdController;
+use App\Http\Controllers\Api\v2\DeviceOperationController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -14,5 +15,11 @@ Route::prefix('v2')->group(function () {
         // Threshold configurations
         Route::get('thresholds', [ThresholdController::class, 'index']);
         Route::post('thresholds/bulk-update', [ThresholdController::class, 'bulkUpdate']);
+
+        // Device Operations
+        Route::post('devices/validate-serial', [DeviceOperationController::class, 'validateSerial']);
+        Route::post('devices/activate', [DeviceOperationController::class, 'activate']);
+        Route::post('maintenances', [DeviceOperationController::class, 'submitMaintenance']);
     });
 });
+
