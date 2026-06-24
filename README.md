@@ -16,23 +16,177 @@ Backend Lobsense V2.0 dirancang menggunakan arsitektur microservices terdekopel 
 
 ---
 
-## 📊 Skema Database (ERD)
+## 📊 Skema Database Relasional (PostgreSQL 16+)
 
-Berikut adalah visualisasi diagram hubungan entitas (Entity-Relationship Diagram) untuk database Lobsense V2.0 yang di-generate menggunakan [dbdiagram.io](https://dbdiagram.io/):
+Berikut adalah detail kamus data skema tabel PostgreSQL 16+ yang digunakan untuk mempermudah pengerjaan tim backend:
 
-![Database Schema ERD](docs/images/database_schema.png)
+### 1. `users` (Manajemen Pengguna)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier unik pengguna |
+| `name` | VARCHAR(255) | NOT NULL | Nama lengkap pengguna |
+| `email` | VARCHAR(255) | UNIQUE, NOT NULL | Alamat email (untuk login) |
+| `role` | ENUM | NOT NULL, DEFAULT 'operator' | Role pengguna: `'operator'`, `'management'`, `'admin'` |
+| `password` | VARCHAR(255) | NOT NULL | Hash password (BCrypt) |
+| `profile_picture`| VARCHAR(255) | NULL | Nama file/path foto profil |
+| `remember_token` | VARCHAR(100) | NULL | Token sesi "remember me" |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Tanggal dibuat |
+| `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Tanggal diubah |
 
-> [!TIP]
-> **Petunjuk Update Gambar ERD:**
-> 1. Ekspor gambar diagram dari editor [dbdiagram.io](https://dbdiagram.io/) dalam format **PNG**.
-> 2. Simpan gambar tersebut dengan nama `database_schema.png` di dalam folder `docs/images/` pada repositori ini.
-> 3. Commit dan push gambar tersebut ke repositori remote untuk memperbarui diagram di atas.
+### 2. `provinces` (Data Provinsi)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier unik provinsi |
+| `code` | VARCHAR(20) | UNIQUE, NOT NULL | Kode BPS provinsi |
+| `name` | VARCHAR(100) | NOT NULL | Nama provinsi |
+
+### 3. `cities` (Data Kota / Kabupaten)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier unik kota |
+| `province_id` | BIGINT | FOREIGN KEY, NOT NULL | Relasi ke `provinces.id` (ON DELETE CASCADE) |
+| `code` | VARCHAR(20) | UNIQUE, NOT NULL | Kode BPS kota |
+| `name` | VARCHAR(100) | NOT NULL | Nama kota / kabupaten |
+
+### 4. `edge_gateways` (Perangkat Edge Gateway)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier unik gateway |
+| `city_id` | BIGINT | FOREIGN KEY, NULL | Relasi ke `cities.id` (ON DELETE SET NULL) |
+| `serial_number` | VARCHAR(100) | UNIQUE, NOT NULL | Serial number perangkat fisik |
+| `ram_memory` | VARCHAR(50) | NULL | Spesifikasi kapasitas RAM |
+| `cpu_speed` | VARCHAR(50) | NULL | Spesifikasi frekuensi CPU |
+| `operating_system` | VARCHAR(100) | NULL | OS perangkat (misal: Linux Armbian) |
+| `runtime_framework` | VARCHAR(100) | NULL | Runtime framework (misal: Python/Go/Node) |
+| `power_supply_type` | VARCHAR(100) | NULL | Sumber daya (misal: Solar Panel / AC) |
+| `voltage_level` | VARCHAR(50) | NULL | Level voltase input |
+| `ip_address` | VARCHAR(45) | NULL | IP Local / Public perangkat |
+| `gateway_ip` | VARCHAR(45) | NULL | IP Gateway jaringan internet |
+| `latitude` | DECIMAL(11,8) | NULL | Koordinat latitude instalasi |
+| `longitude` | DECIMAL(11,8) | NULL | Koordinat longitude instalasi |
+| `max_connected_nodes` | INT | DEFAULT 50 | Limit maksimal koneksi IoT node |
+| `device_photo` | VARCHAR(255) | NULL | Path foto fisik perangkat |
+| `installation_photo` | VARCHAR(255) | NULL | Path foto pemasangan di lapangan |
+| `handover_signature` | VARCHAR(255) | NULL | Path tanda tangan serah terima |
+| `installed_at` | TIMESTAMP | NULL | Tanggal pemasangan fisik |
+| `activated_at` | TIMESTAMP | NULL | Tanggal aktivasi perangkat |
+| `activated_by` | BIGINT | FOREIGN KEY, NULL | Relasi ke `users.id` (ON DELETE SET NULL) |
+
+### 5. `iot_nodes` (Perangkat IoT Node Sensor)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier unik IoT node |
+| `city_id` | BIGINT | FOREIGN KEY, NOT NULL | Relasi ke `cities.id` (ON DELETE CASCADE) |
+| `owner_id` | BIGINT | FOREIGN KEY, NOT NULL | Relasi ke `users.id` pemilik (ON DELETE CASCADE) |
+| `edge_gateway_id` | BIGINT | FOREIGN KEY, NULL | Relasi ke `edge_gateways.id` (ON DELETE SET NULL) |
+| `gateway_channel_number` | BIGINT | NULL | Nomor channel relay pada gateway |
+| `serial_number` | VARCHAR(100) | UNIQUE, NOT NULL | Serial number fisik node |
+| `ip_address` | VARCHAR(45) | NULL | IP Local node |
+| `gateway_ip` | VARCHAR(45) | NULL | IP Gateway penampung |
+| `latitude` | DECIMAL(11,8) | NULL | Koordinat latitude node |
+| `longitude` | DECIMAL(11,8) | NULL | Koordinat longitude node |
+| `device_photo` | VARCHAR(255) | NULL | Path foto fisik node |
+| `installation_photo` | VARCHAR(255) | NULL | Path foto pemasangan node |
+| `handover_signature` | VARCHAR(255) | NULL | Path tanda tangan serah terima |
+| `installed_at` | TIMESTAMP | NULL | Tanggal pemasangan fisik |
+| `activated_at` | TIMESTAMP | NULL | Tanggal aktivasi |
+| `activated_by` | BIGINT | FOREIGN KEY, NULL | Relasi ke `users.id` (ON DELETE SET NULL) |
+
+### 6. `cages` (Manajemen KJA / Keramba Jaring Apung)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier unik keramba |
+| `cage_code` | VARCHAR(50) | UNIQUE, NOT NULL | Kode pengenal keramba (KJA) |
+| `latitude` | DECIMAL(11,8) | NOT NULL | Koordinat lokasi latitude keramba |
+| `longitude` | DECIMAL(11,8) | NOT NULL | Koordinat lokasi longitude keramba |
+| `volume_cubic_meters` | DOUBLE | NOT NULL | Volume kubikasi keramba |
+| `structure_condition` | VARCHAR(100) | NOT NULL | Status kelayakan fisik (misal: Baik, Retak) |
+| `lobster_count` | INT | DEFAULT 0 | Jumlah bibit lobster dalam keramba |
+| `lobster_age_days` | INT | NULL | Umur rata-rata lobster (dalam hari) |
+| `age_last_updated_at` | TIMESTAMP | NULL | Waktu pembaruan log umur lobster terakhir |
+
+### 7. `operators` (Manajemen Operator Lapangan)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier unik operator |
+| `full_name` | VARCHAR(150) | NOT NULL | Nama lengkap operator lapangan |
+| `phone_number` | VARCHAR(20) | NOT NULL | Nomor telepon WA/Telp operator |
+| `address` | TEXT | NOT NULL | Alamat tempat tinggal operator |
+
+### 8. `feeding_logs` (Pencatatan Pemberian Pakan)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier log pakan |
+| `cage_id` | BIGINT | FOREIGN KEY, NOT NULL | Relasi ke `cages.id` (ON DELETE CASCADE) |
+| `operator_id` | BIGINT | FOREIGN KEY, NOT NULL | Relasi ke `operators.id` (ON DELETE RESTRICT) |
+| `feed_session` | ENUM | NOT NULL | Waktu pakan: `'morning'`, `'afternoon'`, `'night'` |
+| `feed_type` | VARCHAR(100) | NOT NULL | Jenis pakan (misal: Pellet, Ikan Rucah) |
+| `weight_kg` | DOUBLE | NOT NULL | Berat pakan yang ditebar (kg) |
+
+### 9. `cameras` (Kamera CCTV Keramba)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier kamera |
+| `camera_code` | VARCHAR(50) | UNIQUE, NOT NULL | Kode pengenal CCTV fisik |
+| `cage_id` | BIGINT | FOREIGN KEY, NOT NULL | Relasi monitoring ke `cages.id` (ON DELETE CASCADE) |
+| `stream_url` | VARCHAR(255) | NULL | URL input stream RTSP kamera CCTV |
+| `is_active` | BOOLEAN | DEFAULT FALSE | Status keaktifan kamera |
+
+### 10. `sensor_types` (Tipe Parameter Sensor)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier tipe sensor |
+| `sensor_code` | VARCHAR(50) | UNIQUE, NOT NULL | Kode parameter sensor (misal: `ph`, `tds`) |
+| `value_range` | VARCHAR(100) | NULL | Batas ukur normal sensor |
+| `description` | TEXT | NULL | Deskripsi sensor / parameter |
+
+### 11. `thresholds` (Batas Aman & Kalibrasi Sensor Node)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier threshold |
+| `iot_node_serial_number` | VARCHAR(100) | FOREIGN KEY, NULL | Relasi ke `iot_nodes.serial_number` (ON DELETE SET NULL) |
+| `sensor_code` | VARCHAR(50) | FOREIGN KEY, NULL | Relasi ke `sensor_types.sensor_code` (ON DELETE SET NULL) |
+| `value_min` | DECIMAL(8,2) | DEFAULT 0.00 | Nilai minimum ambang batas aman |
+| `value_max` | DECIMAL(8,2) | DEFAULT 0.00 | Nilai maksimum ambang batas aman |
+| `offset_value` | DECIMAL(8,2) | DEFAULT 0.00 | Nilai bias kalibrasi sensor (+/-) |
+| `filter_rules` | VARCHAR(255) | NULL | Aturan penyaringan (misal: `clamp_extreme`) |
+
+### 12. `maintenances` (Log Pemeliharaan Lapangan)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier tiket pemeliharaan |
+| `iot_node_id` | BIGINT | FOREIGN KEY, NULL | Relasi ke `iot_nodes.id` (ON DELETE SET NULL) |
+| `operator_id` | BIGINT | FOREIGN KEY, NULL | Relasi operator pelapor ke `users.id` (ON DELETE SET NULL) |
+| `description` | TEXT | NOT NULL | Deskripsi kerusakan / pemeliharaan |
+| `device_photo` | VARCHAR(255) | NULL | Path bukti foto perbaikan |
+| `operator_signature` | VARCHAR(255) | NULL | Path tanda tangan digital operator |
+| `latitude` | DECIMAL(11,8) | NULL | Latitude saat perbaikan disubmit |
+| `longitude` | DECIMAL(11,8) | NULL | Longitude saat perbaikan disubmit |
+
+### 13. `weather_reports` (Log Prakiraan Cuaca Wilayah)
+| Nama Kolom | Tipe Data | Atribut | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Identifier log cuaca |
+| `province_code` | VARCHAR(20) | NOT NULL | Kode BPS provinsi |
+| `city_code` | VARCHAR(20) | NOT NULL | Kode BPS kota / kabupaten |
+| `district_code` | VARCHAR(20) | NOT NULL | Kode BPS kecamatan |
+| `village_code` | VARCHAR(20) | NOT NULL | Kode BPS kelurahan / desa |
+| `village_name` | VARCHAR(150) | NULL | Nama desa |
+| `district_name` | VARCHAR(150) | NULL | Nama kecamatan |
+| `city_name` | VARCHAR(150) | NULL | Nama kota / kabupaten |
+| `province_name` | VARCHAR(150) | NULL | Nama provinsi |
+| `temperature` | VARCHAR(50) | NULL | Suhu udara |
+| `humidity` | VARCHAR(50) | NULL | Kelembapan udara |
+| `wind_speed` | VARCHAR(50) | NULL | Kecepatan angin |
+| `rainfall` | VARCHAR(50) | NULL | Curah hujan |
+| `icon_url` | VARCHAR(255) | NULL | URL ikon grafis cuaca |
+| `weather_description` | VARCHAR(255) | NULL | Deskripsi kondisi cuaca |
 
 ---
 
-## 📁 Struktur Proyek (Clean Architecture)
+## 📁 Struktur Proyek (Layered Architecture)
 
-Backend menggunakan pembagian layer yang bersih (*layered architecture*) di dalam direktori `app/`:
+Backend menggunakan pembagian layer yang bersih (*layered architecture*) di dalam direktori `app/` untuk pemisahan logika:
 ```bash
 app/
 ├── Http/
