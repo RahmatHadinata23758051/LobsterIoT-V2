@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\v2\AuthController;
 use App\Http\Controllers\Api\v2\ThresholdController;
 use App\Http\Controllers\Api\v2\DeviceOperationController;
 use App\Http\Controllers\Api\v2\CageController;
+use App\Http\Controllers\Api\v2\CameraController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -24,7 +25,11 @@ Route::prefix('v2')->group(function () {
 
         // Cages (KJA)
         Route::apiResource('cages', CageController::class);
+
+        // Cameras
+        Route::apiResource('cameras', CameraController::class);
     });
 });
+
 
 
