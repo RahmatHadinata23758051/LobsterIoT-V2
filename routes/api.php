@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\v2\CameraController;
 use App\Http\Controllers\Api\v2\OperatorController;
 use App\Http\Controllers\Api\v2\RegionController;
 use App\Http\Controllers\Api\v2\SensorTypeController;
+use App\Http\Controllers\Api\v2\FeedingLogController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -41,8 +42,13 @@ Route::prefix('v2')->group(function () {
 
         // Sensor Types
         Route::get('sensor-types', [SensorTypeController::class, 'index']);
+
+        // Feeding Logs
+        Route::get('feeding-logs', [FeedingLogController::class, 'index']);
+        Route::post('feeding-logs', [FeedingLogController::class, 'store']);
     });
 });
+
 
 
 
