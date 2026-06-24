@@ -33,7 +33,7 @@ Membangun frontend aplikasi web dasbor pemantauan IoT, integrasi peta dinamis, p
 *   **Mock Availability**: Jika REST API backend belum siap, wajib menyediakan data sensor tiruan (*mock data*) dan mock bounding box agar UI/UX tetap dapat diverifikasi.
 *   **Git Integrity**: Semua file frontend wajib berada di branch `frontend` pada subfolder `Frontend`.
 *   **No AI Slop (Strict Enforcement)**: Dilarang menggunakan placeholder comments (`// TODO: implement`, `// ... rest of code unchanged`). Tulis kode fungsional secara utuh, bersih, dan aman. Hindari desain generik tanpa konsep.
-
+*   **No Push Without Approval**: Dilarang melakukan git push ke remote repository sebelum ada instruksi atau persetujuan tertulis dari USER. Semua komit dan perubahan harus tetap berada di tingkat lokal.
 
 ---
 
