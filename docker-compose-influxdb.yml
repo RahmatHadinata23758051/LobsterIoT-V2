@@ -17,5 +17,17 @@ services:
     volumes:
       - influxdb_dev_data:/var/lib/influxdb2
 
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: lobsense-mosquitto-dev
+    restart: always
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./docker/mosquitto/config:/mosquitto/config
+      - ./docker/mosquitto/data:/mosquitto/data
+      - ./docker/mosquitto/log:/mosquitto/log
+
 volumes:
   influxdb_dev_data:
