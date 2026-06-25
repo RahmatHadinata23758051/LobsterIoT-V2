@@ -27,10 +27,15 @@ class MqttSubscribeCommand extends Command
         $username = config('mqtt.username');
         $password = config('mqtt.password');
 
-        $connectionSettings = (new ConnectionSettings)
-            ->setUsername($username)
-            ->setPassword($password)
-            ->setKeepAliveInterval(60);
+        $connectionSettings = new ConnectionSettings();
+        $connectionSettings->setKeepAliveInterval(60);
+
+        if (!empty($username) && trim($username) !== '') {
+            $connectionSettings->setUsername($username);
+        }
+        if (!empty($password)) {
+            $connectionSettings->setPassword($password);
+        }
 
         // Enable TLS if using port 8883
         if ($port === 8883) {
