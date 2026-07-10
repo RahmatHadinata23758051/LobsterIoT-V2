@@ -68,34 +68,37 @@ export const api = {
   },
 
   // Sensor Thresholds Configuration API
-  async fetchThresholds(token) {
-    return fetch(`${BACKEND_URL}/api/v2/thresholds`, {
+  async fetchThresholds(token, serial) {
+    return fetch(`${BACKEND_URL}/api/v2/thresholds?iot_node_serial_number=${encodeURIComponent(serial)}`, {
       headers: getHeaders(token),
     });
   },
 
-  async updateThresholds(token, thresholds) {
+  async updateThresholds(token, serial, thresholds) {
     return fetch(`${BACKEND_URL}/api/v2/thresholds/bulk-update`, {
       method: 'POST',
       headers: getHeaders(token),
-      body: JSON.stringify({ thresholds }),
+      body: JSON.stringify({ iot_node_serial_number: serial, thresholds }),
     });
   },
 
   // Device Operations API (Validation, Activation, Maintenance)
-  async validateDeviceSerial(token, serialNumber) {
+  async validateDeviceSerial(token, category, serialNumber) {
     return fetch(`${BACKEND_URL}/api/v2/devices/validate-serial`, {
       method: 'POST',
       headers: getHeaders(token),
-      body: JSON.stringify({ serial_number: serialNumber }),
+      body: JSON.stringify({ category, serial_number: serialNumber }),
     });
   },
 
-  async activateDevice(token, data) {
+  async activateDevice(token, formData) {
     return fetch(`${BACKEND_URL}/api/v2/devices/activate`, {
       method: 'POST',
-      headers: getHeaders(token),
-      body: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+      body: formData,
     });
   },
 
@@ -105,26 +108,59 @@ export const api = {
     });
   },
 
-  async submitMaintenance(token, data) {
+  async submitMaintenance(token, formData) {
     return fetch(`${BACKEND_URL}/api/v2/maintenances`, {
       method: 'POST',
-      headers: getHeaders(token),
-      body: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+      body: formData,
     });
   },
 
   // Profile Settings API
   async updateProfile(token, data) {
-    return fetch(`${BACKEND_URL}/api/v2/operators/profile`, {
+    return fetch(`${BACKEND_URL}/api/v2/profile`, {
       method: 'PUT',
       headers: getHeaders(token),
       body: JSON.stringify(data),
     });
   },
 
-  // Cities List Lookup API
-  async fetchCities(token) {
-    return fetch(`${BACKEND_URL}/api/v2/cities`, {
+  // System Settings API
+  async fetchSystemSettings(token) {
+    return fetch(`${BACKEND_URL}/api/v2/system-settings`, {
+      headers: getHeaders(token),
+    });
+  },
+
+  async updateSystemSettings(token, settings) {
+    return fetch(`${BACKEND_URL}/api/v2/system-settings`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(settings),
+    });
+  },
+
+  // Regional API
+  async fetchProvinces(token) {
+    return fetch(`${BACKEND_URL}/api/v2/provinces`, {
+      headers: getHeaders(token),
+    });
+  },
+
+  async fetchCities(token, provinceCode = '') {
+    const url = provinceCode 
+      ? `${BACKEND_URL}/api/v2/cities?province_code=${provinceCode}`
+      : `${BACKEND_URL}/api/v2/cities`;
+    return fetch(url, {
+      headers: getHeaders(token),
+    });
+  },
+
+  async fetchDistricts(token, cityCode) {
+    return fetch(`${BACKEND_URL}/api/v2/districts?city_code=${cityCode}`, {
       headers: getHeaders(token),
     });
   },
