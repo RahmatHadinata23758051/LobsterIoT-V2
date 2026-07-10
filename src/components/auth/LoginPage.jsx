@@ -97,7 +97,10 @@ export const LoginPage = ({ onLoginSuccess }) => {
       </div>
 
       {/* ──────────────── RIGHT — Login Form ──────────────── */}
-      <div className="w-full lg:w-[42%] bg-[#fafaf9] flex items-center justify-center px-8 md:px-16 lg:px-20 relative min-h-screen">
+      <div
+        className="w-full lg:w-[44%] bg-[#fafaf9] flex items-center justify-center px-8 md:px-16 lg:px-20 relative min-h-screen lg:rounded-l-[50px] lg:-ml-12 lg:z-10"
+        style={{ boxShadow: '-12px 0 40px rgba(0,0,0,0.07)' }}
+      >
 
         {/* Mobile-only brand header (when left panel is hidden) */}
         <div className="absolute top-8 left-8 lg:hidden">
