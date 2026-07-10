@@ -25,11 +25,11 @@ class IotNodeController extends Controller
             'serial_number' => 'required|string|max:100|unique:iot_nodes,serial_number',
             'city_id' => 'required|integer|exists:cities,id',
             'edge_gateway_id' => 'nullable|integer|exists:edge_gateways,id',
-            'gateway_channel_number' => 'nullable|integer',
-            'ip_address' => 'nullable|string|max:45',
-            'gateway_ip' => 'nullable|string|max:45',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'gateway_channel_number' => 'nullable|integer|min:0',
+            'ip_address' => 'nullable|ip',
+            'gateway_ip' => 'nullable|ip',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'owner_id' => 'nullable|integer|exists:users,id'
         ]);
 
@@ -71,11 +71,11 @@ class IotNodeController extends Controller
             'serial_number' => 'sometimes|required|string|max:100|unique:iot_nodes,serial_number,' . $id,
             'city_id' => 'sometimes|required|integer|exists:cities,id',
             'edge_gateway_id' => 'nullable|integer|exists:edge_gateways,id',
-            'gateway_channel_number' => 'nullable|integer',
-            'ip_address' => 'nullable|string|max:45',
-            'gateway_ip' => 'nullable|string|max:45',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'gateway_channel_number' => 'nullable|integer|min:0',
+            'ip_address' => 'nullable|ip',
+            'gateway_ip' => 'nullable|ip',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'owner_id' => 'nullable|integer|exists:users,id'
         ]);
 

@@ -30,11 +30,11 @@ class EdgeGatewayController extends Controller
             'runtime_framework' => 'nullable|string|max:100',
             'power_supply_type' => 'nullable|string|max:100',
             'voltage_level' => 'nullable|string|max:50',
-            'ip_address' => 'nullable|string|max:45',
-            'gateway_ip' => 'nullable|string|max:45',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'max_connected_nodes' => 'nullable|integer'
+            'ip_address' => 'nullable|ip',
+            'gateway_ip' => 'nullable|ip',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'max_connected_nodes' => 'nullable|integer|min:0'
         ]);
 
         if ($validator->fails()) {
@@ -75,11 +75,11 @@ class EdgeGatewayController extends Controller
             'runtime_framework' => 'nullable|string|max:100',
             'power_supply_type' => 'nullable|string|max:100',
             'voltage_level' => 'nullable|string|max:50',
-            'ip_address' => 'nullable|string|max:45',
-            'gateway_ip' => 'nullable|string|max:45',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'max_connected_nodes' => 'nullable|integer'
+            'ip_address' => 'nullable|ip',
+            'gateway_ip' => 'nullable|ip',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'max_connected_nodes' => 'nullable|integer|min:0'
         ]);
 
         if ($validator->fails()) {

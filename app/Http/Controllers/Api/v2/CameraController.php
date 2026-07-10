@@ -26,7 +26,7 @@ class CameraController extends Controller
         $validator = Validator::make($request->all(), [
             'camera_code' => 'required|string|max:50|unique:cameras,camera_code',
             'cage_id' => 'required|integer|exists:cages,id',
-            'stream_url' => 'nullable|string|max:255',
+            'stream_url' => 'nullable|url|max:255',
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -72,7 +72,7 @@ class CameraController extends Controller
         $validator = Validator::make($request->all(), [
             'camera_code' => 'sometimes|required|string|max:50|unique:cameras,camera_code,' . $id,
             'cage_id' => 'sometimes|required|integer|exists:cages,id',
-            'stream_url' => 'nullable|string|max:255',
+            'stream_url' => 'nullable|url|max:255',
             'is_active' => 'sometimes|required|boolean',
         ]);
 
