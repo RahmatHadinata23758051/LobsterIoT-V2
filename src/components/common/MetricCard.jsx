@@ -125,7 +125,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
       >
         {/* FRONT FACE */}
         <div
-          className={`absolute inset-0 w-full h-full bg-white border rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 ${borderClass} ${shadowClass}`}
+          className={`absolute inset-0 w-full h-full bg-white border rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 overflow-hidden ${borderClass} ${shadowClass}`}
           style={{ backfaceVisibility: 'hidden' }}
         >
           <div className="flex flex-col gap-2.5">
@@ -171,7 +171,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
 
         {/* BACK FACE */}
         <div 
-          className="absolute inset-0 w-full h-full bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-2 shadow-md"
+          className="absolute inset-0 w-full h-full bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-2 shadow-md overflow-hidden"
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           {/* Tabs selector */}
@@ -201,17 +201,17 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
           </div>
 
           {/* Info Details Content */}
-          <div className="flex-1 overflow-hidden py-1 text-[10.5px] leading-relaxed text-slate-600 select-text" onClick={(e) => e.stopPropagation()}>
-            <p className="text-slate-400 font-semibold mb-2 line-clamp-2">{meta.description}</p>
+          <div className="flex-1 overflow-y-auto py-1 text-[10.5px] leading-relaxed text-slate-600 select-text pr-0.5 scrollbar-thin" onClick={(e) => e.stopPropagation()}>
+            <p className="text-slate-400 font-semibold mb-2">{meta.description}</p>
             {activeTab === 'impact' ? (
               <div className="flex items-start gap-1.5 p-2 bg-red-50/60 border border-red-100/50 rounded-xl text-red-950 font-bold leading-normal">
                 <ShieldAlert className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
-                <span className="line-clamp-3">Dampak: {meta.risk}</span>
+                <span>Dampak: {meta.risk}</span>
               </div>
             ) : (
               <div className="flex items-start gap-1.5 p-2 bg-green-50/60 border border-green-100/50 rounded-xl text-green-900 font-bold leading-normal">
                 <Wrench className="h-3.5 w-3.5 text-[#0D9D1B] shrink-0 mt-0.5" />
-                <span className="line-clamp-3">Tindakan: {meta.action}</span>
+                <span>Tindakan: {meta.action}</span>
               </div>
             )}
           </div>

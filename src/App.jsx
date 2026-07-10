@@ -274,7 +274,33 @@ export default function App() {
     try {
       const r = await api.fetchWeather(token);
       const data = await r.json();
-      if (r.ok && data.status === 'success') setWeatherData(data.data);
+      if (r.ok && data.status === 'success') {
+        const reports = data.data;
+        if (Array.isArray(reports) && reports.length > 0) {
+          const report = reports[0];
+          setWeatherData({
+            temperature_c: report.temperature ? Math.round(parseFloat(report.temperature)) : 28,
+            condition: report.weather_description || 'Cerah',
+            humidity: report.humidity || '--',
+            wind_speed: report.wind_speed || '--',
+            rainfall: report.rainfall || '0',
+            icon_url: report.icon_url,
+            city_name: report.city_name || 'Lombok'
+          });
+        } else if (reports && !Array.isArray(reports)) {
+          setWeatherData({
+            temperature_c: reports.temperature ? Math.round(parseFloat(reports.temperature)) : 28,
+            condition: reports.weather_description || 'Cerah',
+            humidity: reports.humidity || '--',
+            wind_speed: reports.wind_speed || '--',
+            rainfall: reports.rainfall || '0',
+            icon_url: reports.icon_url,
+            city_name: reports.city_name || 'Lombok'
+          });
+        } else {
+          setWeatherData(null);
+        }
+      }
     } catch {}
   };
 
@@ -776,18 +802,30 @@ export default function App() {
     <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-800 flex" id="app-root">
       
       {/* ═ LEFT SIDEBAR ════════════════════════════════════════════════ */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 sticky top-0 h-screen z-40">
+      <aside className="w-64 bg-white border-r-0 flex flex-col shrink-0 sticky top-0 h-screen z-40 rounded-r-[1.75rem] shadow-[4px_0_16px_rgba(0,0,0,0.015)] select-none">
         
         {/* Brand Header */}
-        <div className="px-5 h-[60px] border-b border-slate-200 flex items-center gap-3 shrink-0 select-none">
+        <div className="px-5 pt-5 pb-3 flex items-center gap-3 shrink-0 select-none">
           <img
             src="/Icon.png"
             alt="SLAM Logo"
-            className="h-9 w-9 rounded-xl object-cover shadow-md flex-shrink-0"
+            className="h-9 w-9 rounded-xl object-cover shadow-sm flex-shrink-0"
           />
           <div>
-            <p className="text-[14px] font-bold leading-none text-slate-900 tracking-tight">{logoText}</p>
-            <p className="text-[10px] text-[#0D9D1B] font-bold leading-none mt-0.5 uppercase tracking-widest">Lobster Monitoring</p>
+            <p className="text-[13px] font-bold leading-none text-slate-900 tracking-tight">{logoText}</p>
+            <p className="text-[9px] text-[#0D9D1B] font-semibold leading-none mt-1.5 uppercase tracking-widest">Lobster Monitoring</p>
+          </div>
+        </div>
+
+        {/* Jam & Tanggal Widget (Planted directly under the logo/app name) */}
+        <div className="px-5 pb-4 border-b border-slate-100/80 shrink-0">
+          <div className="flex flex-col gap-1 bg-slate-50/80 border border-slate-150/70 p-3 rounded-xl text-center select-none shadow-sm">
+            <span className="font-bold text-slate-800 font-mono text-sm tracking-tight tabular-nums">
+              {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+            <span className="text-[9px] text-slate-400 font-medium uppercase tracking-wider font-sans">
+              {currentTime.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
+            </span>
           </div>
         </div>
 
@@ -831,104 +869,97 @@ export default function App() {
       {/* ═ RIGHT CONTENT WRAPPER ══════════════════════════════════════ */}
       <div className="flex-1 flex flex-col min-w-0">
         
-        {/* Top Header */}
-        <header className="bg-white border-b border-slate-200 h-[56px] px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm shrink-0">
-          
-          {/* Left: Combined Clock + Weather + Status */}
-          <div className="flex items-center gap-3">
-            {/* Clock + Weather combined widget */}
-            <div className="flex items-center gap-2 text-[12px] bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg select-none">
-              <Clock className="h-3.5 w-3.5 text-[#0D9D1B] shrink-0" />
-              <span className="font-bold text-slate-800 font-mono tabular-nums">
-                {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </span>
-              <span className="text-slate-300">·</span>
-              <span className="text-slate-500 font-medium">
-                {currentTime.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
-              </span>
-              {weatherData && (
-                <>
-                  <span className="text-slate-300">·</span>
-                  <span className="font-semibold text-[#0D9D1B]">{weatherData.temperature_c}°C</span>
-                  <span className="capitalize text-slate-500">{weatherData.condition}</span>
-                </>
-              )}
-            </div>
-
-            {/* Connection Error Banner inline */}
-            {connError && (
-              <div className="flex items-center gap-1.5 text-xs text-red-600 font-bold bg-red-50 px-3 py-1 rounded-lg border border-red-200 animate-pulse">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                <span>Koneksi Terputus</span>
-              </div>
-            )}
-
-            {/* Overall Status Badge */}
-            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border select-none
-              ${overallStatus === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-200'
-               : overallStatus === 'offline' ? 'bg-slate-50 text-slate-500 border-slate-200'
-               : 'bg-[#f0fdf4] text-[#15803D] border-[#bbf7d0]'}`}>
-              {overallStatus === 'warning'
-                ? <AlertTriangle className="h-3.5 w-3.5" />
-                : overallStatus === 'offline'
-                ? <WifiOff className="h-3.5 w-3.5" />
-                : <CheckCircle className="h-3.5 w-3.5" />}
-              <span>{overallStatus === 'warning' ? 'Peringatan' : overallStatus === 'offline' ? 'Offline' : 'Normal'}</span>
-            </div>
-          </div>
-
-          {/* Right: Active Node Select & Clock & Operator profile info */}
-          <div className="flex items-center gap-4">
+        {/* Top Header Wrapper with margin for floating layout */}
+        <div className="px-6 pt-4 shrink-0">
+          <header className="bg-white border border-slate-200/80 rounded-2xl h-[56px] px-5 flex items-center justify-between shadow-sm select-none">
             
-            {/* Active Node Dropdown */}
-            {nodes.length > 0 && (
-              <div className="relative" ref={dropdownRef}>
-                <button onClick={() => setNodeDropdownOpen(!nodeDropdownOpen)}
-                  className="flex items-center gap-2 h-8 px-3 border border-slate-250 rounded-lg text-[12px] font-medium text-slate-750 bg-white hover:bg-slate-50 transition cursor-pointer select-none">
-                  <span className={`h-2 w-2 rounded-full ${activeNode ? 'bg-[#0D9D1B] animate-pulse' : 'bg-slate-300'}`} />
-                  <span className="max-w-[145px] truncate font-mono font-bold text-slate-800">{activeNodeSerial || 'Pilih Node'}</span>
-                  <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform ${nodeDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {nodeDropdownOpen && (
-                  <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 animate-[fadeIn_0.15s_ease-out]">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 pt-2 pb-1">Daftar Node Aktif</p>
-                    {loadingNodes
-                      ? <div className="py-6 text-center text-xs text-slate-400">Memuat...</div>
-                      : nodes.map(node => (
-                        <button key={node.id}
-                          onClick={() => { setActiveNodeSerial(node.serial_number); setNodeDropdownOpen(false); }}
-                          className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B] font-semibold' : 'text-slate-700'}`}>
-                          <Cpu className={`h-4 w-4 shrink-0 ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B]' : 'text-slate-400'}`} />
-                          <div className="min-w-0">
-                            <p className="text-[12px] font-semibold font-mono truncate">{node.serial_number}</p>
-                            <p className="text-[10px] text-slate-400">{node.city?.name || 'Lokasi tidak diketahui'}</p>
-                          </div>
-                        </button>
-                      ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Left: Weather Info + System Status */}
+            <div className="flex items-center gap-2.5">
+              
+              {/* Weather Info (Pill display) */}
+              {weatherData && (
+                <div className="flex items-center gap-2 text-[11px] bg-slate-50 border border-slate-150 px-3 py-1.5 rounded-xl text-slate-600 font-medium select-none">
+                  <span className="text-[#0D9D1B] font-bold">{weatherData.temperature_c}°C</span>
+                  <span className="text-slate-350">·</span>
+                  <span className="capitalize">{weatherData.condition}</span>
+                </div>
+              )}
 
-            {/* Refresh Action */}
-            <button onClick={() => activeNodeSerial && fetchDashboardData(activeNodeSerial)}
-              disabled={loadingDashboard || !activeNodeSerial}
-              title="Segarkan data telemetri"
-              className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-750 hover:bg-slate-50 transition cursor-pointer disabled:opacity-30">
-              <RotateCcw className={`h-4 w-4 ${loadingDashboard ? 'animate-spin text-[#0D9D1B]' : ''}`} />
-            </button>
+              {/* Connection Error Banner inline */}
+              {connError && (
+                <div className="flex items-center gap-1.5 text-xs text-red-650 font-bold bg-red-50 px-3 py-1 rounded-xl border border-red-200 animate-pulse">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>Koneksi Terputus</span>
+                </div>
+              )}
 
-            {/* User Profile display */}
-            <div className="flex items-center gap-2 pl-3 border-l border-slate-200 h-6">
-              <div className="text-right select-none">
-                <p className="text-[11px] font-semibold text-slate-900 leading-none">{user?.name || 'Operator'}</p>
-                <p className="text-[9px] text-slate-400 font-bold capitalize leading-none mt-0.5">{user?.role || '—'}</p>
+              {/* Overall Status Badge */}
+              <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border select-none
+                ${overallStatus === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-150'
+                 : overallStatus === 'offline' ? 'bg-slate-50 text-slate-500 border-slate-150'
+                 : 'bg-green-50/50 text-green-700 border-green-150'}`}>
+                {overallStatus === 'warning'
+                  ? <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                  : overallStatus === 'offline'
+                  ? <WifiOff className="h-3.5 w-3.5 text-slate-400" />
+                  : <CheckCircle className="h-3.5 w-3.5 text-[#0D9D1B]" />}
+                <span>{overallStatus === 'warning' ? 'Peringatan' : overallStatus === 'offline' ? 'Offline' : 'Normal'}</span>
               </div>
             </div>
 
-          </div>
+            {/* Right: Active Node Select & Clock & Operator profile info */}
+            <div className="flex items-center gap-3">
+              
+              {/* Active Node Dropdown */}
+              {nodes.length > 0 && (
+                <div className="relative" ref={dropdownRef}>
+                  <button onClick={() => setNodeDropdownOpen(!nodeDropdownOpen)}
+                    className="flex items-center gap-2 h-8 px-3 border border-slate-250 rounded-lg text-[12px] font-medium text-slate-750 bg-white hover:bg-slate-50 transition cursor-pointer select-none">
+                    <span className={`h-2 w-2 rounded-full ${activeNode ? 'bg-[#0D9D1B] animate-pulse' : 'bg-slate-300'}`} />
+                    <span className="max-w-[145px] truncate font-mono font-bold text-slate-800">{activeNodeSerial || 'Pilih Node'}</span>
+                    <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform ${nodeDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {nodeDropdownOpen && (
+                    <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 animate-[fadeIn_0.15s_ease-out]">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 pt-2 pb-1">Daftar Node Aktif</p>
+                      {loadingNodes
+                        ? <div className="py-6 text-center text-xs text-slate-400">Memuat...</div>
+                        : nodes.map(node => (
+                          <button key={node.id}
+                            onClick={() => { setActiveNodeSerial(node.serial_number); setNodeDropdownOpen(false); }}
+                            className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B] font-semibold' : 'text-slate-700'}`}>
+                            <Cpu className={`h-4 w-4 shrink-0 ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B]' : 'text-slate-400'}`} />
+                            <div className="min-w-0">
+                              <p className="text-[12px] font-semibold font-mono truncate">{node.serial_number}</p>
+                              <p className="text-[10px] text-slate-400">{node.city?.name || 'Lokasi tidak diketahui'}</p>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
-        </header>
+              {/* Refresh Action */}
+              <button onClick={() => activeNodeSerial && fetchDashboardData(activeNodeSerial)}
+                disabled={loadingDashboard || !activeNodeSerial}
+                title="Segarkan data telemetri"
+                className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-750 hover:bg-slate-50 transition cursor-pointer disabled:opacity-30">
+                <RotateCcw className={`h-4 w-4 ${loadingDashboard ? 'animate-spin text-[#0D9D1B]' : ''}`} />
+              </button>
+
+              {/* User Profile display */}
+              <div className="flex items-center gap-2 pl-3 border-l border-slate-200 h-6">
+                <div className="text-right select-none">
+                  <p className="text-[11px] font-semibold text-slate-900 leading-none">{user?.name || 'Operator'}</p>
+                  <p className="text-[9px] text-slate-400 font-bold capitalize leading-none mt-0.5">{user?.role || '—'}</p>
+                </div>
+              </div>
+
+            </div>
+
+          </header>
+        </div>
 
         {/* Main Content Area */}
         <main className="flex-1 px-6 py-6 max-w-screen-2xl w-full mx-auto flex flex-col gap-6 overflow-y-auto">
@@ -940,6 +971,7 @@ export default function App() {
               cameras={cameras}
               chartMetric={chartMetric}
               setChartMetric={setChartMetric}
+              weatherData={weatherData}
             />
           )}
 

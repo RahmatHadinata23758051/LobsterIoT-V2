@@ -19,7 +19,8 @@ export const DashboardTab = ({
   dashboardData,
   cameras,
   chartMetric,
-  setChartMetric
+  setChartMetric,
+  weatherData
 }) => {
 
   const getCameraStreamUrl = () => {
@@ -47,7 +48,7 @@ export const DashboardTab = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-[fadeIn_0.4s_ease-out]">
+    <div className="flex flex-col gap-6 animate-fade-in">
       <div>
         <h1 className="text-lg font-bold text-slate-900 tracking-tight">Sistem Layanan Akuakultur Monitoring (SLAM 2.0)</h1>
         <p className="text-xs text-slate-500 mt-1">
@@ -57,23 +58,87 @@ export const DashboardTab = ({
         </p>
       </div>
 
-      {/* Sensor Cards Row */}
+      {/* Sensor Cards & Weather Grid */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <div className="w-1 h-4 bg-[#0D9D1B] rounded-full" />
-          <h2 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Real-time Sensor Hub</h2>
+          <h2 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Real-time Sensor Hub & Kondisi Lingkungan</h2>
           <span className="text-[10px] text-slate-400 font-medium font-mono">(Klik kartu untuk glossary)</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {SENSOR_MAP.map(({ key, code }) => (
-            <MetricCard
-              key={key}
-              type={code}
-              value={getLiveValue(key)}
-              minIdeal={getThreshold(code)?.min}
-              maxIdeal={getThreshold(code)?.max}
-            />
-          ))}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Left Side: 3 Columns x 2 Rows of parameter cards */}
+          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {SENSOR_MAP.map(({ key, code }) => (
+              <MetricCard
+                key={key}
+                type={code}
+                value={getLiveValue(key)}
+                minIdeal={getThreshold(code)?.min}
+                maxIdeal={getThreshold(code)?.max}
+              />
+            ))}
+          </div>
+
+          {/* Right Side: 1 Large Weather Card matching the height (376px) */}
+          <div className="lg:col-span-1 flex">
+            <div className="relative w-full h-full min-h-[360px] lg:h-[376px] bg-gradient-to-br from-[#0D9D1B]/95 to-[#056310]/95 border border-[#0D9D1B]/30 rounded-2xl p-6 text-white shadow-sm flex flex-col justify-between overflow-hidden group hover:shadow-[0_8px_24px_rgba(13,157,27,0.15)] transition-all duration-300">
+              
+              {/* Decorative background overlay */}
+              <div className="absolute -right-8 -bottom-8 w-44 h-44 bg-white/5 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute -left-8 -top-8 w-32 h-32 bg-[#0D9D1B]/20 rounded-full blur-2xl" />
+
+              {/* Header: Location info */}
+              <div className="relative z-10 shrink-0">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[9px] font-bold text-green-200 uppercase tracking-widest block">Kondisi Cuaca</span>
+                    <h3 className="text-sm font-semibold tracking-tight text-white mt-0.5 uppercase">
+                      {weatherData?.city_name || activeNode?.city?.name || 'Balai Akuakultur'}
+                    </h3>
+                  </div>
+                  {weatherData?.icon_url ? (
+                    <img 
+                      src={weatherData.icon_url} 
+                      alt="Weather Icon" 
+                      className="h-10 w-10 object-contain drop-shadow"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 bg-white/10 rounded-full flex items-center justify-center text-xs">☀️</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Middle: Big Temp and Condition */}
+              <div className="relative z-10 my-auto py-4 flex flex-col items-center justify-center text-center">
+                <span className="text-5xl font-extrabold font-mono tracking-tighter text-white drop-shadow-sm select-none">
+                  {weatherData ? `${weatherData.temperature_c}°` : '28°'}
+                </span>
+                <span className="text-[11px] font-semibold text-green-100 uppercase tracking-wider mt-2.5 bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm select-none">
+                  {weatherData?.condition || 'Cerah'}
+                </span>
+              </div>
+
+              {/* Footer: Details list */}
+              <div className="relative z-10 border-t border-white/10 pt-4 shrink-0">
+                <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-[10.5px] text-green-100">
+                  <div>
+                    <span className="text-[9px] text-green-200 block uppercase font-semibold tracking-wider">Kelembapan</span>
+                    <span className="font-semibold font-mono text-white text-xs">{weatherData?.humidity ? `${weatherData.humidity}%` : '70%'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] text-green-200 block uppercase font-semibold tracking-wider">Angin</span>
+                    <span className="font-semibold font-mono text-white text-xs">{weatherData?.wind_speed ? `${weatherData.wind_speed} m/s` : '3.5 m/s'}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-[9px] text-green-200 block uppercase font-semibold tracking-wider">Curah Hujan</span>
+                    <span className="font-semibold font-mono text-white text-xs">{weatherData?.rainfall ? `${weatherData.rainfall} mm` : '0 mm'}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
 
