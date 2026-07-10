@@ -1,20 +1,57 @@
 @import "tailwindcss";
 
-/* Custom HSL brand theme for Lobsense */
 :root {
-  --color-brand-primary: hsl(197, 85%, 45%);
-  --color-brand-secondary: hsl(164, 85%, 40%);
-  --color-brand-bg: hsl(220, 20%, 10%);
-  --color-brand-card: hsl(220, 20%, 15%);
-  --color-brand-border: hsl(220, 15%, 22%);
-  --color-brand-text: hsl(220, 10%, 90%);
-  --color-brand-text-muted: hsl(220, 10%, 65%);
+  --font-sans: 'Space Grotesk', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  
+  --color-brand-cyan: #00f2fe;
+  --color-brand-mint: #10b981;
+  --color-brand-alert: #f43f5e;
+  --color-brand-warning: #f59e0b;
 }
 
 body {
-  background-color: var(--color-brand-bg);
-  color: var(--color-brand-text);
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  background-color: #030712; /* Deep dark slate-950 */
+  color: #f3f4f6;
+  font-family: var(--font-sans);
   margin: 0;
   padding: 0;
+  background-image: 
+    linear-gradient(rgba(0, 242, 254, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 242, 254, 0.015) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Monospace text utility */
+.font-mono-tech {
+  font-family: var(--font-mono);
+}
+
+/* Glowing utilities */
+.glow-cyan {
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.35);
+}
+
+.glow-mint {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+}
+
+.glow-alert {
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.35);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }
