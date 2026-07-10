@@ -14,7 +14,9 @@ import {
   CloudRain, 
   CloudLightning, 
   CloudSnow, 
-  CloudFog 
+  CloudFog,
+  Sunrise,
+  Sunset
 } from 'lucide-react';
 import { MetricCard } from '../common/MetricCard';
 import { SensorChart } from '../common/SensorChart';
@@ -172,11 +174,21 @@ export const DashboardTab = ({
     const desc = (weatherData?.condition || 'Cerah').toLowerCase();
     const iconUrl = weatherData?.icon_url || '';
     
-    // Check if it's night based on OpenWeather API icon code ("n")
-    const isNight = iconUrl ? iconUrl.includes('n') : (new Date().getHours() >= 18 || new Date().getHours() < 6);
+    // Check if it's night based on OpenWeather API icon code (e.g. "/wn/01n" -> ends in 'n')
+    let isNight = false;
+    const match = iconUrl.match(/\/wn\/([0-9]+[dn])/);
+    if (match) {
+      isNight = match[1].endsWith('n');
+    } else {
+      const currentHour = new Date().getHours();
+      isNight = currentHour >= 18 || currentHour < 6;
+    }
 
+    const hour = new Date().getHours();
+
+    // 1. Extreme Weather Overrides (independent of time of day)
     if (desc.includes('thunderstorm') || desc.includes('petir') || desc.includes('badai')) {
-      return <CloudLightning className="h-6 w-6 text-yellow-350 animate-pulse" />;
+      return <CloudLightning className="h-6 w-6 text-yellow-300 animate-pulse" />;
     }
     if (desc.includes('rain') || desc.includes('gerimis') || desc.includes('hujan')) {
       return <CloudRain className="h-6 w-6 text-blue-200 animate-bounce" style={{ animationDuration: '2.5s' }} />;
@@ -187,26 +199,27 @@ export const DashboardTab = ({
     if (desc.includes('fog') || desc.includes('mist') || desc.includes('haze') || desc.includes('kabut') || desc.includes('asap')) {
       return <CloudFog className="h-6 w-6 text-slate-350" />;
     }
-    if (desc.includes('clear') || desc.includes('cerah') || desc.includes('terang')) {
-      if (isNight) {
-        return <Moon className="h-6 w-6 text-yellow-100 animate-[pulse_3s_infinite]" />;
-      }
-      return <Sun className="h-6 w-6 text-yellow-350 animate-[spin_10s_linear_infinite]" />;
-    }
-    if (desc.includes('cloud') || desc.includes('berawan') || desc.includes('mendung')) {
-      if (desc.includes('few') || desc.includes('scattered') || desc.includes('partly') || desc.includes('sebagian')) {
-        if (isNight) {
-          return <CloudMoon className="h-6 w-6 text-slate-200" />;
-        }
-        return <CloudSun className="h-6 w-6 text-yellow-200" />;
-      }
-      return <Cloud className="h-6 w-6 text-slate-200" />;
+
+    // 2. Clear or Light Cloudy Conditions mapped to specific times of day
+    if (isNight) {
+      return <Moon className="h-6 w-6 text-yellow-100 animate-[pulse_3s_infinite]" />;
     }
 
-    // Default fallback
-    if (isNight) {
-      return <Moon className="h-6 w-6 text-yellow-100" />;
+    // Daytime: Morning, Noon, Afternoon/Evening
+    if (hour >= 6 && hour < 11) {
+      // Pagi (Morning): Sunrise
+      return <Sunrise className="h-6 w-6 text-amber-300 animate-pulse" />;
     }
+    if (hour >= 11 && hour < 15) {
+      // Siang (Noon/Afternoon): Sun
+      return <Sun className="h-6 w-6 text-yellow-350 animate-[spin_10s_linear_infinite]" />;
+    }
+    if (hour >= 15 && hour < 18) {
+      // Sore (Late Afternoon/Evening): Sunset
+      return <Sunset className="h-6 w-6 text-orange-350 animate-pulse" />;
+    }
+
+    // Default Fallback
     return <Sun className="h-6 w-6 text-yellow-350 animate-[spin_10s_linear_infinite]" />;
   };
 
