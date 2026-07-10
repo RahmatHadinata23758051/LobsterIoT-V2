@@ -139,6 +139,15 @@ class DeviceOperationController extends Controller
     }
 
     /**
+     * Display a listing of maintenance logs.
+     */
+    public function indexMaintenance()
+    {
+        $maintenances = Maintenance::with(['iotNode', 'operator'])->orderBy('created_at', 'desc')->get();
+        return $this->success('Maintenance logs retrieved successfully', $maintenances);
+    }
+
+    /**
      * Standard success JSON response envelope.
      */
     protected function success(string $message, $data = null, int $status = 200)

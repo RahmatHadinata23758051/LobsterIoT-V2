@@ -12,6 +12,9 @@ use App\Http\Controllers\Api\v2\FeedingLogController;
 use App\Http\Controllers\Api\v2\WeatherController;
 use App\Http\Controllers\Api\v2\AiProxyController;
 use App\Http\Controllers\Api\v2\MonitoringController;
+use App\Http\Controllers\Api\v2\EdgeGatewayController;
+use App\Http\Controllers\Api\v2\IotNodeController;
+use App\Http\Controllers\Api\v2\SystemSettingController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -29,6 +32,7 @@ Route::prefix('v2')->group(function () {
         Route::post('devices/validate-serial', [DeviceOperationController::class, 'validateSerial']);
         Route::post('devices/activate', [DeviceOperationController::class, 'activate']);
         Route::post('maintenances', [DeviceOperationController::class, 'submitMaintenance']);
+        Route::get('maintenances', [DeviceOperationController::class, 'indexMaintenance']);
 
         // Cages (KJA)
         Route::apiResource('cages', CageController::class);
@@ -39,9 +43,16 @@ Route::prefix('v2')->group(function () {
         // Operators
         Route::apiResource('operators', OperatorController::class);
 
-        // Regions (Provinces & Cities)
+        // Edge Gateways
+        Route::apiResource('edge-gateways', EdgeGatewayController::class);
+
+        // IoT Nodes Master
+        Route::apiResource('iot-nodes-master', IotNodeController::class);
+
+        // Regions (Provinces, Cities & Districts)
         Route::get('provinces', [RegionController::class, 'provinces']);
         Route::get('cities', [RegionController::class, 'cities']);
+        Route::get('districts', [RegionController::class, 'districts']);
 
         // Sensor Types
         Route::get('sensor-types', [SensorTypeController::class, 'index']);
@@ -49,9 +60,15 @@ Route::prefix('v2')->group(function () {
         // Feeding Logs
         Route::get('feeding-logs', [FeedingLogController::class, 'index']);
         Route::post('feeding-logs', [FeedingLogController::class, 'store']);
+        Route::delete('feeding-logs/{id}', [FeedingLogController::class, 'destroy']);
+
 
         // Weather
         Route::get('weather/latest', [WeatherController::class, 'latest']);
+
+        // System Settings
+        Route::get('system-settings', [SystemSettingController::class, 'index']);
+        Route::put('system-settings', [SystemSettingController::class, 'update']);
 
         // AI Proxy
         Route::post('detect', [AiProxyController::class, 'detect']);

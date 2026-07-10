@@ -72,6 +72,22 @@ class FeedingLogController extends Controller
     }
 
     /**
+     * Remove the specified feeding log.
+     */
+    public function destroy(string $id)
+    {
+        $log = FeedingLog::find($id);
+
+        if (!$log) {
+            return $this->error('Log pakan tidak ditemukan.', null, 404);
+        }
+
+        $log->delete();
+
+        return $this->success('Log pakan berhasil dihapus.');
+    }
+
+    /**
      * Standard success JSON response envelope.
      */
     protected function success(string $message, $data = null, int $status = 200)
