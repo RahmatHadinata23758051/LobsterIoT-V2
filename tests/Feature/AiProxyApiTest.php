@@ -120,6 +120,13 @@ class AiProxyApiTest extends TestCase
                 ]
             ]);
 
+        // Verify database log prediction record
+        $this->assertDatabaseCount('log_predictions', 1);
+        $log = \App\Models\LogPrediction::first();
+        $this->assertNotNull($log);
+        $this->assertEquals(66.67, $log->class_percentage['lobster_alive']);
+        $this->assertEquals(33.33, $log->class_percentage['lobster_dead']);
+
         // Verify that Http request was correctly formatted with in-memory attachment
         Http::assertSent(function ($request) {
             return $request->url() === 'http://yolo-test-server/predict' &&

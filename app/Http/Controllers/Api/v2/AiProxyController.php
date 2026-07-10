@@ -53,6 +53,17 @@ class AiProxyController extends Controller
             $total = count($predictions);
             $classes = collect($predictions)->groupBy('class')->map->count()->toArray();
 
+            if ($total > 0) {
+                $classPercentage = collect($classes)->map(function ($count) use ($total) {
+                    return round(($count / $total) * 100, 2);
+                })->toArray();
+
+                \App\Models\LogPrediction::create([
+                    'raw_prediction' => $predictions,
+                    'class_percentage' => $classPercentage,
+                ]);
+            }
+
             return $this->success('Detection completed successfully', [
                 'total' => $total,
                 'classes' => $classes,
