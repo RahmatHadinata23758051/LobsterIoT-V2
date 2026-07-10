@@ -80,11 +80,12 @@ class InfluxDBService
             foreach ($table->records as $record) {
                 $row = $record->values;
                 $cleanRow = [
-                    'time' => $record->getTime()
+                    'time' => $record->getTime(),
+                    '_time' => $record->getTime()
                 ];
 
                 foreach ($row as $key => $val) {
-                    if (!in_array($key, ['result', 'table', '_start', '_stop', '_time', '_measurement', '_field', '_value', 'iot_node_serial_number', 'cage_code'])) {
+                    if (!in_array($key, ['result', 'table', '_start', '_stop', '_time', '_measurement', '_field', '_value'])) {
                         $cleanRow[$key] = is_numeric($val) ? (float) $val : $val;
                     }
                 }
