@@ -762,6 +762,6 @@ export const useLobsense = () => {
     handleAddFeedingLog, handleDeleteFeedingLog,
     handleUpdateThresholds, handleValidateSerial, handleActivateNode,
     handleSubmitMaintenance, handleUpdateProfile,
-    getSensorStatus, overallStatus,
+    getSensorStatus, overallStatus, api,
   };
 };

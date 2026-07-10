@@ -120,7 +120,7 @@ export default function App() {
     handleAddFeedingLog, handleDeleteFeedingLog,
     handleUpdateThresholds, handleValidateSerial, handleActivateNode,
     handleSubmitMaintenance, handleUpdateProfile,
-    getSensorStatus, overallStatus,
+    getSensorStatus, overallStatus, api,
   } = useLobsense();
 
   const activeNode = nodes.find(n => n.serial_number === activeNodeSerial);
