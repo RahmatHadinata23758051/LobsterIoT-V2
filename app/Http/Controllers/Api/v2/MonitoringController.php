@@ -88,6 +88,7 @@ class MonitoringController extends Controller
             'startDate' => 'required|date_format:Y-m-d',
             'endDate' => 'required|date_format:Y-m-d',
             'limit' => 'nullable|integer|min:1|max:1000',
+            'resolution' => 'nullable|string|in:raw,5m,15m,1h,6h,12h,1d',
         ]);
 
         if ($validator->fails()) {
@@ -102,11 +103,34 @@ class MonitoringController extends Controller
         $startIso = $startDate . 'T00:00:00Z';
         $stopIso = $endDate . 'T23:59:59Z';
 
+        // Parse dates to compute resolution dynamically
+        $startCarbon = \Carbon\Carbon::parse($startDate);
+        $endCarbon = \Carbon\Carbon::parse($endDate);
+        $diffInDays = $startCarbon->diffInDays($endCarbon);
+
+        $resolution = $request->input('resolution');
+        if (empty($resolution)) {
+            if ($diffInDays <= 1) {
+                $resolution = 'raw';
+            } elseif ($diffInDays <= 7) {
+                $resolution = '1h';
+            } elseif ($diffInDays <= 30) {
+                $resolution = '6h';
+            } else {
+                $resolution = '1d';
+            }
+        }
+
+        $aggregateClause = '';
+        if ($resolution !== 'raw') {
+            $aggregateClause = '|> aggregateWindow(every: ' . $resolution . ', fn: mean, createEmpty: false) ';
+        }
+
         $historyQuery = 'from(bucket: "' . $this->bucket . '")
             |> range(start: ' . $startIso . ', stop: ' . $stopIso . ')
             |> filter(fn: (r) => r["_measurement"] == "telemetries")
             |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
-            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+            ' . $aggregateClause . '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
             |> limit(n: ' . $limit . ')';
 
         $telemetries = $this->influxDB->queryParsed($historyQuery);
@@ -114,6 +138,7 @@ class MonitoringController extends Controller
         return $this->success('Historical data retrieved', [
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'resolution' => $resolution,
             'telemetries' => $telemetries
         ]);
     }

@@ -224,14 +224,14 @@ class MonitoringApiTest extends TestCase
 
         $this->mock(InfluxDBService::class, function (MockInterface $mock) use ($mockHistory) {
             $mock->shouldReceive('queryParsed')
-                ->with(Mockery::on(fn($q) => str_contains($q, 'range(start: 2026-06-01T00:00:00Z, stop: 2026-06-07T23:59:59Z)')))
+                ->with(Mockery::on(fn($q) => str_contains($q, 'range(start: 2026-06-01T00:00:00Z, stop: 2026-06-07T23:59:59Z)') && str_contains($q, 'aggregateWindow(every: 1h, fn: mean, createEmpty: false)')))
                 ->once()
                 ->andReturn($mockHistory);
         });
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
-        ])->getJson('/api/v2/monitoring/history/SN-HIST-200?startDate=2026-06-01&endDate=2026-06-07&limit=50');
+        ])->getJson('/api/v2/monitoring/history/SN-HIST-200?startDate=2026-06-01&endDate=2026-06-07&limit=50&resolution=1h');
 
         $response->assertStatus(200)
             ->assertJson([
@@ -240,6 +240,7 @@ class MonitoringApiTest extends TestCase
                 'data' => [
                     'startDate' => '2026-06-01',
                     'endDate' => '2026-06-07',
+                    'resolution' => '1h',
                     'telemetries' => $mockHistory
                 ]
             ]);
