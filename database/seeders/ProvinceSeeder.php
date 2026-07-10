@@ -12,19 +12,16 @@ class ProvinceSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('provinces')->updateOrInsert(
-            ['code' => '32'],
-            ['name' => 'JAWA BARAT', 'created_at' => now(), 'updated_at' => now()]
-        );
-
-        DB::table('provinces')->updateOrInsert(
-            ['code' => '31'],
-            ['name' => 'DKI JAKARTA', 'created_at' => now(), 'updated_at' => now()]
-        );
-
-        DB::table('provinces')->updateOrInsert(
-            ['code' => '36'],
-            ['name' => 'BANTEN', 'created_at' => now(), 'updated_at' => now()]
-        );
+        $indoProvinces = DB::table('indonesia_provinces')->get();
+        foreach ($indoProvinces as $prov) {
+            DB::table('provinces')->updateOrInsert(
+                ['code' => $prov->code],
+                [
+                    'name' => $prov->name,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+        }
     }
 }
