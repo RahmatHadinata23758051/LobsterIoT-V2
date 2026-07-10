@@ -251,7 +251,7 @@ export const DashboardTab = ({
             </div>
             <span className="text-[10px] text-slate-400 font-mono font-bold uppercase">{activeNodeSerial || 'N/A'}</span>
           </div>
-          <div className="bg-slate-950 aspect-video w-full">
+          <div className="bg-slate-950 aspect-video w-full ring-1 ring-slate-800 rounded-lg overflow-hidden shadow-inner">
             <CctvView streamUrl={getCameraStreamUrl()} />
           </div>
         </div>

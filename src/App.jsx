@@ -897,10 +897,10 @@ export default function App() {
           {/* Jam & Tanggal Widget (Planted at the very top of sidebar) */}
           <div className="p-4 border-b border-slate-100/85 bg-slate-50/50 shrink-0">
             <div className="flex flex-col gap-1 bg-white border border-slate-150/70 p-3 rounded-2xl text-center select-none shadow-sm">
-              <span className="font-bold text-slate-800 font-mono text-base tracking-tight tabular-nums">
+              <span className="font-extrabold text-slate-800 font-sans text-[20px] tracking-tight tabular-nums leading-none my-0.5">
                 {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
-              <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider font-sans mt-0.5">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-sans mt-1">
                 {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
             </div>
@@ -910,16 +910,16 @@ export default function App() {
           <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto scrollbar-none">
             {navGroups.map((group, gIdx) => (
               <div key={gIdx} className="space-y-1">
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-3 mb-2">{group.title}</p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">{group.title}</p>
                 <div className="space-y-0.5">
                   {group.items.map(({ id, label, icon: Icon }) => (
                     <button
                       key={id}
                       onClick={() => setActiveTab(id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-150 cursor-pointer select-none
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14.5px] font-bold transition-all duration-150 cursor-pointer select-none
                         ${activeTab === id
                           ? 'bg-[#0D9D1B] text-white shadow-sm shadow-green-500/20'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
+                          : 'text-slate-650 hover:text-slate-900 hover:bg-slate-50'}`}
                     >
                       <Icon className="h-[15px] w-[15px] shrink-0" />
                       <span>{label}</span>
@@ -934,7 +934,7 @@ export default function App() {
           <div className="p-4 border-t border-slate-100 shrink-0">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer select-none"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-[13.5px] font-bold text-red-650 hover:bg-red-50 transition cursor-pointer select-none"
             >
               <LogOut className="h-4 w-4 shrink-0" />
               <span>Keluar Sistem</span>

@@ -91,7 +91,7 @@ export const CctvView = ({ streamUrl }) => {
   const togglePtzLock = () => setPtzLocked(!ptzLocked);
 
   return (
-    <div className="relative w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden select-none" style={{ minHeight: '100%' }}>
+    <div className="relative w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden select-none ring-1 ring-slate-800 rounded-lg shadow-inner" style={{ minHeight: '100%' }}>
       
       {/* Actual Video Canvas */}
       <video
@@ -101,7 +101,7 @@ export const CctvView = ({ streamUrl }) => {
           transformOrigin: 'center center',
           transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
-        className={`w-full h-full object-cover ${status === 'playing' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
+        className={`w-full h-full object-cover outline-none ${status === 'playing' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
         muted
         playsInline
         autoPlay
@@ -132,7 +132,7 @@ export const CctvView = ({ streamUrl }) => {
               </div>
               <div className="text-[9px] text-slate-500 font-bold">1080P · H.264 · 24fps</div>
             </div>
-            <div className="text-right text-emerald-300 font-bold tracking-widest">{timestamp}</div>
+            <div className="text-right text-emerald-300 font-extrabold tracking-wider text-xs md:text-sm font-sans">{timestamp}</div>
           </div>
 
           {/* Bottom Info Bar & Floating controls */}
@@ -192,7 +192,7 @@ export const CctvView = ({ streamUrl }) => {
           <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-slate-750/30" />
           <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-slate-750/30" />
           
-          <div className="absolute top-4 right-4 font-mono text-[9px] text-slate-500 tracking-wider">
+          <div className="absolute top-4 right-4 font-sans text-xs font-bold text-slate-500 tracking-wider">
             {timestamp}
           </div>
 
@@ -214,7 +214,7 @@ export const CctvView = ({ streamUrl }) => {
           <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-red-800/30" />
           <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-red-800/30" />
 
-          <div className="absolute top-4 right-4 font-mono text-[9px] text-red-500/80 tracking-wider">
+          <div className="absolute top-4 right-4 font-sans text-xs font-bold text-red-500/80 tracking-wider">
             {timestamp}
           </div>
 
