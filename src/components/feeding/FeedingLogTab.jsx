@@ -50,7 +50,7 @@ export const FeedingLogTab = ({
       <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
         <div>
           <div className="border-b border-slate-100 pb-3 mb-4">
-            <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Catat Pemberian Pakan</h2>
+            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Catat Pemberian Pakan</h2>
             <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Rekam data log pemberian pakan lobster baru</p>
           </div>
 
@@ -61,7 +61,7 @@ export const FeedingLogTab = ({
                 required
                 value={newFeed.cage_id}
                 onChange={(e) => setNewFeed({ ...newFeed, cage_id: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               >
                 <option value="">-- Pilih Keramba --</option>
                 {cagesList.map((c) => (
@@ -78,7 +78,7 @@ export const FeedingLogTab = ({
                 required
                 value={newFeed.operator_id}
                 onChange={(e) => setNewFeed({ ...newFeed, operator_id: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               >
                 <option value="">-- Pilih Petugas --</option>
                 {operatorsList.map((op) => (
@@ -95,7 +95,7 @@ export const FeedingLogTab = ({
                 required
                 value={newFeed.feed_session}
                 onChange={(e) => setNewFeed({ ...newFeed, feed_session: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               >
                 <option value="morning">Pagi (Morning)</option>
                 <option value="afternoon">Siang (Afternoon)</option>
@@ -111,7 +111,7 @@ export const FeedingLogTab = ({
                 placeholder="Contoh: Ikan Rucah, Pellet, Udang rebon"
                 value={newFeed.feed_type}
                 onChange={(e) => setNewFeed({ ...newFeed, feed_type: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B]"
               />
             </div>
 
@@ -124,13 +124,13 @@ export const FeedingLogTab = ({
                 placeholder="Contoh: 2.50"
                 value={newFeed.weight_kg}
                 onChange={(e) => setNewFeed({ ...newFeed, weight_kg: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B]"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
+              className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
             >
               Simpan Log Pakan
             </button>
@@ -142,7 +142,7 @@ export const FeedingLogTab = ({
       <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
         <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Riwayat Pemberian Pakan</h2>
+            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Riwayat Pemberian Pakan</h2>
             <p className="text-[10px] text-slate-400 mt-0.5">Daftar catatan pemberian pakan KJA lobster aktif</p>
           </div>
           <button
@@ -184,7 +184,7 @@ export const FeedingLogTab = ({
                     <td className="px-4 py-3 whitespace-nowrap capitalize">
                       {log.feed_session === 'morning' ? 'Pagi' : log.feed_session === 'afternoon' ? 'Siang' : 'Malam'}
                     </td>
-                    <td className="px-4 py-3 font-mono font-bold text-[#22C55E]">{log.weight_kg} kg</td>
+                    <td className="px-4 py-3 font-mono font-bold text-[#0D9D1B]">{log.weight_kg} kg</td>
                     <td className="px-4 py-3 font-semibold">{log.feed_type}</td>
                     <td className="px-4 py-3 text-right">
                       <button

@@ -786,8 +786,8 @@ export default function App() {
             className="h-9 w-9 rounded-xl object-cover shadow-md flex-shrink-0"
           />
           <div>
-            <p className="text-[14px] font-black leading-none text-slate-900 tracking-tight">{logoText}</p>
-            <p className="text-[10px] text-[#22C55E] font-bold leading-none mt-0.5 uppercase tracking-widest">Lobster Monitoring</p>
+            <p className="text-[14px] font-bold leading-none text-slate-900 tracking-tight">{logoText}</p>
+            <p className="text-[10px] text-[#0D9D1B] font-bold leading-none mt-0.5 uppercase tracking-widest">Lobster Monitoring</p>
           </div>
         </div>
 
@@ -795,7 +795,7 @@ export default function App() {
         <nav className="flex-1 px-3 py-5 space-y-5 overflow-y-auto scrollbar-none">
           {navGroups.map((group, gIdx) => (
             <div key={gIdx} className="space-y-1">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest px-3 mb-2">{group.title}</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-3 mb-2">{group.title}</p>
               <div className="space-y-0.5">
                 {group.items.map(({ id, label, icon: Icon }) => (
                   <button
@@ -803,7 +803,7 @@ export default function App() {
                     onClick={() => setActiveTab(id)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-150 cursor-pointer select-none
                       ${activeTab === id
-                        ? 'bg-[#22C55E] text-white shadow-sm shadow-green-500/20'
+                        ? 'bg-[#0D9D1B] text-white shadow-sm shadow-green-500/20'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
                   >
                     <Icon className="h-[15px] w-[15px] shrink-0" />
@@ -838,7 +838,7 @@ export default function App() {
           <div className="flex items-center gap-3">
             {/* Clock + Weather combined widget */}
             <div className="flex items-center gap-2 text-[12px] bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg select-none">
-              <Clock className="h-3.5 w-3.5 text-[#22C55E] shrink-0" />
+              <Clock className="h-3.5 w-3.5 text-[#0D9D1B] shrink-0" />
               <span className="font-bold text-slate-800 font-mono tabular-nums">
                 {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
@@ -849,7 +849,7 @@ export default function App() {
               {weatherData && (
                 <>
                   <span className="text-slate-300">·</span>
-                  <span className="font-semibold text-[#22C55E]">{weatherData.temperature_c}°C</span>
+                  <span className="font-semibold text-[#0D9D1B]">{weatherData.temperature_c}°C</span>
                   <span className="capitalize text-slate-500">{weatherData.condition}</span>
                 </>
               )}
@@ -885,7 +885,7 @@ export default function App() {
               <div className="relative" ref={dropdownRef}>
                 <button onClick={() => setNodeDropdownOpen(!nodeDropdownOpen)}
                   className="flex items-center gap-2 h-8 px-3 border border-slate-250 rounded-lg text-[12px] font-medium text-slate-750 bg-white hover:bg-slate-50 transition cursor-pointer select-none">
-                  <span className={`h-2 w-2 rounded-full ${activeNode ? 'bg-[#22C55E] animate-pulse' : 'bg-slate-300'}`} />
+                  <span className={`h-2 w-2 rounded-full ${activeNode ? 'bg-[#0D9D1B] animate-pulse' : 'bg-slate-300'}`} />
                   <span className="max-w-[145px] truncate font-mono font-bold text-slate-800">{activeNodeSerial || 'Pilih Node'}</span>
                   <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform ${nodeDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -897,8 +897,8 @@ export default function App() {
                       : nodes.map(node => (
                         <button key={node.id}
                           onClick={() => { setActiveNodeSerial(node.serial_number); setNodeDropdownOpen(false); }}
-                          className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors ${node.serial_number === activeNodeSerial ? 'text-[#22C55E] font-semibold' : 'text-slate-700'}`}>
-                          <Cpu className={`h-4 w-4 shrink-0 ${node.serial_number === activeNodeSerial ? 'text-[#22C55E]' : 'text-slate-400'}`} />
+                          className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B] font-semibold' : 'text-slate-700'}`}>
+                          <Cpu className={`h-4 w-4 shrink-0 ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B]' : 'text-slate-400'}`} />
                           <div className="min-w-0">
                             <p className="text-[12px] font-semibold font-mono truncate">{node.serial_number}</p>
                             <p className="text-[10px] text-slate-400">{node.city?.name || 'Lokasi tidak diketahui'}</p>
@@ -915,13 +915,13 @@ export default function App() {
               disabled={loadingDashboard || !activeNodeSerial}
               title="Segarkan data telemetri"
               className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-750 hover:bg-slate-50 transition cursor-pointer disabled:opacity-30">
-              <RotateCcw className={`h-4 w-4 ${loadingDashboard ? 'animate-spin text-[#22C55E]' : ''}`} />
+              <RotateCcw className={`h-4 w-4 ${loadingDashboard ? 'animate-spin text-[#0D9D1B]' : ''}`} />
             </button>
 
             {/* User Profile display */}
             <div className="flex items-center gap-2 pl-3 border-l border-slate-200 h-6">
               <div className="text-right select-none">
-                <p className="text-[11px] font-extrabold text-slate-900 leading-none">{user?.name || 'Operator'}</p>
+                <p className="text-[11px] font-semibold text-slate-900 leading-none">{user?.name || 'Operator'}</p>
                 <p className="text-[9px] text-slate-400 font-bold capitalize leading-none mt-0.5">{user?.role || '—'}</p>
               </div>
             </div>

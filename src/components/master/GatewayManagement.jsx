@@ -60,8 +60,8 @@ export const GatewayManagement = ({
       {/* Add Form */}
       <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-fit">
         <div className="border-b border-slate-100 pb-3 mb-4">
-          <h3 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <Cpu className="h-4 w-4 text-[#22C55E]" />
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <Cpu className="h-4 w-4 text-[#0D9D1B]" />
             Tambah Edge Gateway
           </h3>
           <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Daftarkan Edge Computing Gateway baru</p>
@@ -76,7 +76,7 @@ export const GatewayManagement = ({
               placeholder="e.g. GW-A001"
               value={newGateway.serial_number}
               onChange={(e) => setNewGateway({ ...newGateway, serial_number: e.target.value })}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
             />
           </div>
 
@@ -88,7 +88,7 @@ export const GatewayManagement = ({
                 placeholder="192.168.1.1"
                 value={newGateway.ip_address}
                 onChange={(e) => setNewGateway({ ...newGateway, ip_address: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
             <div>
@@ -98,7 +98,7 @@ export const GatewayManagement = ({
                 placeholder="50"
                 value={newGateway.max_connected_nodes}
                 onChange={(e) => setNewGateway({ ...newGateway, max_connected_nodes: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               />
             </div>
           </div>
@@ -111,7 +111,7 @@ export const GatewayManagement = ({
                 placeholder="e.g. Ubuntu 22.04 LTS"
                 value={newGateway.operating_system}
                 onChange={(e) => setNewGateway({ ...newGateway, operating_system: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               />
             </div>
             <div>
@@ -119,7 +119,7 @@ export const GatewayManagement = ({
               <select
                 value={newGateway.city_id}
                 onChange={(e) => setNewGateway({ ...newGateway, city_id: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               >
                 <option value="">-- Pilih Kota --</option>
                 {citiesList.map((c) => (
@@ -140,7 +140,7 @@ export const GatewayManagement = ({
                 placeholder="-8.65"
                 value={newGateway.latitude}
                 onChange={(e) => setNewGateway({ ...newGateway, latitude: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
             <div>
@@ -151,14 +151,14 @@ export const GatewayManagement = ({
                 placeholder="116.3"
                 value={newGateway.longitude}
                 onChange={(e) => setNewGateway({ ...newGateway, longitude: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
+            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
           >
             Simpan Gateway
           </button>
@@ -169,7 +169,7 @@ export const GatewayManagement = ({
       <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
         <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Daftar Edge Gateway</h3>
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Daftar Edge Gateway</h3>
             <p className="text-[10px] text-slate-400 mt-0.5">Total data terdaftar pada basis data backend</p>
           </div>
           <button

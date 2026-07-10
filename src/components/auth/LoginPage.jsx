@@ -48,11 +48,11 @@ export const LoginPage = ({ onLoginSuccess }) => {
         
         {/* Brand header */}
         <div className="text-center flex flex-col items-center space-y-2">
-          <div className="bg-[#22C55E] text-white p-3 rounded-2xl inline-flex shadow-sm shadow-green-500/20">
+          <div className="bg-[#0D9D1B] text-white p-3 rounded-2xl inline-flex shadow-sm shadow-green-500/20">
             <Waves className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">SLAM 2.0</h2>
+            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">SLAM 2.0</h2>
             <p className="text-xs text-slate-400 mt-1">Sistem Layanan Akuakultur Monitoring V2.0</p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] focus:ring-1 focus:ring-[#0D9D1B]"
               />
             </div>
           </div>
@@ -96,7 +96,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] focus:ring-1 focus:ring-[#0D9D1B]"
               />
             </div>
           </div>
@@ -104,7 +104,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 select-none shadow-sm shadow-green-500/10 text-xs"
+            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 select-none shadow-sm shadow-green-500/10 text-xs"
           >
             {loading ? 'Masuk ke Sistem...' : 'Masuk Dashboard'}
           </button>

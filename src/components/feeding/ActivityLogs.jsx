@@ -6,7 +6,7 @@ export const ActivityLogs = ({ activityLogs }) => {
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
       <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Log Aktivitas</h2>
+          <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Log Aktivitas</h2>
           <p className="text-[10px] text-slate-400 mt-0.5">Segala aktivitas sistem yang tercatat di sesi ini</p>
         </div>
         <Clock className="h-4.5 w-4.5 text-slate-400" />

@@ -60,11 +60,11 @@ export const AccountProfile = ({
 
       {/* Page Header */}
       <div className="flex items-center gap-3">
-        <div className="bg-[#22C55E] p-2 rounded-xl shadow-sm">
+        <div className="bg-[#0D9D1B] p-2 rounded-xl shadow-sm">
           <UserRound className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h1 className="text-base font-extrabold text-slate-900 tracking-tight">Profil Akun</h1>
+          <h1 className="text-base font-semibold text-slate-900 tracking-tight">Profil Akun</h1>
           <p className="text-[11px] text-slate-400 font-medium mt-0.5">Kelola informasi pribadi dan keamanan akun Anda</p>
         </div>
       </div>
@@ -74,9 +74,9 @@ export const AccountProfile = ({
         {/* Column 1: Edit Profile Form */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
           <div className="border-b border-slate-100 pb-4 mb-6 flex items-center gap-2.5">
-            <UserRound className="h-4 w-4 text-[#22C55E]" />
+            <UserRound className="h-4 w-4 text-[#0D9D1B]" />
             <div>
-              <h2 className="text-sm font-extrabold text-slate-800">Informasi Akun</h2>
+              <h2 className="text-sm font-semibold text-slate-800">Informasi Akun</h2>
               <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Perbarui nama, email, dan kata sandi</p>
             </div>
           </div>
@@ -96,7 +96,7 @@ export const AccountProfile = ({
                     value={name}
                     onChange={(e) => { setLocalMsg(''); setName(e.target.value); }}
                     placeholder="Nama lengkap Anda"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] focus:outline-none focus:border-[#22C55E] focus:bg-white transition"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
                   />
                 </div>
               </div>
@@ -114,7 +114,7 @@ export const AccountProfile = ({
                     value={email}
                     onChange={(e) => { setLocalMsg(''); setEmail(e.target.value); }}
                     placeholder="email@domain.com"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] focus:outline-none focus:border-[#22C55E] focus:bg-white transition"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
                   />
                 </div>
               </div>
@@ -135,7 +135,7 @@ export const AccountProfile = ({
                       value={password}
                       onChange={(e) => { setLocalMsg(''); setPassword(e.target.value); }}
                       placeholder="Min. 6 karakter"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] placeholder-slate-400 focus:outline-none focus:border-[#22C55E] focus:bg-white transition"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
                     />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export const AccountProfile = ({
                       value={confirmPassword}
                       onChange={(e) => { setLocalMsg(''); setConfirmPassword(e.target.value); }}
                       placeholder="Ulangi kata sandi baru"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] placeholder-slate-400 focus:outline-none focus:border-[#22C55E] focus:bg-white transition"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
                     />
                   </div>
                 </div>
@@ -173,7 +173,7 @@ export const AccountProfile = ({
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] disabled:opacity-60 text-white text-[12px] font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/20"
+              className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] disabled:opacity-60 text-white text-[12px] font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/20"
             >
               {saving ? 'Menyimpan...' : 'Simpan Perubahan Akun'}
             </button>
@@ -184,16 +184,16 @@ export const AccountProfile = ({
         <div className="space-y-5">
           {/* Avatar / User card */}
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm text-center">
-            <div className="w-16 h-16 rounded-full bg-[#22C55E]/10 border-2 border-[#22C55E]/30 flex items-center justify-center mx-auto mb-3">
-              <span className="text-2xl font-black text-[#22C55E]">
+            <div className="w-16 h-16 rounded-full bg-[#0D9D1B]/10 border-2 border-[#0D9D1B]/30 flex items-center justify-center mx-auto mb-3">
+              <span className="text-2xl font-bold text-[#0D9D1B]">
                 {(user?.name || 'U').charAt(0).toUpperCase()}
               </span>
             </div>
-            <p className="text-[15px] font-extrabold text-slate-900">{user?.name || '—'}</p>
+            <p className="text-[15px] font-semibold text-slate-900">{user?.name || '—'}</p>
             <p className="text-[11px] text-slate-400 font-medium mt-0.5">{user?.email || '—'}</p>
-            <span className={`inline-block mt-2 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+            <span className={`inline-block mt-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
               user?.role === 'admin' || user?.role === 'superadmin'
-                ? 'bg-[#22C55E]/10 text-[#22C55E]'
+                ? 'bg-[#0D9D1B]/10 text-[#0D9D1B]'
                 : 'bg-slate-100 text-slate-500'
             }`}>
               {roleLabel}
@@ -203,8 +203,8 @@ export const AccountProfile = ({
           {/* Info table */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-              <ShieldCheck className="h-4 w-4 text-[#22C55E]" />
-              <h2 className="text-[12px] font-extrabold text-slate-800 uppercase tracking-wide">Detail Sesi</h2>
+              <ShieldCheck className="h-4 w-4 text-[#0D9D1B]" />
+              <h2 className="text-[12px] font-semibold text-slate-800 uppercase tracking-wide">Detail Sesi</h2>
             </div>
             <div className="space-y-0 divide-y divide-slate-50 text-[12px]">
               {[
@@ -214,7 +214,7 @@ export const AccountProfile = ({
               ].map(({ label, value, mono, green }) => (
                 <div key={label} className="flex justify-between items-center py-2.5">
                   <span className="text-slate-400 font-medium">{label}</span>
-                  <span className={`font-bold ${green ? 'text-[#22C55E]' : 'text-slate-800'} ${mono ? 'font-mono' : ''}`}>
+                  <span className={`font-bold ${green ? 'text-[#0D9D1B]' : 'text-slate-800'} ${mono ? 'font-mono' : ''}`}>
                     {value}
                   </span>
                 </div>

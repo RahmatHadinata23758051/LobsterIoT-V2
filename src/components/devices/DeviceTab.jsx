@@ -62,7 +62,7 @@ export const DeviceTab = ({
         {/* Device Validation */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="border-b border-slate-100 pb-3 mb-4">
-            <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Validasi Perangkat</h2>
+            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Validasi Perangkat</h2>
             <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Periksa keaslian nomor seri IoT Node di database pabrikan</p>
           </div>
 
@@ -74,12 +74,12 @@ export const DeviceTab = ({
                 placeholder="Masukkan Nomor Seri (e.g. DEMO-NODE-001)"
                 value={valSerial}
                 onChange={(e) => setValSerial(e.target.value)}
-                className="flex-1 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="flex-1 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
               <button
                 type="submit"
                 disabled={loadingValidation}
-                className="bg-slate-800 hover:bg-slate-900 text-white font-extrabold px-4 rounded-lg uppercase tracking-wider text-[10px] transition cursor-pointer disabled:opacity-50 select-none"
+                className="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 rounded-lg uppercase tracking-wider text-[10px] transition cursor-pointer disabled:opacity-50 select-none"
               >
                 {loadingValidation ? 'Pengecekan...' : 'Cek'}
               </button>
@@ -89,7 +89,7 @@ export const DeviceTab = ({
               <div className={`p-3.5 rounded-xl border text-[11px] font-medium leading-normal ${
                 validationResult.status === 'success' ? 'bg-green-50 border-green-100 text-green-900' : 'bg-red-50 border-red-100 text-red-950'
               }`}>
-                <p className="font-extrabold uppercase tracking-wide text-xs">Hasil Pemeriksaan:</p>
+                <p className="font-semibold uppercase tracking-wide text-xs">Hasil Pemeriksaan:</p>
                 <p className="mt-1 leading-normal">{validationResult.message}</p>
               </div>
             )}
@@ -99,7 +99,7 @@ export const DeviceTab = ({
         {/* Device Activation */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="border-b border-slate-100 pb-3 mb-4">
-            <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Aktivasi IoT Node Baru</h2>
+            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Aktivasi IoT Node Baru</h2>
             <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Daftarkan dan aktifkan unit Node telemetry di lokasi tambak</p>
           </div>
 
@@ -113,7 +113,7 @@ export const DeviceTab = ({
                   placeholder="Contoh: NODE-001"
                   value={activation.serial_number}
                   onChange={(e) => setActivation({ ...activation, serial_number: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:border-[#22C55E]"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B]"
                 />
               </div>
               <div>
@@ -122,7 +122,7 @@ export const DeviceTab = ({
                   required
                   value={activation.city_id}
                   onChange={(e) => setActivation({ ...activation, city_id: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
                 >
                   <option value="">-- Pilih Kota --</option>
                   {citiesList.map((c) => (
@@ -143,7 +143,7 @@ export const DeviceTab = ({
                   placeholder="Contoh: -8.6529"
                   value={activation.latitude}
                   onChange={(e) => setActivation({ ...activation, latitude: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E] font-mono"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] font-mono"
                 />
               </div>
               <div>
@@ -154,7 +154,7 @@ export const DeviceTab = ({
                   placeholder="Contoh: 116.3195"
                   value={activation.longitude}
                   onChange={(e) => setActivation({ ...activation, longitude: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E] font-mono"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] font-mono"
                 />
               </div>
             </div>
@@ -162,7 +162,7 @@ export const DeviceTab = ({
             <button
               type="submit"
               disabled={loadingActivation}
-              className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 shadow-sm shadow-green-500/10"
+              className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 shadow-sm shadow-green-500/10"
             >
               {loadingActivation ? 'Mengaktivasi...' : 'Aktifkan Perangkat'}
             </button>
@@ -177,7 +177,7 @@ export const DeviceTab = ({
         {/* Maintenance Logger Form */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="border-b border-slate-100 pb-3 mb-4">
-            <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Laporan Pemeliharaan Perangkat</h2>
+            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Laporan Pemeliharaan Perangkat</h2>
             <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Catat tindakan servis atau perbaikan sensor kolam</p>
           </div>
 
@@ -190,7 +190,7 @@ export const DeviceTab = ({
                 placeholder="Contoh: NODE-001"
                 value={maintenance.iot_node_serial_number}
                 onChange={(e) => setMaintenance({ ...maintenance, iot_node_serial_number: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B]"
               />
             </div>
 
@@ -199,7 +199,7 @@ export const DeviceTab = ({
               <select
                 value={maintenance.maintenance_type}
                 onChange={(e) => setMaintenance({ ...maintenance, maintenance_type: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               >
                 <option value="rutin">Pembersihan Rutin</option>
                 <option value="perbaikan">Perbaikan Kerusakan</option>
@@ -216,7 +216,7 @@ export const DeviceTab = ({
                 value={maintenance.description}
                 onChange={(e) => setMaintenance({ ...maintenance, description: e.target.value })}
                 rows="3"
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E] resize-none"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] resize-none"
               />
             </div>
 
@@ -227,14 +227,14 @@ export const DeviceTab = ({
                 placeholder="Contoh: Ahmad Fauzi"
                 value={maintenance.performed_by}
                 onChange={(e) => setMaintenance({ ...maintenance, performed_by: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B]"
               />
             </div>
 
             <button
               type="submit"
               disabled={loadingMaintenance}
-              className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 shadow-sm shadow-green-500/10"
+              className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 shadow-sm shadow-green-500/10"
             >
               {loadingMaintenance ? 'Mengirim...' : 'Kirim Laporan Pemeliharaan'}
             </button>
@@ -245,7 +245,7 @@ export const DeviceTab = ({
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
           <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Riwayat Tindakan Servis</h2>
+              <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Riwayat Tindakan Servis</h2>
               <p className="text-[10px] text-slate-400 mt-0.5">Daftar pemeliharaan perangkat IoT tambak</p>
             </div>
             <button
@@ -282,11 +282,11 @@ export const DeviceTab = ({
                       </td>
                       <td className="px-4 py-3 font-bold text-slate-900 font-mono">{m.iot_node_serial_number}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase border ${
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase border ${
                           m.maintenance_type === 'perbaikan' ? 'bg-red-50 text-red-700 border-red-100' :
                           m.maintenance_type === 'kalibrasi' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                           m.maintenance_type === 'ganti_komponen' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
-                          'bg-green-50 text-[#22C55E] border-green-100'
+                          'bg-green-50 text-[#0D9D1B] border-green-100'
                         }`}>
                           {m.maintenance_type === 'ganti_komponen' ? 'GANTI PART' : m.maintenance_type}
                         </span>

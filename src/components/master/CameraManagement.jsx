@@ -42,8 +42,8 @@ export const CameraManagement = ({
       {/* Add Form */}
       <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-fit">
         <div className="border-b border-slate-100 pb-3 mb-4">
-          <h3 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <Video className="h-4 w-4 text-[#22C55E]" />
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <Video className="h-4 w-4 text-[#0D9D1B]" />
             Tambah Kamera Baru
           </h3>
           <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Daftarkan kamera CCTV pemantau KJA</p>
@@ -58,7 +58,7 @@ export const CameraManagement = ({
               placeholder="Contoh: CAM-A01-01"
               value={newCamera.camera_code}
               onChange={(e) => setNewCamera({ ...newCamera, camera_code: e.target.value })}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
             />
           </div>
 
@@ -68,7 +68,7 @@ export const CameraManagement = ({
               required
               value={newCamera.cage_id}
               onChange={(e) => setNewCamera({ ...newCamera, cage_id: e.target.value })}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
             >
               <option value="">-- Pilih Keramba --</option>
               {cagesList.map((c) => (
@@ -86,7 +86,7 @@ export const CameraManagement = ({
               placeholder="e.g. http://192.168.1.100:8554/mystream.m3u8"
               value={newCamera.stream_url}
               onChange={(e) => setNewCamera({ ...newCamera, stream_url: e.target.value })}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
             />
           </div>
 
@@ -96,7 +96,7 @@ export const CameraManagement = ({
               id="cam-active"
               checked={newCamera.is_active}
               onChange={(e) => setNewCamera({ ...newCamera, is_active: e.target.checked })}
-              className="h-4 w-4 rounded border-slate-200 text-[#22C55E] focus:ring-[#22C55E] cursor-pointer"
+              className="h-4 w-4 rounded border-slate-200 text-[#0D9D1B] focus:ring-[#0D9D1B] cursor-pointer"
             />
             <label htmlFor="cam-active" className="text-[10px] font-bold text-slate-600 uppercase cursor-pointer select-none">
               Kamera Aktif
@@ -105,7 +105,7 @@ export const CameraManagement = ({
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
+            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
           >
             Simpan Kamera
           </button>
@@ -116,7 +116,7 @@ export const CameraManagement = ({
       <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
         <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Daftar Kamera CCTV</h3>
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Daftar Kamera CCTV</h3>
             <p className="text-[10px] text-slate-400 mt-0.5">Total data terdaftar pada basis data backend</p>
           </div>
           <button
@@ -159,7 +159,7 @@ export const CameraManagement = ({
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-bold border ${
-                        cam.is_active ? 'bg-green-50 text-[#22C55E] border-green-100' : 'bg-slate-100 text-slate-500 border-slate-200'
+                        cam.is_active ? 'bg-green-50 text-[#0D9D1B] border-green-100' : 'bg-slate-100 text-slate-500 border-slate-200'
                       }`}>
                         {cam.is_active ? 'AKTIF' : 'NON-AKTIF'}
                       </span>

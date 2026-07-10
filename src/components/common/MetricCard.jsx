@@ -77,7 +77,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
   // Colors
   const accentColor = isWarn ? '#ef4444' : isOff ? '#94a3b8' : '#10b981';
   const accentBg    = isWarn ? '#fef2f2' : isOff ? '#f8fafc' : '#ecfdf5';
-  const borderClass = isWarn ? 'border-red-200' : flipped ? 'border-[#22C55E]' : 'border-slate-200/80';
+  const borderClass = isWarn ? 'border-red-200' : flipped ? 'border-[#0D9D1B]' : 'border-slate-200/80';
   const shadowClass = isWarn 
     ? 'shadow-[0_4px_16px_rgba(239,68,68,0.04)] hover:shadow-[0_8px_24px_rgba(239,68,68,0.08)]'
     : flipped 
@@ -93,7 +93,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
           const isActive = seg <= activeSegments;
           let color = 'bg-slate-100';
           if (isActive) {
-            color = isWarn ? 'bg-red-500' : 'bg-[#22C55E]';
+            color = isWarn ? 'bg-red-500' : 'bg-[#0D9D1B]';
           }
           return (
             <div
@@ -138,7 +138,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
                 >
                   <Icon className="h-4 w-4 animate-[softGlow_2s_infinite]" style={{ color: accentColor }} />
                 </div>
-                <span className="text-[12px] font-extrabold text-slate-700 tracking-wide uppercase">{meta.label}</span>
+                <span className="text-[12px] font-semibold text-slate-700 tracking-wide uppercase">{meta.label}</span>
               </div>
               
               <button 
@@ -152,10 +152,10 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
 
             {/* Value Display */}
             <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-4xl font-black font-mono leading-none tracking-tight text-slate-900">
+              <span className="text-4xl font-bold font-mono leading-none tracking-tight text-slate-900">
                 {isOff ? '--' : value.toFixed(type === 'tds' ? 0 : 2)}
               </span>
-              <span className="text-sm font-extrabold text-slate-400 font-mono tracking-wider">{meta.unit}</span>
+              <span className="text-sm font-semibold text-slate-400 font-mono tracking-wider">{meta.unit}</span>
             </div>
           </div>
 
@@ -176,15 +176,15 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
         >
           {/* Tabs selector */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 shrink-0">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="h-3.5 w-3.5 text-[#22C55E] animate-spin-slow" />
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5 text-[#0D9D1B] animate-spin-slow" />
               Glosarium
             </span>
             <div className="flex items-center gap-1 bg-slate-50 p-0.5 rounded-lg text-[10px] font-bold" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setActiveTab('impact')}
                 className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${
-                  activeTab === 'impact' ? 'bg-[#22C55E] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  activeTab === 'impact' ? 'bg-[#0D9D1B] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Risiko
@@ -192,7 +192,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
               <button
                 onClick={() => setActiveTab('solution')}
                 className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${
-                  activeTab === 'solution' ? 'bg-[#22C55E] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  activeTab === 'solution' ? 'bg-[#0D9D1B] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Solusi
@@ -210,7 +210,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
               </div>
             ) : (
               <div className="flex items-start gap-1.5 p-2 bg-green-50/60 border border-green-100/50 rounded-xl text-green-900 font-bold leading-normal">
-                <Wrench className="h-3.5 w-3.5 text-[#22C55E] shrink-0 mt-0.5" />
+                <Wrench className="h-3.5 w-3.5 text-[#0D9D1B] shrink-0 mt-0.5" />
                 <span className="line-clamp-3">Tindakan: {meta.action}</span>
               </div>
             )}
@@ -221,7 +221,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
             <span className="font-mono text-slate-350">{type.toUpperCase()}</span>
             <button 
               onClick={(e) => { e.stopPropagation(); setFlipped(false); }}
-              className="text-[#22C55E] hover:text-[#16A34A] transition-colors font-black flex items-center gap-0.5 cursor-pointer uppercase tracking-widest text-[9px]"
+              className="text-[#0D9D1B] hover:text-[#0A8516] transition-colors font-bold flex items-center gap-0.5 cursor-pointer uppercase tracking-widest text-[9px]"
             >
               Tutup &rarr;
             </button>

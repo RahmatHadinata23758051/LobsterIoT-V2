@@ -60,7 +60,7 @@ export const MasterTab = ({
   return (
     <div className="flex flex-col gap-6 animate-[fadeIn_0.4s_ease-out]">
       <div>
-        <h1 className="text-lg font-black text-slate-900 tracking-tight">Manajemen Data Master</h1>
+        <h1 className="text-lg font-bold text-slate-900 tracking-tight">Manajemen Data Master</h1>
         <p className="text-xs text-slate-500 mt-1">Kelola data keramba, kamera pengawas, dan operator lapangan terdaftar.</p>
       </div>
 
@@ -72,7 +72,7 @@ export const MasterTab = ({
             onClick={() => setMasterSubTab(id)}
             className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
               masterSubTab === id
-                ? 'bg-[#22C55E] text-white shadow-sm shadow-green-500/10'
+                ? 'bg-[#0D9D1B] text-white shadow-sm shadow-green-500/10'
                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >

@@ -127,7 +127,7 @@ export const CctvView = ({ streamUrl }) => {
           <div className="flex items-start justify-between w-full z-10">
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-emerald-300">
-                <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse" />
+                <span className="h-2 w-2 rounded-full bg-[#0D9D1B] animate-pulse" />
                 <span>CCTV_STREAM_01</span>
               </div>
               <div className="text-[9px] text-slate-500 font-bold">1080P · H.264 · 24fps</div>
@@ -150,7 +150,7 @@ export const CctvView = ({ streamUrl }) => {
                 className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 transition cursor-pointer"
                 title="Zoom Out"
               >
-                <span className="font-extrabold text-sm leading-none">-</span>
+                <span className="font-semibold text-sm leading-none">-</span>
               </button>
               <div className="text-[9px] font-bold text-emerald-400 px-1 min-w-[32px] text-center font-mono">
                 {zoom.toFixed(1)}x
@@ -161,7 +161,7 @@ export const CctvView = ({ streamUrl }) => {
                 className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 transition cursor-pointer"
                 title="Zoom In"
               >
-                <span className="font-extrabold text-sm leading-none">+</span>
+                <span className="font-semibold text-sm leading-none">+</span>
               </button>
               <div className="w-px h-4 bg-slate-850 mx-0.5" />
               <button
@@ -179,7 +179,7 @@ export const CctvView = ({ streamUrl }) => {
       {/* ─── LOADING STATE ───────────────────────────────────────── */}
       {status === 'loading' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 gap-3">
-          <div className="w-7 h-7 border-2 border-[#22C55E]/30 border-t-[#22C55E] rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-[#0D9D1B]/30 border-t-[#0D9D1B] rounded-full animate-spin" />
           <span className="text-[10px] text-slate-500 font-mono tracking-wider">Menghubungkan stream dekoder HLS...</span>
         </div>
       )}
@@ -198,7 +198,7 @@ export const CctvView = ({ streamUrl }) => {
 
           <WifiOff className="h-10 w-10 text-slate-800 mb-3" />
           <div className="text-center">
-            <p className="text-xs font-black text-slate-500 uppercase tracking-wider">Kamera Offline</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kamera Offline</p>
             <p className="text-[10px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
               Tidak ada feed HLS aktif terdeteksi. Silakan pilih node IoT aktif yang memiliki perangkat kamera terhubung.
             </p>
@@ -220,7 +220,7 @@ export const CctvView = ({ streamUrl }) => {
 
           <CameraOff className="h-10 w-10 text-red-950 mb-3 animate-pulse" />
           <div className="text-center px-4">
-            <p className="text-xs font-black text-red-500 uppercase tracking-wider flex items-center justify-center gap-1.5">
+            <p className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center justify-center gap-1.5">
               <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
               <span>Koneksi Stream Gagal</span>
             </p>

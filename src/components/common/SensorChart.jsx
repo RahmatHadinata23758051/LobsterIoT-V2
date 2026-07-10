@@ -118,10 +118,10 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
       {/* Chart Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3" id="chart-header">
         <div className="flex items-center space-x-2">
-          <div className="relative flex items-center justify-center h-10 w-10 bg-gradient-to-br from-[#22C55E]/10 to-[#22C55E]/5 rounded-xl border border-[#22C55E]/20 shadow-[0_2px_10px_-3px_rgba(16,185,129,0.1)] overflow-hidden group shrink-0">
+          <div className="relative flex items-center justify-center h-10 w-10 bg-gradient-to-br from-[#0D9D1B]/10 to-[#0D9D1B]/5 rounded-xl border border-[#0D9D1B]/20 shadow-[0_2px_10px_-3px_rgba(16,185,129,0.1)] overflow-hidden group shrink-0">
             {/* Animated background glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-emerald-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
-            <svg className="w-5.5 h-5.5 text-[#22C55E] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-5.5 h-5.5 text-[#0D9D1B] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path className="animate-[pulseWave_2.5s_linear_infinite]" strokeDasharray="40" strokeDashoffset="40" d="M3 12h3l2.5-6 3.5 12 2-9 2.5 5 2.5-2h3" />
             </svg>
             <style>{`
@@ -133,7 +133,7 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
             `}</style>
           </div>
           <div>
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Grafik Riwayat Telemetri</h3>
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Grafik Riwayat Telemetri</h3>
             <p className="text-[10px] text-slate-500 mt-0.5">Analisis kondisi kualitas air 24 jam terakhir</p>
           </div>
         </div>
@@ -147,7 +147,7 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
               onClick={() => onChangeMetric(type)}
               className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                 selectedMetric === type
-                  ? 'bg-[#22C55E] text-white shadow-sm'
+                  ? 'bg-[#0D9D1B] text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
               }`}
             >
@@ -323,7 +323,7 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
                 <Clock className="h-2.5 w-2.5 text-slate-500" />
                 <span>Pukul {points[hoveredIndex].time}</span>
               </div>
-              <div className="font-mono font-black text-xs text-emerald-400 flex items-center gap-0.5">
+              <div className="font-mono font-bold text-xs text-emerald-400 flex items-center gap-0.5">
                 {points[hoveredIndex].value.toFixed(selectedMetric === 'tds' ? 0 : 2)}
                 <span className="text-[9px] font-bold text-slate-300">{meta.unit}</span>
               </div>

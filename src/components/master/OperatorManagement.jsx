@@ -30,8 +30,8 @@ export const OperatorManagement = ({
       {/* Add Form */}
       <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-fit">
         <div className="border-b border-slate-100 pb-3 mb-4">
-          <h3 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <User className="h-4 w-4 text-[#22C55E]" />
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <User className="h-4 w-4 text-[#0D9D1B]" />
             Tambah Operator Baru
           </h3>
           <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Daftarkan petugas lapangan baru</p>
@@ -46,7 +46,7 @@ export const OperatorManagement = ({
               placeholder="Contoh: Budi Santoso"
               value={newOperator.full_name}
               onChange={(e) => setNewOperator({ ...newOperator, full_name: e.target.value })}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
             />
           </div>
 
@@ -58,7 +58,7 @@ export const OperatorManagement = ({
               placeholder="Contoh: 081234567890"
               value={newOperator.phone_number}
               onChange={(e) => setNewOperator({ ...newOperator, phone_number: e.target.value })}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
             />
           </div>
 
@@ -70,13 +70,13 @@ export const OperatorManagement = ({
               value={newOperator.address}
               onChange={(e) => setNewOperator({ ...newOperator, address: e.target.value })}
               rows="3"
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] resize-none"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] resize-none"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
+            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
           >
             Simpan Operator
           </button>
@@ -87,7 +87,7 @@ export const OperatorManagement = ({
       <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
         <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Daftar Operator Lapangan</h3>
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Daftar Operator Lapangan</h3>
             <p className="text-[10px] text-slate-400 mt-0.5">Total data terdaftar pada basis data backend</p>
           </div>
           <button

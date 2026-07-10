@@ -43,7 +43,7 @@ export const SensorTypeManagement = ({
       <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm w-full">
         <div className="border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Tipe Sensor Aktif</h2>
+            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Tipe Sensor Aktif</h2>
             <p className="text-[10px] text-slate-400 mt-0.5">Informasi spesifikasi parameter sensor yang terdaftar dalam sistem</p>
           </div>
           <button
@@ -67,11 +67,11 @@ export const SensorTypeManagement = ({
               const Icon = ICON_MAP[st.sensor_code] || Droplet;
               return (
                 <div key={st.id} className="flex gap-4 p-4 border border-slate-100 rounded-xl hover:bg-slate-50/50 transition-colors bg-slate-50/10">
-                  <div className="p-2.5 bg-[#22C55E]/10 text-[#22C55E] rounded-xl shrink-0 h-fit">
+                  <div className="p-2.5 bg-[#0D9D1B]/10 text-[#0D9D1B] rounded-xl shrink-0 h-fit">
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="text-xs leading-normal">
-                    <h4 className="font-extrabold text-slate-900 text-[13px]">{st.name || st.sensor_code.toUpperCase()}</h4>
+                    <h4 className="font-semibold text-slate-900 text-[13px]">{st.name || st.sensor_code.toUpperCase()}</h4>
                     <p className="text-[10px] text-slate-400 font-mono font-bold mt-0.5">KODE: {st.sensor_code} · SATUAN: {st.unit || '—'}</p>
                     <p className="text-slate-500 mt-1.5 leading-relaxed">{st.description || 'Tidak ada deskripsi sensor.'}</p>
                   </div>
@@ -86,7 +86,7 @@ export const SensorTypeManagement = ({
       <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm w-full">
         <div className="border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Pengaturan Ambang Batas Sensor</h2>
+            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Pengaturan Ambang Batas Sensor</h2>
             <p className="text-[10px] text-slate-455 mt-0.5">Sesuaikan ambang batas nilai ideal pemicu peringatan sensor kualitas air</p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export const SensorTypeManagement = ({
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-extrabold text-slate-800">{label}</p>
+                        <p className="font-semibold text-slate-800">{label}</p>
                         <p className="text-[10px] text-slate-400 font-mono">ID: {th.sensor_code}</p>
                       </div>
                     </div>
@@ -128,7 +128,7 @@ export const SensorTypeManagement = ({
                             copy[index].value_min = e.target.value;
                             setThresholdsList(copy);
                           }}
-                          className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#22C55E]"
+                          className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#0D9D1B]"
                         />
                       </div>
 
@@ -145,7 +145,7 @@ export const SensorTypeManagement = ({
                             copy[index].value_max = e.target.value;
                             setThresholdsList(copy);
                           }}
-                          className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#22C55E]"
+                          className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#0D9D1B]"
                         />
                       </div>
                     </div>
@@ -157,7 +157,7 @@ export const SensorTypeManagement = ({
             <button
               type="submit"
               disabled={loadingThresholds}
-              className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 shadow-sm shadow-green-500/10"
+              className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50 shadow-sm shadow-green-500/10"
             >
               {loadingThresholds ? 'Menyimpan...' : 'Perbarui Ambang Batas Sensor'}
             </button>

@@ -50,8 +50,8 @@ export const CageManagement = ({
       {/* Add Form */}
       <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-fit">
         <div className="border-b border-slate-100 pb-3 mb-4">
-          <h3 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <Anchor className="h-4 w-4 text-[#22C55E]" />
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <Anchor className="h-4 w-4 text-[#0D9D1B]" />
             Tambah KJA Baru
           </h3>
           <p className="text-[10px] text-slate-400 mt-0.5">Daftarkan keramba jaring apung lobster baru</p>
@@ -66,7 +66,7 @@ export const CageManagement = ({
               placeholder="Contoh: CAGE-B02"
               value={newCage.cage_code}
               onChange={(e) => setNewCage({ ...newCage, cage_code: e.target.value })}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
             />
           </div>
 
@@ -80,7 +80,7 @@ export const CageManagement = ({
                 placeholder="-8.65"
                 value={newCage.latitude}
                 onChange={(e) => setNewCage({ ...newCage, latitude: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
             <div>
@@ -92,7 +92,7 @@ export const CageManagement = ({
                 placeholder="116.3"
                 value={newCage.longitude}
                 onChange={(e) => setNewCage({ ...newCage, longitude: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
           </div>
@@ -107,7 +107,7 @@ export const CageManagement = ({
                 placeholder="8.5"
                 value={newCage.volume_cubic_meters}
                 onChange={(e) => setNewCage({ ...newCage, volume_cubic_meters: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
             <div>
@@ -118,7 +118,7 @@ export const CageManagement = ({
                 placeholder="Contoh: Baik / Servis"
                 value={newCage.structure_condition}
                 onChange={(e) => setNewCage({ ...newCage, structure_condition: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E]"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               />
             </div>
           </div>
@@ -131,7 +131,7 @@ export const CageManagement = ({
                 placeholder="200"
                 value={newCage.lobster_count}
                 onChange={(e) => setNewCage({ ...newCage, lobster_count: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
             <div>
@@ -141,14 +141,14 @@ export const CageManagement = ({
                 placeholder="45"
                 value={newCage.lobster_age_days}
                 onChange={(e) => setNewCage({ ...newCage, lobster_age_days: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#22C55E] font-mono"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
+            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
           >
             Simpan KJA
           </button>
@@ -159,7 +159,7 @@ export const CageManagement = ({
       <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
         <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Daftar Keramba Jaring Apung</h3>
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Daftar Keramba Jaring Apung</h3>
             <p className="text-[10px] text-slate-400 mt-0.5">Total data terdaftar pada basis data backend</p>
           </div>
           <button

@@ -27,7 +27,7 @@ export const ThresholdConfig = ({
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm max-w-3xl mx-auto w-full animate-[fadeIn_0.4s_ease-out]">
       <div className="border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Konfigurasi Batas Sensor</h2>
+          <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Konfigurasi Batas Sensor</h2>
           <p className="text-[10px] text-slate-400 mt-0.5">Sesuaikan batas ideal pemicu peringatan sensor kualitas air</p>
         </div>
         <button
@@ -56,10 +56,10 @@ export const ThresholdConfig = ({
                 <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-slate-50/55 transition-colors">
                   <div className="flex items-center gap-3 min-w-[200px]">
                     <div className="p-1.5 bg-slate-100 text-slate-500 rounded-lg">
-                      <Icon className="h-4 w-4 text-[#22C55E]" />
+                      <Icon className="h-4 w-4 text-[#0D9D1B]" />
                     </div>
                     <div>
-                      <p className="font-extrabold text-slate-800">{label}</p>
+                      <p className="font-semibold text-slate-800">{label}</p>
                       <p className="text-[10px] text-slate-400 font-mono">ID: {th.sensor_code}</p>
                     </div>
                   </div>
@@ -76,7 +76,7 @@ export const ThresholdConfig = ({
                           copy[index].value_min = e.target.value;
                           setThresholdsList(copy);
                         }}
-                        className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#22C55E]"
+                        className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#0D9D1B]"
                       />
                     </div>
 
@@ -93,7 +93,7 @@ export const ThresholdConfig = ({
                           copy[index].value_max = e.target.value;
                           setThresholdsList(copy);
                         }}
-                        className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#22C55E]"
+                        className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#0D9D1B]"
                       />
                     </div>
                   </div>
@@ -105,7 +105,7 @@ export const ThresholdConfig = ({
           <button
             type="submit"
             disabled={loadingThresholds}
-            className="w-full py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white font-extrabold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50"
+            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer disabled:opacity-50"
           >
             {loadingThresholds ? 'Menyimpan...' : 'Perbarui Batas Sensor Massal'}
           </button>
