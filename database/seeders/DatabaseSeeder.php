@@ -15,23 +15,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Admin User
+        // ── 1. Admin — full system access ──
         User::updateOrCreate(
             ['email' => 'admin@lobsense.com'],
             [
-                'name' => 'Admin Lobsense',
-                'password' => Hash::make('Lobsense123!'),
-                'role' => 'admin',
+                'name'     => 'Admin Lobsense',
+                'password' => Hash::make('Admin2026Lob'),
+                'role'     => 'admin',
             ]
         );
 
-        // Create Operator User
+        // ── 2. Management — read-only dashboard & reports ──
+        User::updateOrCreate(
+            ['email' => 'management@lobsense.com'],
+            [
+                'name'     => 'Management Lobsense',
+                'password' => Hash::make('Manage2026Lob'),
+                'role'     => 'management',
+            ]
+        );
+
+        // ── 3. Operator — field-level cage operations ──
         User::updateOrCreate(
             ['email' => 'operator@lobsense.com'],
             [
-                'name' => 'Operator Lobsense',
-                'password' => Hash::make('Lobsense123!'),
-                'role' => 'operator',
+                'name'     => 'Operator Lobsense',
+                'password' => Hash::make('Operator2026Lob'),
+                'role'     => 'operator',
             ]
         );
 
