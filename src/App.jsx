@@ -4,7 +4,7 @@ import {
   RotateCcw, LogOut, AlertCircle, ChevronDown,
   LayoutDashboard, Settings, Clock, CheckCircle, AlertTriangle,
   Cpu, WifiOff, Wrench, Calendar,
-  Anchor, Video, User, Layers, Droplet, UserRound
+  Anchor, Video, User, Layers, Droplet, UserRound, FileDown
 } from 'lucide-react';
 import { LoginPage } from './components/auth/LoginPage';
 import { DashboardTab } from './components/dashboard/DashboardTab';
@@ -19,6 +19,7 @@ import { OperatorManagement } from './components/master/OperatorManagement';
 import { GatewayManagement } from './components/master/GatewayManagement';
 import { NodeManagement } from './components/master/NodeManagement';
 import { SensorTypeManagement } from './components/master/SensorTypeManagement';
+import { ReportsTab } from './components/reports/ReportsTab';
 import { api } from './api/api';
 
 const SENSOR_MAP = [
@@ -34,6 +35,7 @@ const PATH_TO_TAB = {
   '/dashboard': 'dashboard',
   '/log-pakan': 'feeding',
   '/log-aktivitas': 'activity_logs',
+  '/laporan-ekspor': 'reports',
   '/data-master/edge-computing': 'edge_computing',
   '/data-master/iot-node': 'iot_node',
   '/data-master/sensor': 'sensor',
@@ -49,6 +51,7 @@ function getPathFromTab(tab) {
   if (tab === 'dashboard') return '/dashboard';
   if (tab === 'feeding') return '/log-pakan';
   if (tab === 'activity_logs') return '/log-aktivitas';
+  if (tab === 'reports') return '/laporan-ekspor';
   if (tab === 'edge_computing') return '/data-master/edge-computing';
   if (tab === 'iot_node') return '/data-master/iot-node';
   if (tab === 'sensor') return '/data-master/sensor';
@@ -789,6 +792,7 @@ export default function App() {
         { id: 'dashboard',     label: 'Dasbor Utama',      icon: LayoutDashboard },
         { id: 'feeding',       label: 'Log Pakan',          icon: Calendar },
         { id: 'activity_logs', label: 'Log Aktivitas',      icon: Clock },
+        { id: 'reports',       label: 'Laporan & Ekspor',   icon: FileDown },
       ]
     },
     {
@@ -998,6 +1002,13 @@ export default function App() {
           {activeTab === 'activity_logs' && (
             <SystemActivityTab
               activityLogs={activityLogs}
+            />
+          )}
+
+          {activeTab === 'reports' && (
+            <ReportsTab
+              token={token}
+              nodes={nodes}
             />
           )}
 

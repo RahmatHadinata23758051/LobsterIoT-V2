@@ -281,4 +281,18 @@ export const api = {
       headers: getHeaders(token),
     });
   },
+
+  // Reports & Exports Download API
+  async downloadReport(token, type, format, serial = '') {
+    const query = serial ? `?serial_number=${encodeURIComponent(serial)}` : '';
+    const response = await fetch(`${BACKEND_URL}/api/v2/reports/${type}/${format}${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Gagal mengunduh file laporan.');
+    }
+    return response.blob();
+  },
 };
