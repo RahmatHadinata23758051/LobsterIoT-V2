@@ -47,6 +47,7 @@ class MonitoringController extends Controller
             |> range(start: -30d)
             |> filter(fn: (r) => r["_measurement"] == "telemetries")
             |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+            |> drop(columns: ["cage_code"])
             |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
             |> tail(n: 1)';
 
@@ -58,6 +59,7 @@ class MonitoringController extends Controller
             |> range(start: -24h)
             |> filter(fn: (r) => r["_measurement"] == "telemetries")
             |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+            |> drop(columns: ["cage_code"])
             |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)
             |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")';
 
@@ -130,6 +132,7 @@ class MonitoringController extends Controller
             |> range(start: ' . $startIso . ', stop: ' . $stopIso . ')
             |> filter(fn: (r) => r["_measurement"] == "telemetries")
             |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+            |> drop(columns: ["cage_code"])
             ' . $aggregateClause . '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
             |> limit(n: ' . $limit . ')';
 
