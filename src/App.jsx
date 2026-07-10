@@ -1009,6 +1009,7 @@ export default function App() {
             <ReportsTab
               token={token}
               nodes={nodes}
+              cagesList={cagesList}
             />
           )}
 
