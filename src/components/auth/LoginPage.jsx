@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, AlertCircle, Check, X, Shield, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { api } from '../../api/api';
 
 export const LoginPage = ({ onLoginSuccess }) => {
@@ -8,9 +8,8 @@ export const LoginPage = ({ onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
-  // Password Validation Rules
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
@@ -19,15 +18,8 @@ export const LoginPage = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setErrorMsg('Email dan password wajib diisi.');
-      return;
-    }
-
-    if (!isPasswordValid) {
-      setErrorMsg('Kata sandi harus memenuhi standar keamanan (minimal 8 karakter dengan kombinasi huruf besar, huruf kecil, dan angka).');
-      return;
-    }
+    if (!email || !password) { setErrorMsg('Email dan password wajib diisi.'); return; }
+    if (!isPasswordValid) { setErrorMsg('Kata sandi tidak memenuhi standar keamanan.'); return; }
 
     setLoading(true);
     setErrorMsg('');
@@ -35,205 +27,185 @@ export const LoginPage = ({ onLoginSuccess }) => {
     try {
       const response = await api.login(email, password);
       const result = await response.json();
-
       if (response.ok && result.status === 'success') {
-        const token = result.data.token;
-        const user = result.data.user;
-        
-        // Save to localStorage
-        localStorage.setItem('lobsense_token', token);
-        localStorage.setItem('lobsense_user', JSON.stringify(user));
-        
-        onLoginSuccess(token, user);
+        localStorage.setItem('lobsense_token', result.data.token);
+        localStorage.setItem('lobsense_user', JSON.stringify(result.data.user));
+        onLoginSuccess(result.data.token, result.data.user);
       } else {
         setErrorMsg(result.message || 'Email atau password salah.');
       }
     } catch (err) {
-      console.error('Login connection error:', err);
-      setErrorMsg('Gagal terhubung ke server backend. Pastikan server backend Anda online.');
+      setErrorMsg('Gagal terhubung ke server.');
     } finally {
       setLoading(false);
     }
   };
 
-  const validationCriteria = [
-    { label: 'Minimal 8 karakter', fulfilled: hasMinLength },
-    { label: 'Mengandung huruf besar (A-Z)', fulfilled: hasUppercase },
-    { label: 'Mengandung huruf kecil (a-z)', fulfilled: hasLowercase },
-    { label: 'Mengandung angka (0-9)', fulfilled: hasNumber },
+  const rules = [
+    { met: hasMinLength, text: 'Min. 8 karakter' },
+    { met: hasUppercase, text: 'Huruf besar' },
+    { met: hasLowercase, text: 'Huruf kecil' },
+    { met: hasNumber, text: 'Angka' },
   ];
 
+  const serif = { fontFamily: "'DM Serif Display', Georgia, serif" };
+
   return (
-    <div className="min-h-screen w-full flex bg-[#f8fafc] font-sans overflow-hidden">
-      
-      {/* ═ PANEL KIRI (Asymmetric Visual Section with Pexels Image & Gradient) ═════ */}
-      <div className="hidden lg:flex lg:w-7/12 relative bg-slate-950 overflow-hidden items-center justify-center">
-        
-        {/* Background Image of Freshwater Lobster Cage */}
-        <img 
-          src="/lobster_aquaculture.jpg" 
-          alt="Freshwater Lobster Aquaculture" 
-          className="absolute inset-0 w-full h-full object-cover opacity-60 scale-105 select-none"
+    <div className="min-h-screen w-full flex font-[Poppins,sans-serif]">
+
+      {/* ──────────────── LEFT — Editorial Visual Panel ──────────────── */}
+      <div className="hidden lg:block lg:w-[58%] relative overflow-hidden bg-slate-950">
+        {/* Photo */}
+        <img
+          src="/lobster_aquaculture.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
+          style={{ objectPosition: '50% 40%' }}
         />
+        {/* Gradient: let photo breathe at top, dark at bottom for text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
-        {/* Deep, Rich Maskulin Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-[#051f08]/90 to-green-950/70" />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-950/40" />
+        {/* Content — vertically spaced: brand top, text bottom */}
+        <div className="relative z-10 h-full flex flex-col justify-between p-12 xl:p-16">
+          {/* Top — brand wordmark */}
+          <p className="text-white/50 text-[10px] font-semibold tracking-[0.35em] uppercase select-none">
+            Lobsense
+          </p>
 
-        {/* Floating Ambient Light Leak */}
-        <div className="absolute -left-1/4 -bottom-1/4 w-96 h-96 bg-[#0D9D1B]/15 rounded-full blur-3xl" />
-        <div className="absolute right-1/4 top-1/4 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl" />
-
-        {/* Overlay Editorial Text Chassis */}
-        <div className="relative z-10 p-16 max-w-xl text-white space-y-6 flex flex-col justify-end h-full w-full select-none">
-          <div className="flex items-center gap-2">
-            <span className="h-[2px] w-8 bg-[#0D9D1B] rounded-full" />
-            <span className="text-[10px] font-bold text-[#0D9D1B] tracking-widest uppercase font-mono">Platform Lobsense V2</span>
-          </div>
-          <div className="space-y-3">
-            <h1 className="text-3xl font-extrabold tracking-tight leading-tight md:text-4xl text-slate-100">
-              Freshwater Lobster <br/>
-              <span className="text-[#0D9D1B]">Cage Monitoring</span> System
+          {/* Bottom — editorial headline */}
+          <div className="max-w-lg space-y-5 pb-4">
+            <h1
+              style={serif}
+              className="text-white text-[2.6rem] xl:text-5xl leading-[1.12] tracking-tight select-none"
+            >
+              Teknologi untuk<br />
+              <em className="text-emerald-400 not-italic">akuakultur</em> yang<br />
+              berkelanjutan.
             </h1>
-            <p className="text-[12px] text-slate-300 font-medium leading-relaxed font-sans max-w-sm">
-              Menerapkan teknologi telemetri real-time, pengawasan video multi-node HLS, dan otomatisasi peringatan dini untuk kelangsungan ekosistem akuakultur lobster.
+            <p className="text-white/40 text-[12.5px] leading-relaxed max-w-[360px] font-light">
+              Pemantauan real-time keramba jaring apung lobster air tawar —
+              telemetri sensor, pengawasan video terpadu, peringatan otomatis.
             </p>
-          </div>
-          <div className="pt-8 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">
-            <span>Balai Akuakultur Nusantara</span>
-            <span>Est. 2026</span>
+            <div className="flex items-center gap-3 pt-3">
+              <span className="h-px w-6 bg-emerald-500/50" />
+              <span className="text-white/25 text-[9px] font-medium tracking-[0.25em] uppercase">
+                Sistem Layanan Akuakultur Monitoring
+              </span>
+            </div>
           </div>
         </div>
-
       </div>
 
-      {/* ═ PANEL KANAN (Form Chassis - Ultra Clean, Minimal, and Precise) ═════ */}
-      <div className="w-full lg:w-5/12 flex items-center justify-center p-8 md:p-16 select-none bg-white relative">
-        
-        {/* Abstract design elements */}
-        <div className="absolute top-12 right-12 text-slate-200">
-          <Shield className="h-20 w-20 stroke-[0.5]" />
+      {/* ──────────────── RIGHT — Login Form ──────────────── */}
+      <div className="w-full lg:w-[42%] bg-[#fafaf9] flex items-center justify-center px-8 md:px-16 lg:px-20 relative min-h-screen">
+
+        {/* Mobile-only brand header (when left panel is hidden) */}
+        <div className="absolute top-8 left-8 lg:hidden">
+          <p className="text-slate-400 text-[10px] font-semibold tracking-[0.3em] uppercase">Lobsense</p>
         </div>
 
-        <div className="max-w-md w-full space-y-8 relative z-10">
-          
-          {/* Header */}
-          <div className="space-y-2">
-            <div className="inline-flex bg-[#0D9D1B]/10 p-2 rounded-xl border border-[#0D9D1B]/20 text-[#0D9D1B] mb-2 shadow-sm">
-              <Shield className="h-5 w-5" />
-            </div>
-            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Selamat Datang Kembali</h2>
-            <p className="text-[11px] text-slate-400 font-semibold">
-              Masukkan kredensial operator Anda untuk mengakses panel kontrol pemantauan KJA.
+        <div className="w-full max-w-[340px]">
+
+          {/* ── Heading ── */}
+          <div className="mb-10">
+            <p className="text-[10px] font-semibold tracking-[0.35em] uppercase text-slate-400 mb-3">
+              Lobsense V2
+            </p>
+            <h2
+              style={serif}
+              className="text-[28px] text-slate-900 tracking-tight leading-tight"
+            >
+              Masuk ke Platform
+            </h2>
+            <p className="text-slate-400 text-[12.5px] mt-2.5 font-light leading-relaxed">
+              Masukkan kredensial operator Anda untuk mengakses panel kontrol.
             </p>
           </div>
 
-          {/* Error Message banner */}
+          {/* ── Error ── */}
           {errorMsg && (
-            <div className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-3.5 flex items-start space-x-2.5 text-xs">
-              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-              <span className="leading-normal font-bold">{errorMsg}</span>
+            <div className="mb-6 flex items-start gap-2.5 bg-red-50/80 border border-red-100 rounded-lg px-4 py-3">
+              <AlertCircle className="h-3.5 w-3.5 text-red-400 mt-0.5 shrink-0" />
+              <span className="text-[11.5px] font-medium text-red-700 leading-snug">{errorMsg}</span>
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5 text-xs">
-            
-            {/* Email Input */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
-                Email Operator
+          {/* ── Form ── */}
+          <form onSubmit={handleSubmit} className="space-y-7">
+
+            {/* Email */}
+            <div>
+              <label className="text-[11px] font-semibold text-slate-400 tracking-wide block mb-2">
+                Email
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="email"
-                  placeholder="operator@lobsense.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-[12px] text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition-all duration-200"
-                />
-              </div>
+              <input
+                type="email"
+                placeholder="nama@lobsense.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-transparent border-b border-slate-200 pb-2.5 text-[14px] text-slate-900 placeholder-slate-300 focus:outline-none focus:border-slate-800 transition-colors duration-300 font-medium"
+              />
             </div>
 
-            {/* Password Input */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+            {/* Password */}
+            <div>
+              <label className="text-[11px] font-semibold text-slate-400 tracking-wide block mb-2">
                 Kata Sandi
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="Masukkan kata sandi"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setPasswordFocused(true)}
-                  onBlur={() => setPasswordFocused(false)}
+                  onChange={(e) => { setPassword(e.target.value); if (!passwordTouched) setPasswordTouched(true); }}
                   required
-                  className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-[12px] text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition-all duration-200"
+                  className="w-full bg-transparent border-b border-slate-200 pb-2.5 pr-8 text-[14px] text-slate-900 placeholder-slate-300 focus:outline-none focus:border-slate-800 transition-colors duration-300 font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                  className="absolute right-0 bottom-2 text-slate-300 hover:text-slate-500 transition-colors cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-[15px] w-[15px]" /> : <Eye className="h-[15px] w-[15px]" />}
                 </button>
               </div>
             </div>
 
-            {/* Real-time Password Strength Checklist (appears on focus or when input starts) */}
-            {(passwordFocused || password.length > 0) && (
-              <div className="p-3.5 bg-slate-50 border border-slate-150 rounded-xl space-y-2">
-                <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                  Standar Keamanan Kata Sandi
-                </p>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[10.5px]">
-                  {validationCriteria.map(({ label, fulfilled }) => (
-                    <div key={label} className="flex items-center gap-1.5 select-none">
-                      <div className={`h-4 w-4 rounded-full flex items-center justify-center shrink-0 border transition-all duration-150
-                        ${fulfilled 
-                          ? 'bg-green-50 border-green-200 text-[#0D9D1B]' 
-                          : 'bg-white border-slate-200 text-slate-300'}`}>
-                        {fulfilled ? (
-                          <Check className="h-2.5 w-2.5 stroke-[3]" />
-                        ) : (
-                          <X className="h-2.5 w-2.5 stroke-[3]" />
-                        )}
-                      </div>
-                      <span className={`font-semibold transition-colors duration-150 ${fulfilled ? 'text-green-700' : 'text-slate-450'}`}>
-                        {label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+            {/* Password strength — subtle inline dots */}
+            {passwordTouched && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 -mt-2">
+                {rules.map(({ met, text }) => (
+                  <span
+                    key={text}
+                    className={`text-[10px] font-semibold tracking-wide flex items-center gap-1.5 transition-colors duration-200
+                      ${met ? 'text-emerald-600' : 'text-slate-300'}`}
+                  >
+                    <span className={`inline-block h-[5px] w-[5px] rounded-full transition-colors duration-200
+                      ${met ? 'bg-emerald-500' : 'bg-slate-250'}`}
+                    />
+                    {text}
+                  </span>
+                ))}
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading || !isPasswordValid}
-              className="w-full py-3 bg-[#0D9D1B] hover:bg-[#0A8516] disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none text-white text-[11px] font-bold rounded-xl tracking-wider uppercase transition-all duration-200 cursor-pointer disabled:cursor-not-allowed select-none shadow-md shadow-green-500/20"
+              className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-150 disabled:text-slate-400 text-white text-[11.5px] font-semibold tracking-[0.12em] uppercase rounded-lg transition-all duration-200 cursor-pointer disabled:cursor-not-allowed select-none"
             >
-              {loading ? 'Mengotentikasi...' : 'Masuk Dashboard'}
+              {loading ? 'Memproses...' : 'Masuk'}
             </button>
-
           </form>
 
-          {/* Footer Details */}
-          <div className="pt-6 border-t border-slate-100 text-center">
-            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-              Lobsense Monitoring © 2026 · Hak Cipta Dilindungi
-            </p>
-          </div>
-
+          {/* ── Footer ── */}
+          <p className="text-[9px] text-slate-300 tracking-[0.2em] uppercase mt-14 text-center font-medium select-none">
+            © 2026 Lobsense Monitoring
+          </p>
         </div>
-
       </div>
-
     </div>
   );
 };
