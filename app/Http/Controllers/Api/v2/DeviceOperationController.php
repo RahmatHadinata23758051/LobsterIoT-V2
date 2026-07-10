@@ -64,8 +64,8 @@ class DeviceOperationController extends Controller
             'id' => 'required|integer',
             'picture' => 'required|image|mimes:jpeg,png,jpg|max:5120',
             'signature' => 'required|image|mimes:png,jpeg,jpg|max:5120',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
         ]);
 
         if ($validator->fails()) {
@@ -111,8 +111,8 @@ class DeviceOperationController extends Controller
             'description' => 'required|string',
             'picture' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'signature' => 'required|image|mimes:png,jpeg,jpg|max:5120',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
         ]);
 
         if ($validator->fails()) {

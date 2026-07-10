@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Laravolt\Indonesia\Models\Province;
-use Laravolt\Indonesia\Models\City;
+use App\Models\Province;
+use App\Models\City;
 use Laravolt\Indonesia\Models\District;
 
 class RegionController extends Controller
@@ -27,7 +27,13 @@ class RegionController extends Controller
         $query = City::query();
 
         if ($request->has('province_code')) {
-            $query->where('province_code', $request->province_code);
+            $query->whereHas('province', function ($q) use ($request) {
+                $q->where('code', $request->province_code);
+            });
+        }
+
+        if ($request->has('province_id')) {
+            $query->where('province_id', $request->province_id);
         }
 
         $cities = $query->orderBy('name', 'asc')->get();

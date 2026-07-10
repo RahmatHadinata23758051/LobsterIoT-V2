@@ -19,10 +19,10 @@ class CageApiTest extends TestCase
         parent::setUp();
 
         $this->user = User::create([
-            'name' => 'Operator Lobsense',
-            'email' => 'operator@lobsense.com',
+            'name' => 'Admin Lobsense',
+            'email' => 'admin@lobsense.com',
             'password' => bcrypt('password123'),
-            'role' => 'operator',
+            'role' => 'admin',
         ]);
         $this->token = $this->user->createToken('test_token')->plainTextToken;
     }
