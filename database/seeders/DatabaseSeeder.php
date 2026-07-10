@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
             ProvinceSeeder::class,
             CitySeeder::class,
             SensorTypeSeeder::class,
+            SystemSettingSeeder::class,
         ]);
     }
 }
