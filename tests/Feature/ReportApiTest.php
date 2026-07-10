@@ -100,7 +100,26 @@ class ReportApiTest extends TestCase
     public function test_reports_require_authentication(): void
     {
         $this->getJson('/api/v2/reports/node-registration/pdf')->assertStatus(401);
-        $this->getJson('/api/v2/reports/node-registration/csv')->assertStatus(401);
+        $this->getJson('/api/v2/reports')->assertStatus(401);
+    }
+
+    public function test_raw_reports_index_endpoint(): void
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->getJson('/api/v2/reports?type=node-registration');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'serial_number',
+                        'owner'
+                    ]
+                ]
+            ]);
     }
 
     public function test_node_registration_pdf_export(): void
@@ -122,6 +141,17 @@ class ReportApiTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
         $this->assertStringContainsString('NODE-TEST-999', $response->streamedContent());
+    }
+
+    public function test_node_registration_excel_export(): void
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->get('/api/v2/reports/node-registration/excel');
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.ms-excel; charset=utf-8');
+        $this->assertStringContainsString('Laporan Registrasi Node', $response->getContent());
     }
 
     public function test_telemetry_pdf_export(): void
@@ -147,7 +177,7 @@ class ReportApiTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
-        ])->get('/api/v2/reports/telemetry/pdf?serial_number=NODE-TEST-999');
+        ])->get('/api/v2/reports/telemetry/pdf?serial_number=NODE-TEST-999&startDate=2026-07-01&endDate=2026-07-10');
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/pdf');
@@ -185,10 +215,6 @@ class ReportApiTest extends TestCase
 
     public function test_maintenance_pdf_export(): void
     {
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-        ])->get('/api/v2/reports/reports/maintenance/pdf'); // Wait, wait! The route is reports/maintenance/pdf (without double reports)
-        // Let's call the actual route
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
         ])->get('/api/v2/reports/maintenance/pdf');

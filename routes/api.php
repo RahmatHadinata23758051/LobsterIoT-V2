@@ -82,14 +82,19 @@ Route::prefix('v2')->group(function () {
         Route::get('monitoring/history/{serial_number}', [MonitoringController::class, 'history']);
 
         // Reports & Exports
+        Route::get('reports', [ReportController::class, 'index']);
         Route::get('reports/node-registration/pdf', [ReportController::class, 'nodeRegistrationPDF']);
         Route::get('reports/node-registration/csv', [ReportController::class, 'nodeRegistrationCSV']);
+        Route::get('reports/node-registration/excel', [ReportController::class, 'nodeRegistrationExcel']);
         Route::get('reports/telemetry/pdf', [ReportController::class, 'telemetryPDF']);
         Route::get('reports/telemetry/csv', [ReportController::class, 'telemetryCSV']);
+        Route::get('reports/telemetry/excel', [ReportController::class, 'telemetryExcel']);
         Route::get('reports/maintenance/pdf', [ReportController::class, 'maintenancePDF']);
         Route::get('reports/maintenance/csv', [ReportController::class, 'maintenanceCSV']);
+        Route::get('reports/maintenance/excel', [ReportController::class, 'maintenanceExcel']);
         Route::get('reports/feeding/pdf', [ReportController::class, 'feedingPDF']);
         Route::get('reports/feeding/csv', [ReportController::class, 'feedingCSV']);
+        Route::get('reports/feeding/excel', [ReportController::class, 'feedingExcel']);
 
         // ── Admin & Management Protected Write Actions ──
         Route::middleware('role:admin,management')->group(function () {
