@@ -1,5 +1,21 @@
 import React from 'react';
-import { Cpu, Video, AlertCircle, AlertTriangle, CheckCircle, WifiOff, Sun } from 'lucide-react';
+import { 
+  Cpu, 
+  Video, 
+  AlertCircle, 
+  AlertTriangle, 
+  CheckCircle, 
+  WifiOff, 
+  Sun, 
+  Moon, 
+  Cloud, 
+  CloudSun, 
+  CloudMoon, 
+  CloudRain, 
+  CloudLightning, 
+  CloudSnow, 
+  CloudFog 
+} from 'lucide-react';
 import { MetricCard } from '../common/MetricCard';
 import { SensorChart } from '../common/SensorChart';
 import { CctvView } from '../common/CctvView';
@@ -152,6 +168,48 @@ export const DashboardTab = ({
     return (val < th.min || val > th.max) ? 'warning' : 'normal';
   };
 
+  const getWeatherIcon = () => {
+    const desc = (weatherData?.condition || 'Cerah').toLowerCase();
+    const iconUrl = weatherData?.icon_url || '';
+    
+    // Check if it's night based on OpenWeather API icon code ("n")
+    const isNight = iconUrl ? iconUrl.includes('n') : (new Date().getHours() >= 18 || new Date().getHours() < 6);
+
+    if (desc.includes('thunderstorm') || desc.includes('petir') || desc.includes('badai')) {
+      return <CloudLightning className="h-6 w-6 text-yellow-350 animate-pulse" />;
+    }
+    if (desc.includes('rain') || desc.includes('gerimis') || desc.includes('hujan')) {
+      return <CloudRain className="h-6 w-6 text-blue-200 animate-bounce" style={{ animationDuration: '2.5s' }} />;
+    }
+    if (desc.includes('snow') || desc.includes('salju')) {
+      return <CloudSnow className="h-6 w-6 text-blue-100" />;
+    }
+    if (desc.includes('fog') || desc.includes('mist') || desc.includes('haze') || desc.includes('kabut') || desc.includes('asap')) {
+      return <CloudFog className="h-6 w-6 text-slate-350" />;
+    }
+    if (desc.includes('clear') || desc.includes('cerah') || desc.includes('terang')) {
+      if (isNight) {
+        return <Moon className="h-6 w-6 text-yellow-100 animate-[pulse_3s_infinite]" />;
+      }
+      return <Sun className="h-6 w-6 text-yellow-350 animate-[spin_10s_linear_infinite]" />;
+    }
+    if (desc.includes('cloud') || desc.includes('berawan') || desc.includes('mendung')) {
+      if (desc.includes('few') || desc.includes('scattered') || desc.includes('partly') || desc.includes('sebagian')) {
+        if (isNight) {
+          return <CloudMoon className="h-6 w-6 text-slate-200" />;
+        }
+        return <CloudSun className="h-6 w-6 text-yellow-200" />;
+      }
+      return <Cloud className="h-6 w-6 text-slate-200" />;
+    }
+
+    // Default fallback
+    if (isNight) {
+      return <Moon className="h-6 w-6 text-yellow-100" />;
+    }
+    return <Sun className="h-6 w-6 text-yellow-350 animate-[spin_10s_linear_infinite]" />;
+  };
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
 
@@ -194,17 +252,9 @@ export const DashboardTab = ({
                       {weatherData?.city_name || activeNode?.city?.name || 'Balai Akuakultur'}
                     </h3>
                   </div>
-                  {weatherData?.icon_url ? (
-                    <img 
-                      src={weatherData.icon_url} 
-                      alt="Weather Icon" 
-                      className="h-10 w-10 object-contain drop-shadow"
-                    />
-                  ) : (
-                    <div className="h-8 w-8 bg-white/10 rounded-xl flex items-center justify-center">
-                      <Sun className="h-5 w-5 text-white/80 animate-[spin_8s_linear_infinite]" />
-                    </div>
-                  )}
+                  <div className="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-inner shrink-0">
+                    {getWeatherIcon()}
+                  </div>
                 </div>
               </div>
 
