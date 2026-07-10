@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\v2\MonitoringController;
 use App\Http\Controllers\Api\v2\EdgeGatewayController;
 use App\Http\Controllers\Api\v2\IotNodeController;
 use App\Http\Controllers\Api\v2\SystemSettingController;
+use App\Http\Controllers\Api\v2\ReportController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -79,6 +80,16 @@ Route::prefix('v2')->group(function () {
         Route::get('iot-nodes', [MonitoringController::class, 'activeNodes']);
         Route::get('monitoring/dashboard/{serial_number}', [MonitoringController::class, 'dashboard']);
         Route::get('monitoring/history/{serial_number}', [MonitoringController::class, 'history']);
+
+        // Reports & Exports
+        Route::get('reports/node-registration/pdf', [ReportController::class, 'nodeRegistrationPDF']);
+        Route::get('reports/node-registration/csv', [ReportController::class, 'nodeRegistrationCSV']);
+        Route::get('reports/telemetry/pdf', [ReportController::class, 'telemetryPDF']);
+        Route::get('reports/telemetry/csv', [ReportController::class, 'telemetryCSV']);
+        Route::get('reports/maintenance/pdf', [ReportController::class, 'maintenancePDF']);
+        Route::get('reports/maintenance/csv', [ReportController::class, 'maintenanceCSV']);
+        Route::get('reports/feeding/pdf', [ReportController::class, 'feedingPDF']);
+        Route::get('reports/feeding/csv', [ReportController::class, 'feedingCSV']);
 
         // ── Admin & Management Protected Write Actions ──
         Route::middleware('role:admin,management')->group(function () {
