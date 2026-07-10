@@ -11,6 +11,7 @@
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
+        "laravolt/indonesia": "^0.41.0",
         "php-mqtt/client": "^2.3"
     },
     "require-dev": {

@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Province;
-use App\Models\City;
+use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Models\City;
+use Laravolt\Indonesia\Models\District;
 
 class RegionController extends Controller
 {
@@ -14,25 +15,40 @@ class RegionController extends Controller
      */
     public function provinces()
     {
-        $provinces = Province::all();
+        $provinces = Province::orderBy('name', 'asc')->get();
         return $this->success('Provinces retrieved successfully', $provinces);
     }
 
     /**
      * Display a listing of cities.
-     * Optionally filtered by province_id query parameter.
      */
     public function cities(Request $request)
     {
         $query = City::query();
 
-        if ($request->has('province_id')) {
-            $query->where('province_id', $request->province_id);
+        if ($request->has('province_code')) {
+            $query->where('province_code', $request->province_code);
         }
 
-        $cities = $query->with('province')->get();
+        $cities = $query->orderBy('name', 'asc')->get();
 
         return $this->success('Cities retrieved successfully', $cities);
+    }
+
+    /**
+     * Display a listing of districts.
+     */
+    public function districts(Request $request)
+    {
+        $query = District::query();
+
+        if ($request->has('city_code')) {
+            $query->where('city_code', $request->city_code);
+        }
+
+        $districts = $query->orderBy('name', 'asc')->get();
+
+        return $this->success('Districts retrieved successfully', $districts);
     }
 
     /**
