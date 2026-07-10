@@ -18,7 +18,16 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => [
+                'required',
+                'min:8',
+                'regex:/[a-z]/',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+            ],
+        ], [
+            'password.min' => 'Kata sandi wajib memiliki minimal 8 karakter.',
+            'password.regex' => 'Kata sandi wajib mengandung kombinasi huruf besar, huruf kecil, dan angka.',
         ]);
 
         if ($validator->fails()) {

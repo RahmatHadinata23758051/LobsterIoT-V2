@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@lobsense.com'],
             [
                 'name' => 'Admin Lobsense',
-                'password' => Hash::make('123'),
+                'password' => Hash::make('Lobsense123!'),
                 'role' => 'admin',
             ]
         );
@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'operator@lobsense.com'],
             [
                 'name' => 'Operator Lobsense',
-                'password' => Hash::make('123'),
+                'password' => Hash::make('Lobsense123!'),
                 'role' => 'operator',
             ]
         );

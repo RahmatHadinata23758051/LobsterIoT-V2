@@ -18,13 +18,13 @@ class AuthTest extends TestCase
         $user = User::create([
             'name' => 'Operator Lobster',
             'email' => 'operator@lobsense.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('Lobsense123!'),
             'role' => 'operator',
         ]);
 
         $response = $this->postJson('/api/v2/auth/login', [
             'email' => 'operator@lobsense.com',
-            'password' => 'password123',
+            'password' => 'Lobsense123!',
         ]);
 
         $response->assertStatus(200)
@@ -56,13 +56,13 @@ class AuthTest extends TestCase
         User::create([
             'name' => 'Operator Lobster',
             'email' => 'operator@lobsense.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('Lobsense123!'),
             'role' => 'operator',
         ]);
 
         $response = $this->postJson('/api/v2/auth/login', [
             'email' => 'operator@lobsense.com',
-            'password' => 'wrongpassword',
+            'password' => 'WrongPassword123!',
         ]);
 
         $response->assertStatus(411)
@@ -81,7 +81,7 @@ class AuthTest extends TestCase
         $user = User::create([
             'name' => 'Operator Lobster',
             'email' => 'operator@lobsense.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('Lobsense123!'),
             'role' => 'operator',
             'profile_picture' => 'images/profiles/avatar.png'
         ]);
@@ -124,7 +124,7 @@ class AuthTest extends TestCase
         $user = User::create([
             'name' => 'Old Name',
             'email' => 'old@lobsense.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('Lobsense123!'),
             'role' => 'operator',
         ]);
 
@@ -163,7 +163,7 @@ class AuthTest extends TestCase
         $user = User::create([
             'name' => 'Operator Lobster',
             'email' => 'operator@lobsense.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('Lobsense123!'),
             'role' => 'operator',
         ]);
 
