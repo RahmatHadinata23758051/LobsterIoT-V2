@@ -187,16 +187,16 @@ export const CctvView = ({ streamUrl }) => {
       {/* ─── IDLE STATE (No URL) ─────────────────────────────────── */}
       {status === 'idle' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 p-6">
-          <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-slate-800" />
-          <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-slate-800" />
-          <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-slate-800" />
-          <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-slate-800" />
+          <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-slate-750/30" />
+          <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-slate-750/30" />
+          <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-slate-750/30" />
+          <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-slate-750/30" />
           
-          <div className="absolute top-4 right-4 font-mono text-[9px] text-slate-700 tracking-wider">
+          <div className="absolute top-4 right-4 font-mono text-[9px] text-slate-500 tracking-wider">
             {timestamp}
           </div>
 
-          <WifiOff className="h-10 w-10 text-slate-800 mb-3" />
+          <WifiOff className="h-10 w-10 text-slate-600 mb-3" />
           <div className="text-center">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kamera Offline</p>
             <p className="text-[10px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
@@ -209,16 +209,16 @@ export const CctvView = ({ streamUrl }) => {
       {/* ─── ERROR STATE ────────────────────────────────────────── */}
       {status === 'error' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 p-6">
-          <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-red-950" />
-          <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-red-950" />
-          <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-red-950" />
-          <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-red-950" />
+          <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-red-800/30" />
+          <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-red-800/30" />
+          <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-red-800/30" />
+          <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-red-800/30" />
 
-          <div className="absolute top-4 right-4 font-mono text-[9px] text-red-700 tracking-wider">
+          <div className="absolute top-4 right-4 font-mono text-[9px] text-red-500/80 tracking-wider">
             {timestamp}
           </div>
 
-          <CameraOff className="h-10 w-10 text-red-950 mb-3 animate-pulse" />
+          <CameraOff className="h-10 w-10 text-red-500/80 mb-3 animate-[pulse_1.5s_infinite]" />
           <div className="text-center px-4">
             <p className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center justify-center gap-1.5">
               <AlertTriangle className="h-3.5 w-3.5 text-red-500" />

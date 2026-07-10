@@ -99,7 +99,7 @@ export const FeedingLogTab = ({
               >
                 <option value="morning">Pagi (Morning)</option>
                 <option value="afternoon">Siang (Afternoon)</option>
-                <option value="evening">Malam (Evening)</option>
+                <option value="night">Malam (Evening)</option>
               </select>
             </div>
 

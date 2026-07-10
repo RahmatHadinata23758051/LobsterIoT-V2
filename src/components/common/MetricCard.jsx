@@ -75,14 +75,14 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
   const pct = isOff ? 0 : Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
 
   // Colors
-  const accentColor = isWarn ? '#ef4444' : isOff ? '#94a3b8' : '#10b981';
-  const accentBg    = isWarn ? '#fef2f2' : isOff ? '#f8fafc' : '#ecfdf5';
+  const accentColor = isWarn ? '#ef4444' : isOff ? '#94a3b8' : '#0D9D1B';
+  const accentBg    = isWarn ? '#fef2f2' : isOff ? '#f8fafc' : '#f0fbf1';
   const borderClass = isWarn ? 'border-red-200' : flipped ? 'border-[#0D9D1B]' : 'border-slate-200/80';
   const shadowClass = isWarn 
     ? 'shadow-[0_4px_16px_rgba(239,68,68,0.04)] hover:shadow-[0_8px_24px_rgba(239,68,68,0.08)]'
     : flipped 
-    ? 'shadow-[0_4px_16px_rgba(16,185,129,0.05)]'
-    : 'shadow-sm hover:shadow-[0_6px_16px_rgba(16,185,129,0.04)] hover:border-slate-300';
+    ? 'shadow-[0_4px_16px_rgba(13, 157, 27, 0.05)]'
+    : 'shadow-sm hover:shadow-[0_6px_16px_rgba(13, 157, 27, 0.04)] hover:border-slate-300';
 
   // Segmented bar gauge
   const renderSegments = () => {
@@ -100,7 +100,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
               key={seg}
               className={`h-1.5 flex-1 rounded-sm transition-all duration-500 ${color}`}
               style={{
-                boxShadow: isActive && !isWarn ? '0 0 6px rgba(16, 185, 129, 0.2)' : isActive && isWarn ? '0 0 6px rgba(239, 68, 68, 0.2)' : 'none'
+                boxShadow: isActive && !isWarn ? '0 0 6px rgba(13, 157, 27, 0.2)' : isActive && isWarn ? '0 0 6px rgba(239, 68, 68, 0.2)' : 'none'
               }}
             />
           );

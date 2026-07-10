@@ -171,8 +171,8 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
             {/* Gradient definition for graph area */}
             <defs>
               <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.16} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0.00} />
+                <stop offset="0%" stopColor="#0D9D1B" stopOpacity={0.16} />
+                <stop offset="100%" stopColor="#0D9D1B" stopOpacity={0.00} />
               </linearGradient>
             </defs>
 
@@ -211,8 +211,8 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
                   graphHeight,
                   ((meta.maxIdeal - meta.minIdeal) / (chartMax - chartMin)) * graphHeight
                 )}
-                fill="rgba(16, 185, 129, 0.015)"
-                stroke="rgba(16, 185, 129, 0.08)"
+                fill="rgba(13, 157, 27, 0.015)"
+                stroke="rgba(13, 157, 27, 0.08)"
                 strokeWidth={0.75}
                 strokeDasharray="2 2"
               />
@@ -225,7 +225,7 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
                 y1={paddingTop}
                 x2={points[hoveredIndex].x}
                 y2={height - paddingBottom}
-                stroke="#10b981"
+                stroke="#0D9D1B"
                 strokeWidth={1}
                 strokeDasharray="3 3"
                 opacity={0.4}
@@ -244,7 +244,7 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
             <path
               d={linePath}
               fill="none"
-              stroke="#10b981"
+              stroke="#0D9D1B"
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -263,8 +263,8 @@ export const SensorChart = ({ historyData = [], selectedMetric, onChangeMetric }
                   cx={p.x}
                   cy={p.y}
                   r={hoveredIndex === i ? 4.5 : 2.5}
-                  fill={hoveredIndex === i ? '#10b981' : '#FFFFFF'}
-                  stroke="#10b981"
+                  fill={hoveredIndex === i ? '#0D9D1B' : '#FFFFFF'}
+                  stroke="#0D9D1B"
                   strokeWidth={hoveredIndex === i ? 2 : 1.5}
                   className="transition-all duration-150"
                 />
