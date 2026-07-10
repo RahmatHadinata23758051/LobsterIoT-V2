@@ -896,7 +896,7 @@ export default function App() {
           
           {/* Jam & Tanggal Widget (Planted at the very top of sidebar) */}
           <div className="p-4 border-b border-slate-100/85 bg-slate-50/50 shrink-0">
-            <div className="flex flex-col gap-1 bg-white border border-slate-150/70 p-3 rounded-2xl text-center select-none shadow-sm">
+            <div className="flex flex-col gap-1 bg-white p-3 rounded-2xl text-center select-none shadow-sm">
               <span className="font-extrabold text-slate-800 font-sans text-[20px] tracking-tight tabular-nums leading-none my-0.5">
                 {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
