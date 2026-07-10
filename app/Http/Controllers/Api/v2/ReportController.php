@@ -101,10 +101,23 @@ class ReportController extends Controller
             $flux .= ' |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")';
         }
 
-        $flux .= ' |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+        $flux .= ' |> drop(columns: ["cage_code"])
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
             |> limit(n: 500)';
 
-        return $this->influxDB->queryParsed($flux);
+        $telemetries = $this->influxDB->queryParsed($flux);
+
+        // Normalize database field keys to match report and export format requirements
+        foreach ($telemetries as &$t) {
+            if (isset($t['water_temperature'])) {
+                $t['temperature'] = $t['water_temperature'];
+            }
+            if (isset($t['ambient_temperature'])) {
+                $t['humidity'] = $t['ambient_temperature'];
+            }
+        }
+
+        return $telemetries;
     }
 
     /**
