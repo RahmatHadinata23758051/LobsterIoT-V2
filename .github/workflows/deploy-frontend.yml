@@ -1,0 +1,51 @@
+name: Deploy Frontend to VPS
+
+on:
+  workflow_dispatch: # Pemicu manual dari tab Actions di GitHub
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd Frontend
+          npm ci
+
+      - name: Build Application
+        run: |
+          cd Frontend
+          echo "VITE_API_URL=http://103.67.78.91:8000" > .env
+          npm run build
+
+      - name: Clean Old Build on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            rm -rf /home/lobsense/Website-lobster/Frontend/dist/*
+
+      - name: Copy Built Files to VPS via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          source: "Frontend/dist/*"
+          target: "/home/lobsense/Website-lobster/Frontend"
+          strip_components: 1
