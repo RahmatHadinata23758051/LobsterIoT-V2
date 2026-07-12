@@ -32,6 +32,7 @@ const SENSOR_MAP = [
 ];
 
 export const DashboardTab = ({
+  token,
   activeNode,
   activeNodeSerial,
   dashboardData,
@@ -41,6 +42,25 @@ export const DashboardTab = ({
   weatherData,
   loadingDashboard = false
 }) => {
+  const [currentTime, setCurrentTime] = React.useState('');
+  const [isCameraOnline, setIsCameraOnline] = React.useState(true);
+
+  React.useEffect(() => {
+    const updateTime = () => {
+      const d = new Date();
+      const yr = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const dy = String(d.getDate()).padStart(2, '0');
+      const hr = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      const se = String(d.getSeconds()).padStart(2, '0');
+      setCurrentTime(`${yr}-${mo}-${dy} ${hr}:${mi}:${se}`);
+    };
+    
+    updateTime();
+    const iv = setInterval(updateTime, 1000);
+    return () => clearInterval(iv);
+  }, []);
 
   if (loadingDashboard && !dashboardData?.latest) {
     return (
@@ -149,7 +169,18 @@ export const DashboardTab = ({
   const getCameraStreamUrl = () => {
     const cageCode = dashboardData.latest?.cage_code || '';
     const cam = cameras.find((c) => c.cage?.cage_code === cageCode);
-    return cam ? cam.stream_url : '';
+    if (cam && cam.stream_url) {
+      return cam.stream_url;
+    }
+
+    // Fallback mock videos for exhibition when camera database is not configured
+    const fallbackVideos = {
+      'CAGE-A01': 'https://files.catbox.moe/g5214q.mp4',
+      'CAGE-B01': 'https://files.catbox.moe/qqt2fo.mp4',
+      'CAGE-C01': 'https://files.catbox.moe/m9yd36.mp4',
+      'CAGE-D01': 'https://files.catbox.moe/h26lry.mp4'
+    };
+    return fallbackVideos[cageCode] || 'https://files.catbox.moe/g5214q.mp4';
   };
 
   const getThreshold = (code) => {
@@ -312,10 +343,37 @@ export const DashboardTab = ({
               <Video className="h-4 w-4 text-[#0D9D1B]" />
               <span className="text-[12px] font-bold text-slate-700 uppercase tracking-wider">Tampilan Live Kamera</span>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono font-bold uppercase">{activeNodeSerial || 'N/A'}</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Kamera:</span>
+                <button
+                  onClick={() => setIsCameraOnline(!isCameraOnline)}
+                  className={`relative inline-flex h-4.5 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${
+                    isCameraOnline ? 'bg-[#0D9D1B]' : 'bg-slate-200'
+                  }`}
+                  aria-pressed={isCameraOnline}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${
+                      isCameraOnline ? 'translate-x-3.5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <span className="text-slate-200 text-xs">|</span>
+
+              <span className="text-[11px] text-slate-500 font-mono font-bold">{currentTime}</span>
+              {activeNodeSerial && (
+                <>
+                  <span className="text-slate-350">|</span>
+                  <span className="text-[10px] text-slate-450 font-mono font-bold uppercase">{activeNodeSerial}</span>
+                </>
+              )}
+            </div>
           </div>
           <div className="bg-slate-950 aspect-video w-full ring-1 ring-slate-800 rounded-lg overflow-hidden shadow-inner">
-            <CctvView streamUrl={getCameraStreamUrl()} />
+            <CctvView token={token} streamUrl={getCameraStreamUrl()} isCameraOnline={isCameraOnline} />
           </div>
         </div>
 

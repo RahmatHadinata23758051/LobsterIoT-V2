@@ -16,4 +16,12 @@ export const telemetryApi = (BACKEND_URL, getHeaders) => ({
       headers: getHeaders(token),
     });
   },
+
+  async detect(token, base64Image) {
+    return fetch(`${BACKEND_URL}/api/v2/detect`, {
+      method: 'POST',
+      headers: getHeaders(token),
+      body: JSON.stringify({ image: base64Image }),
+    });
+  },
 });

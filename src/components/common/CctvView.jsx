@@ -1,38 +1,23 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Hls from 'hls.js';
-import { CameraOff, WifiOff, Lock, Unlock, AlertTriangle } from 'lucide-react';
+import { CameraOff, WifiOff, AlertTriangle } from 'lucide-react';
+import { api } from '../../api/api';
 
-export const CctvView = ({ streamUrl }) => {
+export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const hlsRef = useRef(null);
   
   const [status, setStatus] = useState('idle'); // idle | loading | playing | error
-  const [zoom, setZoom] = useState(1.0);
-  const [ptzLocked, setPtzLocked] = useState(true);
-  const [timestamp, setTimestamp] = useState('');
+  const [predictions, setPredictions] = useState([]);
 
-  // Ticking timestamp for CCTV HUD
-  useEffect(() => {
-    const iv = setInterval(() => {
-      const d = new Date();
-      const yr = d.getFullYear();
-      const mo = String(d.getMonth() + 1).padStart(2, '0');
-      const dy = String(d.getDate()).padStart(2, '0');
-      const hr = String(d.getHours()).padStart(2, '0');
-      const mi = String(d.getMinutes()).padStart(2, '0');
-      const se = String(d.getSeconds()).padStart(2, '0');
-      const ms = String(d.getMilliseconds()).padStart(3, '0');
-      setTimestamp(`${yr}-${mo}-${dy} ${hr}:${mi}:${se}.${ms}`);
-    }, 45); // high frequency millisecond update
-    return () => clearInterval(iv);
-  }, []);
-
-  // HLS stream listener
+  // HLS/Stream source loader
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     setStatus('idle');
+    setPredictions([]);
     if (!streamUrl) return;
 
     setStatus('loading');
@@ -85,122 +70,194 @@ export const CctvView = ({ streamUrl }) => {
     };
   }, [streamUrl]);
 
-  // Zoom control handlers
-  const zoomIn = () => setZoom(z => Math.min(4.0, z + 0.5));
-  const zoomOut = () => setZoom(z => Math.max(1.0, z - 0.5));
-  const togglePtzLock = () => setPtzLocked(!ptzLocked);
+  // Frame capture and inference caller
+  useEffect(() => {
+    if (status !== 'playing' || !token || !isCameraOnline) {
+      setPredictions([]);
+      return;
+    }
+
+    const video = videoRef.current;
+    let isMounted = true;
+
+    // Offscreen canvas to capture a smaller representation (640x360) of the current video frame
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = 640;
+    offscreenCanvas.height = 360;
+    const offCtx = offscreenCanvas.getContext('2d');
+
+    const captureAndDetect = async () => {
+      if (!video || video.paused || video.ended) return;
+
+      try {
+        // Draw video frame to offscreen canvas
+        offCtx.drawImage(video, 0, 0, 640, 360);
+        
+        // Convert to base64 jpeg with 0.75 quality for small footprint
+        const base64Image = offscreenCanvas.toDataURL('image/jpeg', 0.75);
+
+        // Request prediction from AI proxy endpoint
+        const response = await api.detect(token, base64Image);
+        if (response.ok) {
+          const res = await response.json();
+          if (isMounted && res.status === 'success') {
+            setPredictions(res.data?.raw_predictions || []);
+          }
+        }
+      } catch (err) {
+        console.error('AI frame detection error:', err);
+      }
+    };
+
+    // Trigger detection every 3 seconds
+    const interval = setInterval(captureAndDetect, 3000);
+    // Trigger first frame detection after HLS buffer plays for 1 second
+    const timeout = setTimeout(captureAndDetect, 1000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [status, token, streamUrl, isCameraOnline]);
+
+  // Bounding box canvas drawer
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    if (!canvas || !video || status !== 'playing' || !isCameraOnline) {
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    // Set drawing canvas size to match display size of video element
+    const clientWidth = video.clientWidth;
+    const clientHeight = video.clientHeight;
+    canvas.width = clientWidth;
+    canvas.height = clientHeight;
+
+    ctx.clearRect(0, 0, clientWidth, clientHeight);
+
+    if (predictions.length === 0) return;
+
+    // Helper for color coding classes
+    const getClassColor = (name) => {
+      switch (name?.toLowerCase()) {
+        case 'aktif':
+          return '#0D9D1B'; // Emerald Green
+        case 'pasif':
+          return '#0284C7'; // Ocean Blue
+        case 'agresif':
+          return '#EF4444'; // Aggressive Red
+        case 'makan':
+          return '#EAB308'; // Feeding Yellow
+        default:
+          return '#10B981'; // Default Emerald
+      }
+    };
+
+    // Calculate scale and offset offsets for letterboxing/cropping (object-fit: cover math)
+    const videoWidth = video.videoWidth || 640;
+    const videoHeight = video.videoHeight || 360;
+
+    const videoRatio = videoWidth / videoHeight;
+    const clientRatio = clientWidth / clientHeight;
+
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (videoRatio > clientRatio) {
+      // Video is wider than container (object-cover matches clientHeight)
+      scale = clientHeight / videoHeight;
+      offsetX = (clientWidth - videoWidth * scale) / 2;
+    } else {
+      // Video is taller than container (object-cover matches clientWidth)
+      scale = clientWidth / videoWidth;
+      offsetY = (clientHeight - videoHeight * scale) / 2;
+    }
+
+    predictions.forEach((pred) => {
+      // Model predictions are relative to 640x360 offscreen frame sizes
+      const sourceX = (pred.x / 640) * videoWidth;
+      const sourceY = (pred.y / 360) * videoHeight;
+      const sourceW = (pred.width / 640) * videoWidth;
+      const sourceH = (pred.height / 360) * videoHeight;
+
+      // Top-left coordinate conversion
+      const srcLeft = sourceX - sourceW / 2;
+      const srcTop = sourceY - sourceH / 2;
+
+      // Map to visible canvas coordinates
+      const left = srcLeft * scale + offsetX;
+      const top = srcTop * scale + offsetY;
+      const width = sourceW * scale;
+      const height = sourceH * scale;
+
+      const color = getClassColor(pred.class);
+
+      // 1. Draw outer boundary box
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(left, top, width, height);
+
+      // 2. Draw label banner
+      const confidencePercent = Math.round(pred.confidence * 100);
+      const labelText = `${pred.class.toUpperCase()} (${confidencePercent}%)`;
+
+      ctx.font = 'bold 11px font-mono, monospace, sans-serif';
+      const textWidth = ctx.measureText(labelText).width;
+      
+      ctx.fillStyle = color;
+      ctx.fillRect(left - 1.25, top - 17, textWidth + 8, 17);
+
+      // 3. Draw text over banner
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(labelText, left + 3, top - 4);
+    });
+  }, [predictions, status]);
 
   return (
     <div className="relative w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden select-none ring-1 ring-slate-800 rounded-lg shadow-inner" style={{ minHeight: '100%' }}>
-      
-      {/* Actual Video Canvas */}
       <video
         ref={videoRef}
-        style={{
-          transform: `scale(${zoom})`,
-          transformOrigin: 'center center',
-          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
         className={`w-full h-full object-cover outline-none ${status === 'playing' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
         muted
         playsInline
         autoPlay
+        loop
+        crossOrigin="anonymous"
       />
 
-      {/* ─── HUD OVERLAY CHASSIS ─────────────────────────────────── */}
+      {/* Render Canvas Overlay on top of playing video element */}
       {status === 'playing' && (
-        <div className="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between font-mono text-[10px] text-emerald-400/80">
-          
-          {/* L-shaped corner brackets */}
-          <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-emerald-400/40" />
-          <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-emerald-400/40" />
-          <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-emerald-400/40" />
-          <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-emerald-400/40" />
-
-          {/* Center crosshair */}
-          <div className="absolute top-1/2 left-1/2 w-4 h-4 -mt-2 -ml-2 border border-dashed border-emerald-400/20 rounded-full flex items-center justify-center">
-            <div className="w-1 h-px bg-emerald-400/50" />
-            <div className="h-1 w-px bg-emerald-400/50 absolute" />
-          </div>
-
-          {/* Top Info Bar */}
-          <div className="flex items-start justify-between w-full z-10">
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-emerald-300">
-                <span className="h-2 w-2 rounded-full bg-[#0D9D1B] animate-pulse" />
-                <span>CCTV_STREAM_01</span>
-              </div>
-              <div className="text-[9px] text-slate-500 font-bold">1080P · H.264 · 24fps</div>
-            </div>
-            <div className="text-right text-emerald-300 font-extrabold tracking-wider text-xs md:text-sm font-sans">{timestamp}</div>
-          </div>
-
-          {/* Bottom Info Bar & Floating controls */}
-          <div className="flex items-end justify-between w-full z-10">
-            <div className="flex flex-col gap-0.5 text-slate-400">
-              <div>LATENCY: <span className="text-emerald-400">120ms (LOW)</span></div>
-              <div>DECODER: <span className="text-emerald-400">GPU-ACCEL</span></div>
-            </div>
-
-            {/* PTZ Zoom Mock Panel (Clickable Controls) */}
-            <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-xl p-1 pointer-events-auto shadow-lg" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={zoomOut}
-                disabled={zoom <= 1.0}
-                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 transition cursor-pointer"
-                title="Zoom Out"
-              >
-                <span className="font-semibold text-sm leading-none">-</span>
-              </button>
-              <div className="text-[9px] font-bold text-emerald-400 px-1 min-w-[32px] text-center font-mono">
-                {zoom.toFixed(1)}x
-              </div>
-              <button
-                onClick={zoomIn}
-                disabled={zoom >= 4.0}
-                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 transition cursor-pointer"
-                title="Zoom In"
-              >
-                <span className="font-semibold text-sm leading-none">+</span>
-              </button>
-              <div className="w-px h-4 bg-slate-850 mx-0.5" />
-              <button
-                onClick={togglePtzLock}
-                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-450 hover:text-white transition cursor-pointer"
-                title={ptzLocked ? "Unlock PTZ Lock" : "Lock PTZ"}
-              >
-                {ptzLocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5 text-amber-500" />}
-              </button>
-            </div>
-          </div>
-        </div>
+        <canvas
+          ref={canvasRef}
+          className="absolute top-0 left-0 w-full h-full pointer-events-none z-10"
+        />
       )}
 
       {/* ─── LOADING STATE ───────────────────────────────────────── */}
       {status === 'loading' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 gap-3">
-          <div className="w-7 h-7 border-2 border-[#0D9D1B]/30 border-t-[#0D9D1B] rounded-full animate-spin" />
-          <span className="text-[10px] text-slate-500 font-mono tracking-wider">Menghubungkan stream dekoder HLS...</span>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 gap-2.5">
+          <div className="w-6 h-6 border-2 border-slate-200 border-t-[#0D9D1B] rounded-full animate-spin" />
+          <span className="text-[10px] text-slate-400 font-sans">Menghubungkan live stream...</span>
         </div>
       )}
 
-      {/* ─── IDLE STATE (No URL) ─────────────────────────────────── */}
-      {status === 'idle' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 p-6">
-          <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-slate-750/30" />
-          <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-slate-750/30" />
-          <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-slate-750/30" />
-          <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-slate-750/30" />
-          
-          <div className="absolute top-4 right-4 font-sans text-xs font-bold text-slate-500 tracking-wider">
-            {timestamp}
-          </div>
-
-          <WifiOff className="h-10 w-10 text-slate-600 mb-3" />
+      {/* ─── IDLE STATE / OFFLINE TOGGLE ─────────────────────────── */}
+      {(status === 'idle' || !isCameraOnline) && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-20 p-6">
+          <WifiOff className="h-8 w-8 text-slate-350 mb-2" />
           <div className="text-center">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kamera Offline</p>
+            <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Camera OFF</p>
             <p className="text-[10px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
-              Tidak ada feed HLS aktif terdeteksi. Silakan pilih node IoT aktif yang memiliki perangkat kamera terhubung.
+              Kamera tidak aktif. Aktifkan koneksi kamera pada panel kontrol di atas untuk melihat siaran langsung.
             </p>
           </div>
         </div>
@@ -208,28 +265,13 @@ export const CctvView = ({ streamUrl }) => {
 
       {/* ─── ERROR STATE ────────────────────────────────────────── */}
       {status === 'error' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 p-6">
-          <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-red-800/30" />
-          <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-red-800/30" />
-          <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-red-800/30" />
-          <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-red-800/30" />
-
-          <div className="absolute top-4 right-4 font-sans text-xs font-bold text-red-500/80 tracking-wider">
-            {timestamp}
-          </div>
-
-          <CameraOff className="h-10 w-10 text-red-500/80 mb-3 animate-[pulse_1.5s_infinite]" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 p-6">
+          <CameraOff className="h-8 w-8 text-red-400 mb-2" />
           <div className="text-center px-4">
-            <p className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center justify-center gap-1.5">
-              <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
-              <span>Koneksi Stream Gagal</span>
+            <p className="text-xs font-bold text-red-500 uppercase tracking-wider">Koneksi Stream Gagal</p>
+            <p className="text-[10px] text-slate-400 mt-1 leading-relaxed max-w-xs mx-auto">
+              Gagal memuat segmen video. Silakan periksa URL stream atau status jaringan Anda.
             </p>
-            <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed max-w-xs mx-auto">
-              Decoder HLS gagal memuat segmen video. Pastikan MediaMTX server aktif dan stream URL dapat diakses.
-            </p>
-            <code className="block text-[8px] text-slate-500 font-mono mt-2 bg-slate-900 border border-slate-850 px-2.5 py-1 rounded max-w-[240px] truncate mx-auto">
-              {streamUrl}
-            </code>
           </div>
         </div>
       )}

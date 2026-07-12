@@ -295,32 +295,13 @@ export default function App() {
         {/* ═ RIGHT CONTENT WRAPPER ══════════════════════════════════════ */}
         <div className="flex-1 flex flex-col min-w-0 my-4 mr-6 ml-3 overflow-hidden">
           
-          {/* Status Bar / Connection Banner / Info right above main content */}
-          <div className="px-3 pb-3 flex items-center gap-3 select-none">
-            {connError && (
-              <div className="flex items-center gap-1.5 text-xs text-red-600 font-bold bg-red-50 px-3 py-1 rounded-xl border border-red-200 animate-pulse">
-                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                <span>Koneksi Terputus</span>
-              </div>
-            )}
 
-            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10.5px] font-semibold border select-none
-              ${overallStatus === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-150'
-               : overallStatus === 'offline' ? 'bg-slate-50 text-slate-500 border-slate-150'
-               : 'bg-green-50/50 text-green-700 border-green-150'}`}>
-              {overallStatus === 'warning'
-                ? <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                : overallStatus === 'offline'
-                ? <WifiOff className="h-3.5 w-3.5 text-slate-400" />
-                : <CheckCircle className="h-3.5 w-3.5 text-[#0D9D1B]" />}
-              <span>Sistem: {overallStatus === 'warning' ? 'Peringatan Parameter' : overallStatus === 'offline' ? 'Offline' : 'Normal'}</span>
-            </div>
-          </div>
 
           {/* Main Content Area */}
           <main className="flex-1 px-3 py-4 max-w-screen-2xl w-full mx-auto flex flex-col gap-6 overflow-y-auto">
           {activeTab === 'dashboard' && (
             <DashboardTab
+              token={token}
               activeNode={activeNode}
               activeNodeSerial={activeNodeSerial}
               dashboardData={dashboardData}
