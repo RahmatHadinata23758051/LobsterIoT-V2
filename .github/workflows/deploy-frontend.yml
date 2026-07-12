@@ -1,6 +1,9 @@
 name: Deploy Frontend to VPS
 
 on:
+  push:
+    branches:
+      - frontend
   workflow_dispatch: # Pemicu manual dari tab Actions di GitHub
 
 jobs:
