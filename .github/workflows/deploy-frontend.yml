@@ -26,7 +26,7 @@ jobs:
 
       - name: Build Application
         run: |
-          echo "VITE_API_URL=http://103.67.78.91:8000" > .env
+          echo "VITE_API_URL=https://app.lobsens-unpad.web.id" > .env
           npm run build
 
       - name: Clean Old Build on VPS
