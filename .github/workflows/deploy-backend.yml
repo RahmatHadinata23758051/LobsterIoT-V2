@@ -1,0 +1,26 @@
+name: Deploy Backend to VPS
+
+on:
+  workflow_dispatch: # Pemicu manual dari tab Actions di GitHub
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute Deployment Commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            cd ~/Website-lobster/Backend
+            git pull origin backend
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan config:clear
+            php artisan route:clear
+            php artisan cache:clear
+            sudo supervisorctl restart mqtt-subscriber:*
