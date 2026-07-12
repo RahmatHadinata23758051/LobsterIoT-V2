@@ -47,5 +47,5 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
           source: "dist/*"
-          target: "/home/lobsense/Website-lobster/Frontend"
+          target: "/home/lobsense/Website-lobster/Frontend/dist"
           strip_components: 1
