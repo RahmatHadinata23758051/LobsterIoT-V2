@@ -519,7 +519,7 @@ export const SystemSettings = ({
                     required
                     value={tempLogo}
                     onChange={(e) => setTempLogo(e.target.value)}
-                    placeholder="Contoh: SLAM 2.0"
+                    placeholder="Contoh: LOBSENSE 1.0"
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-900 text-[13px] font-bold focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
                   />
                   <p className="text-[9px] text-slate-400 mt-1 flex items-center gap-1">
@@ -560,11 +560,11 @@ export const SystemSettings = ({
                     <div className="bg-[#0D9D1B] p-1 rounded-md">
                       <img src="/Icon.png" alt="Logo" className="h-3.5 w-3.5 rounded-sm object-cover" />
                     </div>
-                    <span className="text-[12px] font-bold text-slate-900">{tempLogo || 'SLAM 2.0'}</span>
+                    <span className="text-[12px] font-bold text-slate-900">{tempLogo || 'LOBSENSE 1.0'}</span>
                   </div>
                   <p className="text-[9px] text-slate-400">
                     Footer: <span className="font-semibold text-slate-600">
-                      {tempLogo || 'SLAM 2.0'} © 2026 · {tempInstansi || 'Balai Akuakultur Nusantara'}
+                      {tempLogo || 'LOBSENSE 1.0'} © 2026 · {tempInstansi || 'Balai Akuakultur Nusantara'}
                     </span>
                   </p>
                 </div>

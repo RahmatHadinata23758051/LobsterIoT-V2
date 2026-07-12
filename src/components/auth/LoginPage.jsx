@@ -89,7 +89,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
             <div className="flex items-center gap-3 pt-3">
               <span className="h-px w-6 bg-emerald-500/50" />
               <span className="text-white/25 text-[9px] font-medium tracking-[0.25em] uppercase">
-                Sistem Layanan Akuakultur Monitoring
+                LOBSTER SENSING SYSTEM
               </span>
             </div>
           </div>
@@ -112,7 +112,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
           {/* ── Heading ── */}
           <div className="mb-10">
             <p className="text-[10px] font-semibold tracking-[0.35em] uppercase text-slate-400 mb-3">
-              Lobsense V2
+              LOBSENSE 1.0
             </p>
             <h2
               style={serif}
@@ -205,7 +205,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
 
           {/* ── Footer ── */}
           <p className="text-[9px] text-slate-300 tracking-[0.2em] uppercase mt-14 text-center font-medium select-none">
-            © 2026 Lobsense Monitoring
+            © 2026 LOBSTER SENSING SYSTEM
           </p>
         </div>
       </div>

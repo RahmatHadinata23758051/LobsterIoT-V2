@@ -24,7 +24,7 @@ export const useLobsense = () => {
     }
   });
 
-  const [logoText, setLogoText] = useState(() => localStorage.getItem('slam_logo_text') || 'SLAM 2.0');
+  const [logoText, setLogoText] = useState(() => localStorage.getItem('slam_logo_text') || 'LOBSENSE 1.0');
   const [instansiName, setInstansiName] = useState(() => localStorage.getItem('slam_instansi_name') || 'Balai Akuakultur Nusantara');
 
   const [activeTab, setActiveTab] = useState('dashboard');

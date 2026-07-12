@@ -176,12 +176,12 @@ export default function App() {
         <div className="flex items-center gap-3 select-none">
           <img
             src="/Icon.png"
-            alt="SLAM Logo"
+            alt="LOBSENSE Logo"
             className="h-9 w-9 rounded-xl object-cover shadow-sm flex-shrink-0"
           />
           <div>
             <p className="text-[14px] font-bold leading-none text-slate-900 tracking-tight">{logoText}</p>
-            <p className="text-[9px] text-[#0D9D1B] font-semibold leading-none mt-1.5 uppercase tracking-widest">Sistem Layanan Akuakultur Monitoring</p>
+            <p className="text-[9px] text-[#0D9D1B] font-semibold leading-none mt-1.5 uppercase tracking-widest">LOBSTER SENSING SYSTEM</p>
           </div>
         </div>
 
@@ -467,7 +467,7 @@ export default function App() {
 
         {/* App Footer */}
         <footer className="border-t border-slate-200 bg-white py-3.5 text-center text-xs text-slate-400 select-none shrink-0" id="main-footer">
-          {logoText} — Sistem Layanan Akuakultur Monitoring &copy; 2026 &nbsp;·&nbsp; {instansiName}
+          {logoText} — LOBSTER SENSING SYSTEM &copy; 2026 &nbsp;·&nbsp; {instansiName}
         </footer>
       </div>
       </div>
