@@ -58,10 +58,14 @@ class AiProxyController extends Controller
                     return round(($count / $total) * 100, 2);
                 })->toArray();
 
-                \App\Models\LogPrediction::create([
-                    'raw_prediction' => $predictions,
-                    'class_percentage' => $classPercentage,
-                ]);
+                try {
+                    \App\Models\LogPrediction::create([
+                        'raw_prediction' => $predictions,
+                        'class_percentage' => $classPercentage,
+                    ]);
+                } catch (\Exception $dbEx) {
+                    Log::warning('Database log prediction failed (ignoring for offline execution): ' . $dbEx->getMessage());
+                }
             }
 
             return $this->success('Detection completed successfully', [

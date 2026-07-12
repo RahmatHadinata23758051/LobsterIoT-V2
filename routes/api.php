@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\v2\ReportController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
+    Route::post('detect', [AiProxyController::class, 'detect']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('profile', [AuthController::class, 'profile']);
@@ -73,8 +74,7 @@ Route::prefix('v2')->group(function () {
         // System Settings — Read Only
         Route::get('system-settings', [SystemSettingController::class, 'index']);
 
-        // AI Proxy
-        Route::post('detect', [AiProxyController::class, 'detect']);
+
 
         // IoT Telemetry Monitoring
         Route::get('iot-nodes', [MonitoringController::class, 'activeNodes']);
