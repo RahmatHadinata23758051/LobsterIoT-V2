@@ -1,6 +1,9 @@
 name: Deploy Backend to VPS
 
 on:
+  push:
+    branches:
+      - backend
   workflow_dispatch: # Pemicu manual dari tab Actions di GitHub
 
 jobs:
