@@ -50,6 +50,7 @@ class DatabaseSeeder extends Seeder
             CitySeeder::class,
             SensorTypeSeeder::class,
             SystemSettingSeeder::class,
+            DemoNodeSeeder::class,
         ]);
     }
 }
