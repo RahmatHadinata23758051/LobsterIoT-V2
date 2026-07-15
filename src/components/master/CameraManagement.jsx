@@ -1,36 +1,46 @@
 import React, { useState } from 'react';
-import { RotateCcw, Trash2, Video } from 'lucide-react';
+import { RotateCcw, Trash2, Video, Edit2 } from 'lucide-react';
 
 export const CameraManagement = ({
   camerasList = [],
-  cagesList = [],
+  iotNodesMasterList = [],
   loadingCameras,
   onAddCamera,
+  onUpdateCamera,
   onDeleteCamera,
   onRefresh
 }) => {
   const [newCamera, setNewCamera] = useState({
     camera_code: '',
-    cage_id: '',
+    iot_node_id: '',
     stream_url: '',
     is_active: true
   });
+  const [editingCameraId, setEditingCameraId] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!newCamera.camera_code || !newCamera.cage_id) {
-      alert('Kode Kamera & Keramba Jaring Apung wajib dipilih.');
+    if (!newCamera.camera_code || !newCamera.iot_node_id) {
+      alert('Kode Kamera & IoT Node wajib dipilih.');
       return;
     }
-    onAddCamera({
+    const payload = {
       camera_code: newCamera.camera_code,
-      cage_id: parseInt(newCamera.cage_id),
+      iot_node_id: parseInt(newCamera.iot_node_id),
       stream_url: newCamera.stream_url || null,
       is_active: newCamera.is_active
-    });
+    };
+
+    if (editingCameraId) {
+      onUpdateCamera(editingCameraId, payload);
+      setEditingCameraId(null);
+    } else {
+      onAddCamera(payload);
+    }
+
     setNewCamera({
       camera_code: '',
-      cage_id: '',
+      iot_node_id: '',
       stream_url: '',
       is_active: true
     });
@@ -44,9 +54,11 @@ export const CameraManagement = ({
         <div className="border-b border-slate-100 pb-3 mb-4">
           <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <Video className="h-4 w-4 text-[#0D9D1B]" />
-            Tambah Kamera Baru
+            {editingCameraId ? 'Edit Kamera CCTV' : 'Tambah Kamera Baru'}
           </h3>
-          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Daftarkan kamera CCTV pemantau KJA</p>
+          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+            {editingCameraId ? 'Perbarui data kamera CCTV yang terdaftar' : 'Daftarkan kamera CCTV pemantau KJA'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -63,27 +75,27 @@ export const CameraManagement = ({
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Pilih Keramba (KJA) *</label>
+            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Pilih IoT Node (KJA Terkait) *</label>
             <select
               required
-              value={newCamera.cage_id}
-              onChange={(e) => setNewCamera({ ...newCamera, cage_id: e.target.value })}
+              value={newCamera.iot_node_id}
+              onChange={(e) => setNewCamera({ ...newCamera, iot_node_id: e.target.value })}
               className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
             >
-              <option value="">-- Pilih Keramba --</option>
-              {cagesList.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.cage_code}
+              <option value="">-- Pilih IoT Node --</option>
+              {iotNodesMasterList.map((n) => (
+                <option key={n.id} value={n.id}>
+                  {n.serial_number} {n.cage ? `(KJA: ${n.cage.cage_code})` : '(Belum Terhubung KJA)'}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">URL Stream HLS (.m3u8)</label>
+            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">URL Stream HLS (.m3u8) atau MP4</label>
             <input
               type="text"
-              placeholder="e.g. http://192.168.1.100:8554/mystream.m3u8"
+              placeholder="Contoh: https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
               value={newCamera.stream_url}
               onChange={(e) => setNewCamera({ ...newCamera, stream_url: e.target.value })}
               className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
@@ -107,8 +119,26 @@ export const CameraManagement = ({
             type="submit"
             className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
           >
-            Simpan Kamera
+            {editingCameraId ? 'Perbarui Kamera' : 'Simpan Kamera'}
           </button>
+
+          {editingCameraId && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCameraId(null);
+                setNewCamera({
+                  camera_code: '',
+                  iot_node_id: '',
+                  stream_url: '',
+                  is_active: true
+                });
+              }}
+              className="w-full mt-2 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer"
+            >
+              Batal
+            </button>
+          )}
         </form>
       </div>
 
@@ -152,7 +182,7 @@ export const CameraManagement = ({
                     <td className="px-4 py-3 font-mono text-slate-400">{cam.id}</td>
                     <td className="px-4 py-3 font-bold text-slate-900 font-mono">{cam.camera_code}</td>
                     <td className="px-4 py-3 font-semibold text-slate-800">
-                      {cam.cage ? `${cam.cage.cage_code} (ID: ${cam.cage_id})` : `ID: ${cam.cage_id}`}
+                      {cam.iot_node?.cage ? `${cam.iot_node.cage.cage_code} (Node: ${cam.iot_node.serial_number})` : cam.iot_node ? `Node: ${cam.iot_node.serial_number}` : '—'}
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-450 truncate max-w-[200px]" title={cam.stream_url}>
                       {cam.stream_url || '—'}
@@ -165,12 +195,30 @@ export const CameraManagement = ({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => onDeleteCamera(cam.id)}
-                        className="p-1 rounded text-red-500 hover:bg-red-50 transition cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => {
+                            setEditingCameraId(cam.id);
+                            setNewCamera({
+                              camera_code: cam.camera_code,
+                              iot_node_id: cam.iot_node_id || '',
+                              stream_url: cam.stream_url || '',
+                              is_active: cam.is_active
+                            });
+                          }}
+                          className="p-1 rounded text-green-600 hover:bg-green-50 transition cursor-pointer"
+                          title="Edit Kamera"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => onDeleteCamera(cam.id)}
+                          className="p-1 rounded text-red-500 hover:bg-red-50 transition cursor-pointer"
+                          title="Hapus Kamera"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
