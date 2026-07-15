@@ -14,7 +14,7 @@ class CameraController extends Controller
      */
     public function index()
     {
-        $cameras = Camera::with('cage')->get();
+        $cameras = Camera::with('iotNode.cage')->get();
         return $this->success('Cameras retrieved successfully', $cameras);
     }
 
@@ -25,7 +25,7 @@ class CameraController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'camera_code' => 'required|string|max:50|unique:cameras,camera_code',
-            'cage_id' => 'required|integer|exists:cages,id',
+            'iot_node_id' => 'required|integer|exists:iot_nodes,id',
             'stream_url' => 'nullable|url|max:255',
             'is_active' => 'nullable|boolean',
         ]);
@@ -36,12 +36,12 @@ class CameraController extends Controller
 
         $camera = Camera::create([
             'camera_code' => $request->camera_code,
-            'cage_id' => $request->cage_id,
+            'iot_node_id' => $request->iot_node_id,
             'stream_url' => $request->stream_url,
             'is_active' => $request->is_active ?? false,
         ]);
 
-        return $this->success('Camera created successfully', $camera->load('cage'), 201);
+        return $this->success('Camera created successfully', $camera->load('iotNode.cage'), 201);
     }
 
     /**
@@ -49,7 +49,7 @@ class CameraController extends Controller
      */
     public function show($id)
     {
-        $camera = Camera::with('cage')->find($id);
+        $camera = Camera::with('iotNode.cage')->find($id);
 
         if (!$camera) {
             return $this->error('Camera tidak ditemukan.', null, 404);
@@ -71,7 +71,7 @@ class CameraController extends Controller
 
         $validator = Validator::make($request->all(), [
             'camera_code' => 'sometimes|required|string|max:50|unique:cameras,camera_code,' . $id,
-            'cage_id' => 'sometimes|required|integer|exists:cages,id',
+            'iot_node_id' => 'sometimes|required|integer|exists:iot_nodes,id',
             'stream_url' => 'nullable|url|max:255',
             'is_active' => 'sometimes|required|boolean',
         ]);
@@ -82,12 +82,12 @@ class CameraController extends Controller
 
         $camera->update($request->only([
             'camera_code',
-            'cage_id',
+            'iot_node_id',
             'stream_url',
             'is_active',
         ]));
 
-        return $this->success('Camera updated successfully', $camera->load('cage'));
+        return $this->success('Camera updated successfully', $camera->load('iotNode.cage'));
     }
 
     /**
