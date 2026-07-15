@@ -58,7 +58,7 @@ class ReportController extends Controller
      */
     protected function getNodeRegistrationData(Request $request)
     {
-        $query = IotNode::with(['owner', 'edgeGateway', 'city'])->whereNotNull('activated_at');
+        $query = IotNode::with(['owner', 'cage.edgeGateway', 'city'])->whereNotNull('activated_at');
         
         if ($request->filled('startDate')) {
             $query->whereDate('activated_at', '>=', $request->startDate);
@@ -142,7 +142,7 @@ class ReportController extends Controller
      */
     protected function getFeedingData(Request $request)
     {
-        $query = FeedingLog::with(['cage', 'operator']);
+        $query = FeedingLog::with(['iotNode.cage', 'operator']);
         
         if ($request->filled('startDate')) {
             $query->whereDate('created_at', '>=', $request->startDate);
@@ -151,7 +151,9 @@ class ReportController extends Controller
             $query->whereDate('created_at', '<=', $request->endDate);
         }
         if ($request->filled('cage_id')) {
-            $query->where('cage_id', $request->cage_id);
+            $query->whereHas('iotNode', function ($q) use ($request) {
+                $q->where('cage_id', $request->cage_id);
+            });
         }
         
         return $query->latest()->get();
@@ -349,7 +351,7 @@ class ReportController extends Controller
                 $index + 1,
                 $node->serial_number,
                 $node->owner->name ?? '-',
-                $node->edgeGateway->serial_number ?? '-',
+                $node->cage->edgeGateway->serial_number ?? '-',
                 $node->ip_address ?? '-',
                 $node->latitude ?? '-',
                 $node->longitude ?? '-',
@@ -376,7 +378,7 @@ class ReportController extends Controller
                 <td style="width:5%;" class="text-center">' . ($index + 1) . '</td>
                 <td style="width:15%;">' . htmlspecialchars($node->serial_number) . '</td>
                 <td style="width:15%;">' . htmlspecialchars($node->owner->name ?? '-') . '</td>
-                <td style="width:15%;">' . htmlspecialchars($node->edgeGateway->serial_number ?? '-') . '</td>
+                <td style="width:15%;">' . htmlspecialchars($node->cage->edgeGateway->serial_number ?? '-') . '</td>
                 <td style="width:12%;">' . htmlspecialchars($node->ip_address ?? '-') . '</td>
                 <td style="width:10%;" class="text-center">' . htmlspecialchars($node->latitude ?? '-') . '</td>
                 <td style="width:10%;" class="text-center">' . htmlspecialchars($node->longitude ?? '-') . '</td>
@@ -574,7 +576,7 @@ class ReportController extends Controller
         foreach ($logs as $index => $log) {
             $rows[] = [
                 $index + 1,
-                $log->cage->cage_code ?? '-',
+                $log->iotNode->cage->cage_code ?? '-',
                 $log->operator->full_name ?? '-',
                 ucfirst($log->feed_session),
                 $log->feed_type,
@@ -599,7 +601,7 @@ class ReportController extends Controller
             $rows .= '
             <tr>
                 <td style="width:5%;" class="text-center">' . ($index + 1) . '</td>
-                <td style="width:15%;">' . htmlspecialchars($log->cage->cage_code ?? '-') . '</td>
+                <td style="width:15%;">' . htmlspecialchars($log->iotNode->cage->cage_code ?? '-') . '</td>
                 <td style="width:20%;">' . htmlspecialchars($log->operator->full_name ?? '-') . '</td>
                 <td style="width:15%;" class="text-center">' . htmlspecialchars(ucfirst($log->feed_session)) . '</td>
                 <td style="width:20%;">' . htmlspecialchars($log->feed_type) . '</td>

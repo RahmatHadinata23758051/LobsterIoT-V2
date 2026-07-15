@@ -16,7 +16,7 @@ class FeedingLogController extends Controller
      */
     public function index(Request $request)
     {
-        $query = FeedingLog::with(['cage', 'operator']);
+        $query = FeedingLog::with(['iotNode.cage', 'operator']);
 
         // Filter by date
         if ($request->has('date') && !empty($request->date)) {
@@ -28,9 +28,16 @@ class FeedingLogController extends Controller
             }
         }
 
-        // Filter by cage_id
+        // Filter by iot_node_id
+        if ($request->has('iot_node_id') && !empty($request->iot_node_id)) {
+            $query->where('iot_node_id', $request->iot_node_id);
+        }
+
+        // Filter by cage_id (via iotNode relationship)
         if ($request->has('cage_id') && !empty($request->cage_id)) {
-            $query->where('cage_id', $request->cage_id);
+            $query->whereHas('iotNode', function ($q) use ($request) {
+                $q->where('cage_id', $request->cage_id);
+            });
         }
 
         // Filter by operator_id
@@ -49,7 +56,7 @@ class FeedingLogController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'cage_id' => 'required|integer|exists:cages,id',
+            'iot_node_id' => 'required|integer|exists:iot_nodes,id',
             'operator_id' => 'required|integer|exists:operators,id',
             'feed_session' => 'required|string|in:morning,afternoon,night',
             'feed_type' => 'required|string|max:100',
@@ -61,15 +68,16 @@ class FeedingLogController extends Controller
         }
 
         $log = FeedingLog::create([
-            'cage_id' => $request->cage_id,
+            'iot_node_id' => $request->iot_node_id,
             'operator_id' => $request->operator_id,
             'feed_session' => $request->feed_session,
             'feed_type' => $request->feed_type,
             'weight_kg' => $request->weight_kg,
         ]);
 
-        return $this->success('Feeding log registered successfully', $log->load(['cage', 'operator']), 201);
+        return $this->success('Feeding log registered successfully', $log->load(['iotNode.cage', 'operator']), 201);
     }
+
 
     /**
      * Remove the specified feeding log.
