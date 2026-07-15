@@ -43,6 +43,14 @@ export const masterApi = (BACKEND_URL, getHeaders) => ({
     });
   },
 
+  async updateEdgeGateway(token, id, data) {
+    return fetch(`${BACKEND_URL}/api/v2/edge-gateways/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(data),
+    });
+  },
+
   // IoT Nodes Master CRUD API
   async fetchIotNodesMaster(token) {
     return fetch(`${BACKEND_URL}/api/v2/iot-nodes-master`, {
@@ -62,6 +70,14 @@ export const masterApi = (BACKEND_URL, getHeaders) => ({
     return fetch(`${BACKEND_URL}/api/v2/iot-nodes-master/${id}`, {
       method: 'DELETE',
       headers: getHeaders(token),
+    });
+  },
+
+  async updateIotNodeMaster(token, id, data) {
+    return fetch(`${BACKEND_URL}/api/v2/iot-nodes-master/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(data),
     });
   },
 
@@ -94,6 +110,14 @@ export const masterApi = (BACKEND_URL, getHeaders) => ({
     });
   },
 
+  async updateCage(token, id, data) {
+    return fetch(`${BACKEND_URL}/api/v2/cages/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(data),
+    });
+  },
+
   // Cameras CRUD API
   async fetchCameras(token) {
     return fetch(`${BACKEND_URL}/api/v2/cameras`, {
@@ -113,6 +137,14 @@ export const masterApi = (BACKEND_URL, getHeaders) => ({
     return fetch(`${BACKEND_URL}/api/v2/cameras/${id}`, {
       method: 'DELETE',
       headers: getHeaders(token),
+    });
+  },
+
+  async updateCamera(token, id, data) {
+    return fetch(`${BACKEND_URL}/api/v2/cameras/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(data),
     });
   },
 

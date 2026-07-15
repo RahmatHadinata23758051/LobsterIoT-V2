@@ -36,7 +36,7 @@ export const useLobsense = () => {
   // States
   const [nodes, setNodes] = useState([]);
   const [activeNodeSerial, setActiveNodeSerial] = useState('');
-  const [dashboardData, setDashboardData] = useState({ latest: null, series_24h: [], thresholds: [] });
+  const [dashboardData, setDashboardData] = useState({ latest: null, series_24h: [], thresholds: [], cameras: [], feeding_logs: [] });
   const [cameras, setCameras] = useState([]);
   const [chartMetric, setChartMetric] = useState('ph');
   
@@ -269,7 +269,10 @@ export const useLobsense = () => {
           latest: result.data.latest || null,
           series_24h: result.data.series_24h || [],
           thresholds: result.data.thresholds || [],
+          cameras: result.data.cameras || [],
+          feeding_logs: result.data.feeding_logs || [],
         });
+
       }
     } catch {} finally {
       if (!silent) setLoadingDashboard(false);
@@ -389,6 +392,23 @@ export const useLobsense = () => {
     }
   };
 
+  const handleUpdateEdgeGateway = async (id, gatewayData) => {
+    try {
+      const r = await api.updateEdgeGateway(token, id, gatewayData);
+      const data = await r.json();
+      if (r.ok && data.status === 'success') {
+        alert('Edge Gateway berhasil diperbarui.');
+        fetchEdgeGateways();
+        logActivity(`Memperbarui Edge Gateway ID: ${id}`);
+        fetchNodesAndCameras();
+      } else {
+        alert(data.message || 'Gagal memperbarui Edge Gateway.');
+      }
+    } catch {
+      alert('Koneksi backend bermasalah.');
+    }
+  };
+
   const handleDeleteEdgeGateway = async (id) => {
     if (!confirm('Apakah Anda yakin ingin menghapus Edge Gateway ini?')) return;
     try {
@@ -414,8 +434,26 @@ export const useLobsense = () => {
         alert('IoT Node baru berhasil didaftarkan.');
         fetchIotNodesMaster();
         logActivity(`Mendaftarkan IoT Node baru: ${data.data.serial_number}`);
+        fetchNodesAndCameras();
       } else {
         alert(data.message || 'Gagal mendaftarkan IoT Node.');
+      }
+    } catch {
+      alert('Koneksi backend bermasalah.');
+    }
+  };
+
+  const handleUpdateIotNodeMaster = async (id, nodeData) => {
+    try {
+      const r = await api.updateIotNodeMaster(token, id, nodeData);
+      const data = await r.json();
+      if (r.ok && data.status === 'success') {
+        alert('IoT Node berhasil diperbarui.');
+        fetchIotNodesMaster();
+        logActivity(`Memperbarui IoT Node ID: ${id}`);
+        fetchNodesAndCameras();
+      } else {
+        alert(data.message || 'Gagal memperbarui IoT Node.');
       }
     } catch {
       alert('Koneksi backend bermasalah.');
@@ -431,6 +469,7 @@ export const useLobsense = () => {
         alert('IoT Node berhasil dihapus.');
         fetchIotNodesMaster();
         logActivity('Menghapus data IoT Node');
+        fetchNodesAndCameras();
       } else {
         alert(data.message || 'Gagal menghapus IoT Node.');
       }
@@ -447,8 +486,26 @@ export const useLobsense = () => {
         alert('Data KJA baru berhasil didaftarkan.');
         logActivity(`Mendaftarkan KJA baru: ${cageData.cage_code}`);
         fetchCages();
+        fetchNodesAndCameras();
       } else {
         alert(data.message || 'Gagal menyimpan KJA.');
+      }
+    } catch {
+      alert('Koneksi backend bermasalah.');
+    }
+  };
+
+  const handleUpdateCage = async (id, cageData) => {
+    try {
+      const r = await api.updateCage(token, id, cageData);
+      const data = await r.json();
+      if (r.ok && data.status === 'success') {
+        alert('Data KJA berhasil diperbarui.');
+        logActivity(`Memperbarui KJA ID: ${id}`);
+        fetchCages();
+        fetchNodesAndCameras();
+      } else {
+        alert(data.message || 'Gagal memperbarui KJA.');
       }
     } catch {
       alert('Koneksi backend bermasalah.');
@@ -464,6 +521,7 @@ export const useLobsense = () => {
         alert('KJA berhasil dihapus.');
         logActivity('Menghapus data keramba KJA');
         fetchCages();
+        fetchNodesAndCameras();
       } else {
         alert(data.message || 'Gagal menghapus KJA.');
       }
@@ -499,6 +557,22 @@ export const useLobsense = () => {
         fetchCamerasList();
       } else {
         alert(data.message || 'Gagal menghapus kamera.');
+      }
+    } catch {
+      alert('Koneksi backend bermasalah.');
+    }
+  };
+
+  const handleUpdateCamera = async (id, cameraData) => {
+    try {
+      const r = await api.updateCamera(token, id, cameraData);
+      const data = await r.json();
+      if (r.ok && data.status === 'success') {
+        alert('Data kamera berhasil diperbarui.');
+        logActivity(`Memperbarui kamera CCTV: ${cameraData.camera_code}`);
+        fetchCamerasList();
+      } else {
+        alert(data.message || 'Gagal memperbarui kamera.');
       }
     } catch {
       alert('Koneksi backend bermasalah.');
@@ -754,10 +828,10 @@ export const useLobsense = () => {
     fetchFeedingLogs, fetchThresholds, fetchDashboardData, fetchMasterData,
     fetchEdgeGateways, fetchIotNodesMaster, fetchSensorTypes, fetchCages,
     fetchCamerasList, fetchOperators, fetchCities, fetchMaintenances,
-    handleAddEdgeGateway, handleDeleteEdgeGateway,
-    handleAddIotNodeMaster, handleDeleteIotNodeMaster,
-    handleAddCage, handleDeleteCage,
-    handleAddCamera, handleDeleteCamera,
+    handleAddEdgeGateway, handleUpdateEdgeGateway, handleDeleteEdgeGateway,
+    handleAddIotNodeMaster, handleUpdateIotNodeMaster, handleDeleteIotNodeMaster,
+    handleAddCage, handleUpdateCage, handleDeleteCage,
+    handleAddCamera, handleUpdateCamera, handleDeleteCamera,
     handleAddOperator, handleDeleteOperator,
     handleAddFeedingLog, handleDeleteFeedingLog,
     handleUpdateThresholds, handleValidateSerial, handleActivateNode,
