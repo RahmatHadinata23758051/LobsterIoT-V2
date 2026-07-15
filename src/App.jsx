@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  RotateCcw, LogOut, AlertCircle, ChevronDown,
+  RotateCcw, LogOut, AlertCircle, ChevronDown, ChevronRight,
   LayoutDashboard, Settings, Clock, CheckCircle, AlertTriangle,
   Cpu, WifiOff, Wrench, Calendar,
   Anchor, Video, User, Layers, Droplet, UserRound, FileDown
@@ -112,10 +112,10 @@ export default function App() {
     fetchFeedingLogs, fetchThresholds, fetchDashboardData, fetchMasterData,
     fetchEdgeGateways, fetchIotNodesMaster, fetchSensorTypes, fetchCages,
     fetchCamerasList, fetchOperators, fetchCities, fetchMaintenances,
-    handleAddEdgeGateway, handleDeleteEdgeGateway,
-    handleAddIotNodeMaster, handleDeleteIotNodeMaster,
-    handleAddCage, handleDeleteCage,
-    handleAddCamera, handleDeleteCamera,
+    handleAddEdgeGateway, handleUpdateEdgeGateway, handleDeleteEdgeGateway,
+    handleAddIotNodeMaster, handleUpdateIotNodeMaster, handleDeleteIotNodeMaster,
+    handleAddCage, handleUpdateCage, handleDeleteCage,
+    handleAddCamera, handleUpdateCamera, handleDeleteCamera,
     handleAddOperator, handleDeleteOperator,
     handleAddFeedingLog, handleDeleteFeedingLog,
     handleUpdateThresholds, handleValidateSerial, handleActivateNode,
@@ -123,7 +123,56 @@ export default function App() {
     getSensorStatus, overallStatus, api,
   } = useLobsense();
 
+  // Local dropdown states for Edge Gateway & cascading menu
+  const [activeEdgeId, setActiveEdgeId] = React.useState('');
+  const [hoveredEdgeId, setHoveredEdgeId] = React.useState(null);
+
+  // Group nodes by Edge Gateway
+  const edgeGateways = [];
+  const edgeMap = new Map();
+
+  nodes.forEach(node => {
+    const gw = node.edge_gateway;
+    const gwId = node.edge_gateway_id || gw?.id || 'unlinked';
+    const gwSerial = gw?.serial_number || 'Tanpa Gateway';
+
+    if (!edgeMap.has(gwId)) {
+      edgeMap.set(gwId, {
+        id: gwId,
+        serial_number: gwSerial,
+        nodes: []
+      });
+      edgeGateways.push(edgeMap.get(gwId));
+    }
+    edgeMap.get(gwId).nodes.push(node);
+  });
+
   const activeNode = nodes.find(n => n.serial_number === activeNodeSerial);
+
+  // Sync activeEdgeId with activeNode changes
+  React.useEffect(() => {
+    if (activeNode) {
+      const gwId = activeNode.edge_gateway_id || activeNode.edge_gateway?.id || 'unlinked';
+      if (gwId !== activeEdgeId) {
+        setActiveEdgeId(gwId);
+      }
+    } else if (nodes.length > 0 && !activeEdgeId) {
+      const firstNode = nodes[0];
+      const gwId = firstNode.edge_gateway_id || firstNode.edge_gateway?.id || 'unlinked';
+      setActiveEdgeId(gwId);
+    }
+  }, [activeNode, nodes]);
+
+  const handleEdgeChange = (edgeId) => {
+    setActiveEdgeId(edgeId);
+    const targetEdge = edgeGateways.find(e => e.id === edgeId);
+    if (targetEdge && targetEdge.nodes.length > 0) {
+      setActiveNodeSerial(targetEdge.nodes[0].serial_number);
+    }
+  };
+
+  const selectedEdge = edgeGateways.find(e => e.id === activeEdgeId);
+  const filteredNodes = selectedEdge ? selectedEdge.nodes : [];
 
   // Authentication gate
   if (!token) {
@@ -188,31 +237,72 @@ export default function App() {
         {/* Right Side: Active Node Dropdown, Refresh, and User Profile */}
         <div className="flex items-center gap-3">
           
-          {/* Active Node Dropdown */}
+          {/* Cascading Edge Gateway & IoT Node Dropdown */}
           {nodes.length > 0 && (
             <div className="relative" ref={dropdownRef}>
               <button onClick={() => setNodeDropdownOpen(!nodeDropdownOpen)}
-                className="flex items-center gap-2 h-9 px-3 border border-slate-250 rounded-lg text-[12px] font-medium text-slate-750 bg-white hover:bg-slate-50 transition cursor-pointer select-none">
-                <span className={`h-2 w-2 rounded-full ${activeNode ? 'bg-[#0D9D1B] animate-pulse' : 'bg-slate-300'}`} />
-                <span className="max-w-[145px] truncate font-mono font-bold text-slate-800">{activeNodeSerial || 'Pilih Node'}</span>
+                className="flex items-center gap-2 h-9 px-3 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-750 bg-white hover:bg-slate-50 transition cursor-pointer select-none">
+                <Layers className="h-3.5 w-3.5 text-slate-400" />
+                <span className="max-w-[220px] truncate font-mono text-slate-800">
+                  {edgeGateways.find(e => e.id === activeEdgeId)?.serial_number || 'Pilih Edge'}
+                  <span className="text-slate-400 mx-1.5 font-sans">➔</span>
+                  {activeNodeSerial || 'Pilih Node'}
+                </span>
                 <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform ${nodeDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
+
               {nodeDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 animate-[fadeIn_0.15s_ease-out]">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 pt-2 pb-1">Daftar Node Aktif</p>
-                  {loadingNodes
-                    ? <div className="py-6 text-center text-xs text-slate-400">Memuat...</div>
-                    : nodes.map(node => (
-                      <button key={node.id}
-                        onClick={() => { setActiveNodeSerial(node.serial_number); setNodeDropdownOpen(false); }}
-                        className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B] font-semibold' : 'text-slate-700'}`}>
-                        <Cpu className={`h-4 w-4 shrink-0 ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B]' : 'text-slate-400'}`} />
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-semibold font-mono truncate">{node.serial_number}</p>
-                          <p className="text-[10px] text-slate-400">{node.city?.name || 'Lokasi tidak diketahui'}</p>
+                <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 animate-[fadeIn_0.15s_ease-out]">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 pt-1.5 pb-1">Daftar Edge Gateway</p>
+                  
+                  {edgeGateways.map(edge => (
+                    <div key={edge.id}
+                      className="relative"
+                      onMouseEnter={() => setHoveredEdgeId(edge.id)}
+                      onMouseLeave={() => setHoveredEdgeId(null)}>
+                      
+                      <button
+                        className={`w-full text-left flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors ${edge.id === activeEdgeId ? 'text-[#0D9D1B] font-semibold' : 'text-slate-705'}`}>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Layers className={`h-4 w-4 shrink-0 ${edge.id === activeEdgeId ? 'text-[#0D9D1B]' : 'text-slate-450'}`} />
+                          <div className="min-w-0">
+                            <p className="text-[12px] font-semibold font-mono truncate">{edge.serial_number}</p>
+                            <p className="text-[10px] text-slate-400">{edge.nodes.length} IoT Node</p>
+                          </div>
                         </div>
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                       </button>
-                    ))}
+
+                      {/* Sub-menu (Flyout) for IoT Nodes under this Edge Gateway */}
+                      {hoveredEdgeId === edge.id && (
+                        <div className="absolute right-full top-0 mr-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 animate-[fadeIn_0.1s_ease-out]">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 pt-1.5 pb-1 font-sans">
+                            IoT Node ({edge.serial_number})
+                          </p>
+                          {edge.nodes.length === 0 ? (
+                            <div className="py-4 text-center text-xs text-slate-400 font-sans">
+                              Tidak ada IoT Node terhubung
+                            </div>
+                          ) : (
+                            edge.nodes.map(node => (
+                              <button key={node.id}
+                                onClick={() => {
+                                  setActiveNodeSerial(node.serial_number);
+                                  setNodeDropdownOpen(false);
+                                }}
+                                className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B] font-semibold' : 'text-slate-705'}`}>
+                                <Cpu className={`h-4 w-4 shrink-0 ${node.serial_number === activeNodeSerial ? 'text-[#0D9D1B]' : 'text-slate-455'}`} />
+                                <div className="min-w-0">
+                                  <p className="text-[12px] font-semibold font-mono truncate">{node.serial_number}</p>
+                                  <p className="text-[10px] text-slate-400">{node.city?.name || 'Lokasi tidak diketahui'}</p>
+                                </div>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -347,6 +437,7 @@ export default function App() {
               cagesList={cagesList}
               loadingCages={loadingCages}
               onAddCage={handleAddCage}
+              onUpdateCage={handleUpdateCage}
               onDeleteCage={handleDeleteCage}
               onRefresh={fetchCages}
             />
@@ -355,8 +446,10 @@ export default function App() {
           {activeTab === 'cameras' && (
             <CameraManagement
               camerasList={camerasList}
+              iotNodesMasterList={iotNodesMasterList}
               loadingCameras={loadingCameras}
               onAddCamera={handleAddCamera}
+              onUpdateCamera={handleUpdateCamera}
               onDeleteCamera={handleDeleteCamera}
               onRefresh={fetchCamerasList}
             />
@@ -375,8 +468,10 @@ export default function App() {
           {activeTab === 'edge_computing' && (
             <GatewayManagement
               edgeGatewaysList={edgeGatewaysList}
+              citiesList={citiesList}
               loadingEdgeGateways={loadingEdgeGateways}
               onAddEdgeGateway={handleAddEdgeGateway}
+              onUpdateEdgeGateway={handleUpdateEdgeGateway}
               onDeleteEdgeGateway={handleDeleteEdgeGateway}
               onRefresh={fetchEdgeGateways}
             />
@@ -389,6 +484,7 @@ export default function App() {
               citiesList={citiesList}
               edgeGatewaysList={edgeGatewaysList}
               onAddIotNodeMaster={handleAddIotNodeMaster}
+              onUpdateIotNodeMaster={handleUpdateIotNodeMaster}
               onDeleteIotNodeMaster={handleDeleteIotNodeMaster}
               onRefresh={fetchIotNodesMaster}
             />
