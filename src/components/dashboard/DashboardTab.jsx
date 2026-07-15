@@ -16,7 +16,8 @@ import {
   CloudSnow, 
   CloudFog,
   Sunrise,
-  Sunset
+  Sunset,
+  Anchor
 } from 'lucide-react';
 import { MetricCard } from '../common/MetricCard';
 import { SensorChart } from '../common/SensorChart';
@@ -167,21 +168,29 @@ export const DashboardTab = ({
   }
 
   const getCameraStreamUrl = () => {
-    const cageCode = dashboardData.latest?.cage_code || '';
-    const cam = cameras.find((c) => c.cage?.cage_code === cageCode);
+    // 1. Prioritaskan kamera yang dikembalikan langsung dari dashboardData (terikat dengan IoT Node aktif)
+    const activeNodeCameras = dashboardData?.cameras || [];
+    if (activeNodeCameras.length > 0 && activeNodeCameras[0].stream_url) {
+      return activeNodeCameras[0].stream_url;
+    }
+
+    // 2. Fallback: Cari dari daftar prop cameras global berdasarkan iot_node_id
+    const cam = (cameras || []).find((c) => c.iot_node_id === activeNode?.id);
     if (cam && cam.stream_url) {
       return cam.stream_url;
     }
 
-    // Fallback mock videos for exhibition when camera database is not configured
+    // 3. Fallback mock videos untuk pameran/pengembangan lokal
+    const cageCode = dashboardData.latest?.cage_code || activeNode?.cage?.cage_code || '';
     const fallbackVideos = {
-      'CAGE-A01': 'https://files.catbox.moe/g5214q.mp4',
-      'CAGE-B01': 'https://files.catbox.moe/qqt2fo.mp4',
-      'CAGE-C01': 'https://files.catbox.moe/m9yd36.mp4',
-      'CAGE-D01': 'https://files.catbox.moe/h26lry.mp4'
+      'CAGE-A01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'CAGE-B01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'CAGE-C01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'CAGE-D01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
     };
-    return fallbackVideos[cageCode] || 'https://files.catbox.moe/g5214q.mp4';
+    return fallbackVideos[cageCode] || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
   };
+
 
   const getThreshold = (code) => {
     const t = dashboardData.thresholds.find((th) => th.sensor_code === code);
@@ -200,6 +209,19 @@ export const DashboardTab = ({
     if (!th) return 'normal';
     return (val < th.min || val > th.max) ? 'warning' : 'normal';
   };
+
+  const getAeratorStatus = () => {
+    const doVal = getLiveValue('dissolved_oxygen');
+    const doTh = getThreshold('dissolved_oxygen');
+    if (doVal === null || !doTh) {
+      return { status: 'MATI', color: 'text-slate-400', bg: 'bg-slate-300', mode: 'STANDBY' };
+    }
+    if (doVal < doTh.min) {
+      return { status: 'AKTIF', color: 'text-[#0D9D1B]', bg: 'bg-[#0D9D1B] animate-pulse', mode: 'OTOMATIS (DO RENDAH)' };
+    }
+    return { status: 'MATI', color: 'text-slate-400', bg: 'bg-slate-300', mode: 'STANDBY' };
+  };
+
 
   const getWeatherIcon = () => {
     const desc = (weatherData?.condition || 'Cerah').toLowerCase();
@@ -404,7 +426,7 @@ export const DashboardTab = ({
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 block font-medium">Kode Keramba</span>
-                <span className="font-bold text-slate-700">{dashboardData.latest?.cage_code || '—'}</span>
+                <span className="font-bold text-slate-700">{dashboardData.latest?.cage_code || activeNode?.cage?.cage_code || '—'}</span>
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 block font-medium">Status Gateway</span>
@@ -412,6 +434,17 @@ export const DashboardTab = ({
                   <span className="h-1.5 w-1.5 rounded-full bg-[#0D9D1B]" />
                   Online
                 </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block font-medium">Status Aerator</span>
+                <span className={`font-bold ${getAeratorStatus().color} flex items-center gap-1`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${getAeratorStatus().bg}`} />
+                  {getAeratorStatus().status}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block font-medium">Mode Aerator</span>
+                <span className="font-bold text-slate-700">{getAeratorStatus().mode}</span>
               </div>
             </div>
           </div>
@@ -459,12 +492,44 @@ export const DashboardTab = ({
                     <div className="text-xs">
                       <p className="font-semibold text-emerald-800">Seluruh Sensor Berfungsi Normal</p>
                       <p className="text-slate-500 mt-1 leading-relaxed">
-                        Pembacaan parameter kualitas air KJA ({dashboardData.latest.cage_code}) berada dalam ambang batas ideal budidaya lobster.
+                        Pembacaan parameter kualitas air KJA ({dashboardData.latest.cage_code || activeNode?.cage?.cage_code || '—'}) berada dalam ambang batas ideal budidaya lobster.
                       </p>
                     </div>
                   </div>
                 );
               })()}
+            </div>
+
+            {/* 3 Log Pakan Terbaru Section */}
+            <div className="mt-4 border-t border-slate-100 pt-4 flex flex-col gap-2.5">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Anchor className="h-3.5 w-3.5 text-slate-400" />
+                  <span>3 Log Pakan Terbaru</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {(() => {
+                  const logs = dashboardData.feeding_logs || [];
+                  if (logs.length === 0) {
+                    return (
+                      <span className="text-[11px] text-slate-400 italic">Belum ada riwayat pakan untuk node ini.</span>
+                    );
+                  }
+                  return logs.slice(0, 3).map((log, i) => (
+                    <div key={i} className="flex justify-between items-center bg-slate-50 hover:bg-slate-100/70 px-3 py-2 rounded-xl border border-slate-150/40 transition-all duration-200">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-bold text-slate-700">{log.feed_type} ({log.weight_kg} kg)</span>
+                        <span className="text-[9px] text-slate-500 font-medium">Oleh: {log.operator?.full_name || 'Petugas'}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[9.5px] font-mono text-slate-400 font-semibold block">{new Date(log.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})}</span>
+                        <span className="text-[8.5px] text-[#0D9D1B] font-bold uppercase tracking-wider block">{log.feed_session}</span>
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
             </div>
           </div>
         </div>
