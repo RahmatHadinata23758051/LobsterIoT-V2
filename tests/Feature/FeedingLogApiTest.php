@@ -5,6 +5,10 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Cage;
+use App\Models\IotNode;
+use App\Models\EdgeGateway;
+use App\Models\Province;
+use App\Models\City;
 use App\Models\Operator;
 use App\Models\FeedingLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,6 +22,8 @@ class FeedingLogApiTest extends TestCase
     protected string $token;
     protected Cage $cage1;
     protected Cage $cage2;
+    protected IotNode $iotNode1;
+    protected IotNode $iotNode2;
     protected Operator $operator1;
     protected Operator $operator2;
 
@@ -33,8 +39,26 @@ class FeedingLogApiTest extends TestCase
         ]);
         $this->token = $this->user->createToken('test_token')->plainTextToken;
 
+        $province = Province::create([
+            'code' => '50',
+            'name' => 'Lombok'
+        ]);
+
+        $city = City::create([
+            'province_id' => $province->id,
+            'code' => '5001',
+            'name' => 'Lombok Barat'
+        ]);
+
+
+        $gateway = EdgeGateway::create([
+            'serial_number' => 'GW-TEST-001',
+            'city_id' => $city->id,
+        ]);
+
         $this->cage1 = Cage::create([
             'cage_code' => 'CAGE-01',
+            'edge_gateway_id' => $gateway->id,
             'latitude' => -6.123,
             'longitude' => 106.123,
             'volume_cubic_meters' => 50.5,
@@ -43,10 +67,27 @@ class FeedingLogApiTest extends TestCase
 
         $this->cage2 = Cage::create([
             'cage_code' => 'CAGE-02',
+            'edge_gateway_id' => $gateway->id,
             'latitude' => -6.456,
             'longitude' => 106.456,
             'volume_cubic_meters' => 75.0,
             'structure_condition' => 'Good',
+        ]);
+
+        $this->iotNode1 = IotNode::create([
+            'serial_number' => 'NODE-TEST-001',
+            'city_id' => $city->id,
+            'owner_id' => $this->user->id,
+            'cage_id' => $this->cage1->id,
+            'activated_at' => now(),
+        ]);
+
+        $this->iotNode2 = IotNode::create([
+            'serial_number' => 'NODE-TEST-002',
+            'city_id' => $city->id,
+            'owner_id' => $this->user->id,
+            'cage_id' => $this->cage2->id,
+            'activated_at' => now(),
         ]);
 
         $this->operator1 = Operator::create([
@@ -77,7 +118,7 @@ class FeedingLogApiTest extends TestCase
     public function test_index_feeding_logs_success(): void
     {
         FeedingLog::create([
-            'cage_id' => $this->cage1->id,
+            'iot_node_id' => $this->iotNode1->id,
             'operator_id' => $this->operator1->id,
             'feed_session' => 'morning',
             'feed_type' => 'Pellet A',
@@ -85,7 +126,7 @@ class FeedingLogApiTest extends TestCase
         ]);
 
         FeedingLog::create([
-            'cage_id' => $this->cage2->id,
+            'iot_node_id' => $this->iotNode2->id,
             'operator_id' => $this->operator2->id,
             'feed_session' => 'afternoon',
             'feed_type' => 'Pellet B',
@@ -112,7 +153,7 @@ class FeedingLogApiTest extends TestCase
     public function test_index_feeding_logs_filtered_by_cage(): void
     {
         FeedingLog::create([
-            'cage_id' => $this->cage1->id,
+            'iot_node_id' => $this->iotNode1->id,
             'operator_id' => $this->operator1->id,
             'feed_session' => 'morning',
             'feed_type' => 'Pellet A',
@@ -120,7 +161,7 @@ class FeedingLogApiTest extends TestCase
         ]);
 
         FeedingLog::create([
-            'cage_id' => $this->cage2->id,
+            'iot_node_id' => $this->iotNode2->id,
             'operator_id' => $this->operator2->id,
             'feed_session' => 'afternoon',
             'feed_type' => 'Pellet B',
@@ -143,7 +184,7 @@ class FeedingLogApiTest extends TestCase
     public function test_index_feeding_logs_filtered_by_operator(): void
     {
         FeedingLog::create([
-            'cage_id' => $this->cage1->id,
+            'iot_node_id' => $this->iotNode1->id,
             'operator_id' => $this->operator1->id,
             'feed_session' => 'morning',
             'feed_type' => 'Pellet A',
@@ -151,7 +192,7 @@ class FeedingLogApiTest extends TestCase
         ]);
 
         FeedingLog::create([
-            'cage_id' => $this->cage2->id,
+            'iot_node_id' => $this->iotNode2->id,
             'operator_id' => $this->operator2->id,
             'feed_session' => 'afternoon',
             'feed_type' => 'Pellet B',
@@ -174,7 +215,7 @@ class FeedingLogApiTest extends TestCase
     public function test_index_feeding_logs_filtered_by_date(): void
     {
         $logToday = FeedingLog::create([
-            'cage_id' => $this->cage1->id,
+            'iot_node_id' => $this->iotNode1->id,
             'operator_id' => $this->operator1->id,
             'feed_session' => 'morning',
             'feed_type' => 'Pellet Today',
@@ -182,7 +223,7 @@ class FeedingLogApiTest extends TestCase
         ]);
 
         $logYesterday = new FeedingLog([
-            'cage_id' => $this->cage2->id,
+            'iot_node_id' => $this->iotNode2->id,
             'operator_id' => $this->operator2->id,
             'feed_session' => 'night',
             'feed_type' => 'Pellet Yesterday',
@@ -220,7 +261,7 @@ class FeedingLogApiTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
         ])->postJson('/api/v2/feeding-logs', [
-            'cage_id' => $this->cage1->id,
+            'iot_node_id' => $this->iotNode1->id,
             'operator_id' => $this->operator1->id,
             'feed_session' => 'night',
             'feed_type' => 'Premium BioFeed',
@@ -239,7 +280,7 @@ class FeedingLogApiTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('feeding_logs', [
-            'cage_id' => $this->cage1->id,
+            'iot_node_id' => $this->iotNode1->id,
             'operator_id' => $this->operator1->id,
             'feed_session' => 'night',
             'feed_type' => 'Premium BioFeed',
@@ -256,7 +297,7 @@ class FeedingLogApiTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
         ])->postJson('/api/v2/feeding-logs', [
-            'cage_id' => 999, // non-existent
+            'iot_node_id' => 999, // non-existent
             'operator_id' => $this->operator1->id,
             'feed_session' => 'invalid_session',
             'feed_type' => 'Standard Pellet',

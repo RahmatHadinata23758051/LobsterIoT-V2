@@ -5,6 +5,9 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Cage;
+use App\Models\IotNode;
+use App\Models\Province;
+use App\Models\City;
 use App\Models\Camera;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -15,6 +18,7 @@ class CameraApiTest extends TestCase
     protected User $user;
     protected string $token;
     protected Cage $cage;
+    protected IotNode $iotNode;
 
     protected function setUp(): void
     {
@@ -28,12 +32,32 @@ class CameraApiTest extends TestCase
         ]);
         $this->token = $this->user->createToken('test_token')->plainTextToken;
 
+        $province = Province::create([
+            'code' => '50',
+            'name' => 'Lombok'
+        ]);
+
+        $city = City::create([
+            'province_id' => $province->id,
+            'code' => '5001',
+            'name' => 'Lombok Barat'
+        ]);
+
+
         $this->cage = Cage::create([
             'cage_code' => 'CAGE-01',
             'latitude' => -6.123,
             'longitude' => 106.123,
             'volume_cubic_meters' => 50.5,
             'structure_condition' => 'Excellent',
+        ]);
+
+        $this->iotNode = IotNode::create([
+            'serial_number' => 'CAM-NODE-01',
+            'city_id' => $city->id,
+            'owner_id' => $this->user->id,
+            'cage_id' => $this->cage->id,
+            'activated_at' => now(),
         ]);
     }
 
@@ -56,14 +80,14 @@ class CameraApiTest extends TestCase
     {
         Camera::create([
             'camera_code' => 'CAM-01',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'stream_url' => 'rtsp://127.0.0.1:8554/cam1',
             'is_active' => true,
         ]);
 
         Camera::create([
             'camera_code' => 'CAM-02',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'stream_url' => 'rtsp://127.0.0.1:8554/cam2',
             'is_active' => false,
         ]);
@@ -91,7 +115,7 @@ class CameraApiTest extends TestCase
             'Authorization' => 'Bearer ' . $this->token,
         ])->postJson('/api/v2/cameras', [
             'camera_code' => 'CAM-NEW',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'stream_url' => 'rtsp://127.0.0.1:8554/camnew',
             'is_active' => true,
         ]);
@@ -105,7 +129,7 @@ class CameraApiTest extends TestCase
 
         $this->assertDatabaseHas('cameras', [
             'camera_code' => 'CAM-NEW',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'is_active' => true,
         ]);
     }
@@ -118,17 +142,17 @@ class CameraApiTest extends TestCase
         // First camera
         Camera::create([
             'camera_code' => 'CAM-DUP',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'stream_url' => 'rtsp://127.0.0.1:8554/camdup',
             'is_active' => true,
         ]);
 
-        // Duplicate code and non-existent cage_id
+        // Duplicate code and non-existent iot_node_id
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
         ])->postJson('/api/v2/cameras', [
             'camera_code' => 'CAM-DUP',
-            'cage_id' => 999, // non-existent
+            'iot_node_id' => 999, // non-existent
         ]);
 
         $response->assertStatus(422)
@@ -145,7 +169,7 @@ class CameraApiTest extends TestCase
     {
         $camera = Camera::create([
             'camera_code' => 'CAM-01',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'stream_url' => 'rtsp://127.0.0.1:8554/cam1',
             'is_active' => true,
         ]);
@@ -188,7 +212,7 @@ class CameraApiTest extends TestCase
     {
         $camera = Camera::create([
             'camera_code' => 'CAM-OLD',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'stream_url' => 'rtsp://127.0.0.1:8554/camold',
             'is_active' => false,
         ]);
@@ -224,7 +248,7 @@ class CameraApiTest extends TestCase
     {
         $camera = Camera::create([
             'camera_code' => 'CAM-TO-DELETE',
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->iotNode->id,
             'stream_url' => 'rtsp://127.0.0.1:8554/camdel',
             'is_active' => true,
         ]);

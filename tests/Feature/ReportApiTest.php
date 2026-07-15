@@ -56,21 +56,23 @@ class ReportApiTest extends TestCase
             'city_id' => $this->city->id,
         ]);
 
-        $this->node = IotNode::create([
-            'serial_number' => 'NODE-TEST-999',
-            'city_id' => $this->city->id,
-            'edge_gateway_id' => $this->gateway->id,
-            'owner_id' => $this->user->id,
-            'activated_at' => now(),
-            'activated_by' => $this->user->id,
-        ]);
-
         $this->cage = Cage::create([
             'cage_code' => 'KJA-TEST-999',
+            'edge_gateway_id' => $this->gateway->id,
             'latitude' => -6.2,
             'longitude' => 106.8,
             'volume_cubic_meters' => 10.5,
             'structure_condition' => 'Excellent',
+        ]);
+
+        $this->node = IotNode::create([
+            'serial_number' => 'NODE-TEST-999',
+            'city_id' => $this->city->id,
+            'edge_gateway_id' => $this->gateway->id,
+            'cage_id' => $this->cage->id,
+            'owner_id' => $this->user->id,
+            'activated_at' => now(),
+            'activated_by' => $this->user->id,
         ]);
 
         $this->operator = Operator::create([
@@ -89,12 +91,13 @@ class ReportApiTest extends TestCase
         ]);
 
         FeedingLog::create([
-            'cage_id' => $this->cage->id,
+            'iot_node_id' => $this->node->id,
             'operator_id' => $this->operator->id,
             'feed_session' => 'morning',
             'feed_type' => 'Pelet Lobster A',
             'weight_kg' => 2.50,
         ]);
+
     }
 
     public function test_reports_require_authentication(): void

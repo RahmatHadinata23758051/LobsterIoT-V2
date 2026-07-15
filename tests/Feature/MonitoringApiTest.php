@@ -7,12 +7,17 @@ use App\Models\User;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\IotNode;
+use App\Models\Cage;
+use App\Models\Camera;
+use App\Models\Operator;
+use App\Models\FeedingLog;
 use App\Models\Threshold;
 use App\Models\SensorType;
 use App\Services\InfluxDBService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery\MockInterface;
 use Mockery;
+
 
 class MonitoringApiTest extends TestCase
 {
@@ -111,11 +116,41 @@ class MonitoringApiTest extends TestCase
      */
     public function test_get_dashboard_data_success(): void
     {
+        $cage = Cage::create([
+            'cage_code' => 'CAGE-DASH-1',
+            'latitude' => -7.123,
+            'longitude' => 108.123,
+            'volume_cubic_meters' => 10.0,
+            'structure_condition' => 'Excellent',
+        ]);
+
         $node = IotNode::create([
             'city_id' => $this->city->id,
             'owner_id' => $this->user->id,
+            'cage_id' => $cage->id,
             'serial_number' => 'SN-DASH-100',
             'activated_at' => now(),
+        ]);
+
+        $camera = Camera::create([
+            'camera_code' => 'CAM-DASH-1',
+            'iot_node_id' => $node->id,
+            'stream_url' => 'rtsp://127.0.0.1/dash',
+            'is_active' => true,
+        ]);
+
+        $operator = Operator::create([
+            'full_name' => 'Operator Dash',
+            'phone_number' => '08999999',
+            'address' => 'Lombok',
+        ]);
+
+        $feed = FeedingLog::create([
+            'iot_node_id' => $node->id,
+            'operator_id' => $operator->id,
+            'feed_session' => 'morning',
+            'feed_type' => 'Pelet Bio',
+            'weight_kg' => 2.5,
         ]);
 
         $threshold = Threshold::create([
@@ -172,6 +207,9 @@ class MonitoringApiTest extends TestCase
                 'status' => 'success',
                 'message' => 'Dashboard data compiled',
                 'data' => [
+                    'node' => [
+                        'serial_number' => 'SN-DASH-100',
+                    ],
                     'latest' => $mockLatest,
                     'series_24h' => $mockSeries,
                     'thresholds' => [
@@ -182,7 +220,11 @@ class MonitoringApiTest extends TestCase
                         ]
                     ]
                 ]
-            ]);
+            ])
+            ->assertJsonCount(1, 'data.cameras')
+            ->assertJsonCount(1, 'data.feeding_logs')
+            ->assertJsonFragment(['camera_code' => 'CAM-DASH-1'])
+            ->assertJsonFragment(['feed_type' => 'Pelet Bio']);
     }
 
     /**

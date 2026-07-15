@@ -65,72 +65,78 @@ class ModelsTest extends TestCase
         $this->assertEquals('CIREBON', $edge->city->name);
         $this->assertEquals('Owner Name', $edge->activatedBy->name);
 
-        // 8. Create IotNode
-        $node = IotNode::create([
-            'city_id' => $city->id,
-            'owner_id' => $user->id,
-            'edge_gateway_id' => $edge->id,
-            'serial_number' => 'NODE-99081',
-            'activated_by' => $user->id,
-        ]);
-
-        // 9. Verify IotNode relations
-        $this->assertEquals('CIREBON', $node->city->name);
-        $this->assertEquals('Owner Name', $node->owner->name);
-        $this->assertEquals('GW-001', $node->edgeGateway->serial_number);
-        $this->assertEquals('Owner Name', $node->activatedBy->name);
-
-        // 10. Create Cage
+        // 8. Create Cage (Parent of IoT Node, Child of EdgeGateway)
         $cage = Cage::create([
             'cage_code' => 'CAGE-01',
+            'edge_gateway_id' => $edge->id,
             'latitude' => -7.123,
             'longitude' => 108.123,
             'volume_cubic_meters' => 12.5,
             'structure_condition' => 'Good',
         ]);
 
-        // 11. Create Operator
+        // 9. Verify Cage relations
+        $this->assertEquals('GW-001', $cage->edgeGateway->serial_number);
+        $this->assertCount(1, $edge->cages);
+
+        // 10. Create IotNode (Child of Cage)
+        $node = IotNode::create([
+            'city_id' => $city->id,
+            'owner_id' => $user->id,
+            'cage_id' => $cage->id,
+            'serial_number' => 'NODE-99081',
+            'activated_by' => $user->id,
+        ]);
+
+        // 11. Verify IotNode relations
+        $this->assertEquals('CIREBON', $node->city->name);
+        $this->assertEquals('Owner Name', $node->owner->name);
+        $this->assertEquals('CAGE-01', $node->cage->cage_code);
+        $this->assertEquals('Owner Name', $node->activatedBy->name);
+        $this->assertEquals('NODE-99081', $cage->fresh()->iotNode->serial_number);
+
+        // 12. Create Operator
         $operator = Operator::create([
             'full_name' => 'Operator Udin',
             'phone_number' => '0812345',
             'address' => 'Cirebon',
         ]);
 
-        // 12. Create FeedingLog
+        // 13. Create FeedingLog (Child of IotNode)
         $feed = FeedingLog::create([
-            'cage_id' => $cage->id,
+            'iot_node_id' => $node->id,
             'operator_id' => $operator->id,
             'feed_session' => 'morning',
             'feed_type' => 'Pelet',
             'weight_kg' => 1.5,
         ]);
 
-        // 13. Verify Cage and Operator relations
-        $this->assertCount(1, $cage->feedingLogs);
-        $this->assertEquals('morning', $cage->feedingLogs->first()->feed_session);
+        // 14. Verify IotNode and Operator relations
+        $this->assertCount(1, $node->feedingLogs);
+        $this->assertEquals('morning', $node->feedingLogs->first()->feed_session);
         $this->assertCount(1, $operator->feedingLogs);
         $this->assertEquals('morning', $operator->feedingLogs->first()->feed_session);
 
-        // 14. Create Camera
+        // 15. Create Camera (Child of IotNode)
         $camera = Camera::create([
             'camera_code' => 'CAM-01',
-            'cage_id' => $cage->id,
+            'iot_node_id' => $node->id,
             'stream_url' => 'rtsp://test',
             'is_active' => true,
         ]);
 
-        // 15. Verify Camera -> Cage relation
-        $this->assertEquals('CAGE-01', $camera->cage->cage_code);
-        $this->assertCount(1, $cage->cameras);
+        // 16. Verify Camera -> IotNode relation
+        $this->assertEquals('NODE-99081', $camera->iotNode->serial_number);
+        $this->assertCount(1, $node->cameras);
 
-        // 16. Create SensorType
+        // 17. Create SensorType
         $sensor = SensorType::create([
             'sensor_code' => 'ph',
             'value_range' => '6.5 - 8.5',
             'description' => 'pH air',
         ]);
 
-        // 17. Create Threshold config
+        // 18. Create Threshold config
         $threshold = Threshold::create([
             'iot_node_serial_number' => $node->serial_number,
             'sensor_code' => $sensor->sensor_code,
@@ -139,22 +145,23 @@ class ModelsTest extends TestCase
             'offset_value' => 0.00,
         ]);
 
-        // 18. Verify Threshold relations via custom keys
+        // 19. Verify Threshold relations via custom keys
         $this->assertEquals('NODE-99081', $threshold->iotNode->serial_number);
         $this->assertEquals('ph', $threshold->sensorType->sensor_code);
         $this->assertCount(1, $node->thresholds);
         $this->assertEquals('ph', $node->thresholds->first()->sensor_code);
 
-        // 19. Create Maintenance log
+        // 20. Create Maintenance log
         $maintenance = Maintenance::create([
             'iot_node_id' => $node->id,
             'operator_id' => $user->id,
             'description' => 'Cleaned DO sensor.',
         ]);
 
-        // 20. Verify Maintenance relations
+        // 21. Verify Maintenance relations
         $this->assertEquals('NODE-99081', $maintenance->iotNode->serial_number);
         $this->assertEquals('Owner Name', $maintenance->operator->name);
         $this->assertCount(1, $node->maintenances);
+
     }
 }
