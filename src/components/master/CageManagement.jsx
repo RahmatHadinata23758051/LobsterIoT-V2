@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { RotateCcw, Trash2, Anchor } from 'lucide-react';
+import { RotateCcw, Trash2, Anchor, MapPin, Edit } from 'lucide-react';
 
 export const CageManagement = ({
   cagesList = [],
   loadingCages,
   onAddCage,
+  onUpdateCage,
   onDeleteCage,
   onRefresh
 }) => {
@@ -17,6 +18,44 @@ export const CageManagement = ({
     lobster_count: '',
     lobster_age_days: ''
   });
+  const [editingCageId, setEditingCageId] = useState(null);
+  const [detectingGps, setDetectingGps] = useState(false);
+
+  const handleDetectGps = () => {
+    if (!navigator.geolocation) {
+      alert('Browser Anda tidak mendukung deteksi lokasi GPS.');
+      return;
+    }
+    setDetectingGps(true);
+
+    const successCallback = (position) => {
+      setNewCage(prev => ({
+        ...prev,
+        latitude: position.coords.latitude.toFixed(6),
+        longitude: position.coords.longitude.toFixed(6)
+      }));
+      setDetectingGps(false);
+    };
+
+    const options = { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 };
+
+    const errorCallback = (error) => {
+      // If high accuracy failed (e.g. timeout on PC/laptop), retry with standard accuracy (faster/uses network IP)
+      if (options.enableHighAccuracy) {
+        options.enableHighAccuracy = false;
+        options.timeout = 10000;
+        navigator.geolocation.getCurrentPosition(successCallback, (err) => {
+          alert('Gagal mengambil lokasi GPS: ' + err.message);
+          setDetectingGps(false);
+        }, options);
+      } else {
+        alert('Gagal mengambil lokasi GPS: ' + error.message);
+        setDetectingGps(false);
+      }
+    };
+
+    navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,7 +63,8 @@ export const CageManagement = ({
       alert('Seluruh kolom bertanda bintang (*) wajib diisi.');
       return;
     }
-    onAddCage({
+
+    const payload = {
       cage_code: newCage.cage_code,
       latitude: parseFloat(newCage.latitude),
       longitude: parseFloat(newCage.longitude),
@@ -32,7 +72,15 @@ export const CageManagement = ({
       structure_condition: newCage.structure_condition || 'Baik',
       lobster_count: newCage.lobster_count ? parseInt(newCage.lobster_count) : 0,
       lobster_age_days: newCage.lobster_age_days ? parseInt(newCage.lobster_age_days) : null
-    });
+    };
+
+    if (editingCageId) {
+      onUpdateCage(editingCageId, payload);
+      setEditingCageId(null);
+    } else {
+      onAddCage(payload);
+    }
+
     setNewCage({
       cage_code: '',
       latitude: '',
@@ -52,9 +100,11 @@ export const CageManagement = ({
         <div className="border-b border-slate-100 pb-3 mb-4">
           <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <Anchor className="h-4 w-4 text-[#0D9D1B]" />
-            Tambah KJA Baru
+            {editingCageId ? 'Edit Detail KJA' : 'Tambah KJA Baru'}
           </h3>
-          <p className="text-[10px] text-slate-400 mt-0.5">Daftarkan keramba jaring apung lobster baru</p>
+          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+            {editingCageId ? 'Perbarui spesifikasi keramba existing' : 'Daftarkan keramba jaring apung lobster baru'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -70,30 +120,42 @@ export const CageManagement = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Latitude *</label>
-              <input
-                type="number"
-                step="0.000001"
-                required
-                placeholder="-8.65"
-                value={newCage.latitude}
-                onChange={(e) => setNewCage({ ...newCage, latitude: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
-              />
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase">Koordinat Lokasi *</label>
+              <button
+                type="button"
+                onClick={handleDetectGps}
+                disabled={detectingGps}
+                className="text-[10px] text-[#0D9D1B] hover:text-[#0A8516] font-bold flex items-center gap-1 cursor-pointer transition select-none disabled:opacity-50"
+              >
+                <MapPin className={`h-3 w-3 ${detectingGps ? 'animate-bounce' : ''}`} />
+                {detectingGps ? 'Mendeteksi...' : 'Deteksi GPS'}
+              </button>
             </div>
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Longitude *</label>
-              <input
-                type="number"
-                step="0.000001"
-                required
-                placeholder="116.3"
-                value={newCage.longitude}
-                onChange={(e) => setNewCage({ ...newCage, longitude: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
-              />
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <input
+                  type="number"
+                  step="0.000001"
+                  required
+                  placeholder="Latitude"
+                  value={newCage.latitude}
+                  onChange={(e) => setNewCage({ ...newCage, latitude: e.target.value })}
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
+                />
+              </div>
+              <div>
+                <input
+                  type="number"
+                  step="0.000001"
+                  required
+                  placeholder="Longitude"
+                  value={newCage.longitude}
+                  onChange={(e) => setNewCage({ ...newCage, longitude: e.target.value })}
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
+                />
+              </div>
             </div>
           </div>
 
@@ -146,12 +208,34 @@ export const CageManagement = ({
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
-          >
-            Simpan KJA
-          </button>
+          <div className="flex gap-2">
+            {editingCageId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCageId(null);
+                  setNewCage({
+                    cage_code: '',
+                    latitude: '',
+                    longitude: '',
+                    volume_cubic_meters: '',
+                    structure_condition: 'Baik',
+                    lobster_count: '',
+                    lobster_age_days: ''
+                  });
+                }}
+                className="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer text-center"
+              >
+                Batal
+              </button>
+            )}
+            <button
+              type="submit"
+              className={`${editingCageId ? 'w-2/3' : 'w-full'} py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10`}
+            >
+              {editingCageId ? 'Perbarui' : 'Simpan'} KJA
+            </button>
+          </div>
         </form>
       </div>
 
@@ -204,12 +288,33 @@ export const CageManagement = ({
                       {cage.lobster_count} ekor {cage.lobster_age_days ? `(${cage.lobster_age_days} hari)` : ''}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => onDeleteCage(cage.id)}
-                        className="p-1 rounded text-red-500 hover:bg-red-50 transition cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setEditingCageId(cage.id);
+                            setNewCage({
+                              cage_code: cage.cage_code,
+                              latitude: cage.latitude,
+                              longitude: cage.longitude,
+                              volume_cubic_meters: cage.volume_cubic_meters,
+                              structure_condition: cage.structure_condition || 'Baik',
+                              lobster_count: cage.lobster_count ?? '',
+                              lobster_age_days: cage.lobster_age_days ?? ''
+                            });
+                          }}
+                          title="Edit KJA"
+                          className="p-1 rounded text-[#0D9D1B] hover:bg-green-50 transition cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => onDeleteCage(cage.id)}
+                          title="Hapus KJA"
+                          className="p-1 rounded text-red-500 hover:bg-red-50 transition cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

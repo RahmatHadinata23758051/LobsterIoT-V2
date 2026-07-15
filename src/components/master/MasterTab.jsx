@@ -24,14 +24,17 @@ export const MasterTab = ({
   loadingIotNodesMaster,
   loadingSensorTypes,
   onAddCage,
+  onUpdateCage,
   onDeleteCage,
   onAddCamera,
   onDeleteCamera,
   onAddOperator,
   onDeleteOperator,
   onAddEdgeGateway,
+  onUpdateEdgeGateway,
   onDeleteEdgeGateway,
   onAddIotNodeMaster,
+  onUpdateIotNodeMaster,
   onDeleteIotNodeMaster,
   onRefreshCages,
   onRefreshCameras,
@@ -89,6 +92,7 @@ export const MasterTab = ({
             cagesList={cagesList}
             loadingCages={loadingCages}
             onAddCage={onAddCage}
+            onUpdateCage={onUpdateCage}
             onDeleteCage={onDeleteCage}
             onRefresh={onRefreshCages}
           />
@@ -121,6 +125,7 @@ export const MasterTab = ({
             citiesList={citiesList}
             loadingEdgeGateways={loadingEdgeGateways}
             onAddEdgeGateway={onAddEdgeGateway}
+            onUpdateEdgeGateway={onUpdateEdgeGateway}
             onDeleteEdgeGateway={onDeleteEdgeGateway}
             onRefresh={onRefreshGateways}
           />
@@ -133,6 +138,7 @@ export const MasterTab = ({
             citiesList={citiesList}
             loadingIotNodesMaster={loadingIotNodesMaster}
             onAddIotNodeMaster={onAddIotNodeMaster}
+            onUpdateIotNodeMaster={onUpdateIotNodeMaster}
             onDeleteIotNodeMaster={onDeleteIotNodeMaster}
             onRefresh={onRefreshNodes}
           />
