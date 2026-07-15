@@ -47,10 +47,11 @@ class EdgeGateway extends Model
     }
 
     /**
-     * Get the IoT nodes connected to this edge gateway.
+     * Get the cages managed by this edge gateway.
      */
-    public function iotNodes(): HasMany
+    public function cages(): HasMany
     {
-        return $this->hasMany(IotNode::class);
+        return $this->hasMany(Cage::class);
     }
+
 }

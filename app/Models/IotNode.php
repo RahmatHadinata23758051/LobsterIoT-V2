@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'city_id',
     'owner_id',
     'edge_gateway_id',
+    'cage_id',
     'gateway_channel_number',
     'serial_number',
     'ip_address',
@@ -43,12 +44,29 @@ class IotNode extends Model
     }
 
     /**
-     * Get the Edge Gateway connected to this IoT Node.
+     * Get the Cage monitored by this IoT Node.
      */
-    public function edgeGateway(): BelongsTo
+    public function cage(): BelongsTo
     {
-        return $this->belongsTo(EdgeGateway::class);
+        return $this->belongsTo(Cage::class);
     }
+
+    /**
+     * Get the cameras monitored by this IoT Node.
+     */
+    public function cameras(): HasMany
+    {
+        return $this->hasMany(Camera::class);
+    }
+
+    /**
+     * Get the feeding logs for this IoT Node.
+     */
+    public function feedingLogs(): HasMany
+    {
+        return $this->hasMany(FeedingLog::class);
+    }
+
 
     /**
      * Get the user who activated this IoT Node.
@@ -64,6 +82,14 @@ class IotNode extends Model
     public function thresholds(): HasMany
     {
         return $this->hasMany(Threshold::class, 'iot_node_serial_number', 'serial_number');
+    }
+
+    /**
+     * Get the Edge Gateway that manages this IoT Node.
+     */
+    public function edgeGateway(): BelongsTo
+    {
+        return $this->belongsTo(EdgeGateway::class);
     }
 
     /**

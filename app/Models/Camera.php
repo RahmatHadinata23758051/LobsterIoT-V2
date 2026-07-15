@@ -6,14 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['camera_code', 'cage_id', 'stream_url', 'is_active'])]
+#[Fillable(['camera_code', 'iot_node_id', 'stream_url', 'is_active'])]
 class Camera extends Model
 {
     /**
-     * Get the cage this camera is placed in.
+     * Get the IoT Node this camera is placed in.
      */
-    public function cage(): BelongsTo
+    public function iotNode(): BelongsTo
     {
-        return $this->belongsTo(Cage::class);
+        return $this->belongsTo(IotNode::class);
     }
 }
+

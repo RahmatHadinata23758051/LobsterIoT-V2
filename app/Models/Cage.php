@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
 #[Fillable([
     'cage_code',
+    'edge_gateway_id',
     'latitude',
     'longitude',
     'volume_cubic_meters',
@@ -19,18 +21,18 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 class Cage extends Model
 {
     /**
-     * Get the feeding logs for this cage.
+     * Get the Edge Gateway managing this cage.
      */
-    public function feedingLogs(): HasMany
+    public function edgeGateway(): BelongsTo
     {
-        return $this->hasMany(FeedingLog::class);
+        return $this->belongsTo(EdgeGateway::class);
     }
 
     /**
-     * Get the cameras installed in this cage.
+     * Get the IoT Node installed in this cage.
      */
-    public function cameras(): HasMany
+    public function iotNode(): HasOne
     {
-        return $this->hasMany(Camera::class);
+        return $this->hasOne(IotNode::class);
     }
 }
