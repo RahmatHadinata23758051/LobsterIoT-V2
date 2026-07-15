@@ -25,10 +25,11 @@ class CageController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'cage_code' => 'required|string|max:50|unique:cages,cage_code',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'volume_cubic_meters' => 'required|numeric|min:0',
-            'structure_condition' => 'required|string|max:100',
+            'edge_gateway_id' => 'nullable|integer|exists:edge_gateways,id',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'volume_cubic_meters' => 'nullable|numeric|min:0.1',
+            'structure_condition' => 'nullable|string|max:100',
             'lobster_count' => 'nullable|integer|min:0',
             'lobster_age_days' => 'nullable|integer|min:0',
         ]);
@@ -39,16 +40,17 @@ class CageController extends Controller
 
         $cage = Cage::create([
             'cage_code' => $request->cage_code,
+            'edge_gateway_id' => $request->edge_gateway_id,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'volume_cubic_meters' => $request->volume_cubic_meters,
             'structure_condition' => $request->structure_condition,
-            'lobster_count' => $request->lobster_count ?? 0,
+            'lobster_count' => $request->lobster_count,
             'lobster_age_days' => $request->lobster_age_days,
-            'age_last_updated_at' => $request->has('lobster_age_days') ? now() : null,
+            'age_last_updated_at' => $request->filled('lobster_age_days') ? now() : null,
         ]);
 
-        return $this->success('Cage created successfully', $cage, 201);
+        return $this->success('Cage created successfully', $cage->load('edgeGateway'), 201);
     }
 
     /**
@@ -56,7 +58,7 @@ class CageController extends Controller
      */
     public function show($id)
     {
-        $cage = Cage::find($id);
+        $cage = Cage::with('edgeGateway')->find($id);
 
         if (!$cage) {
             return $this->error('Cage tidak ditemukan.', null, 404);
@@ -78,10 +80,11 @@ class CageController extends Controller
 
         $validator = Validator::make($request->all(), [
             'cage_code' => 'sometimes|required|string|max:50|unique:cages,cage_code,' . $id,
-            'latitude' => 'sometimes|required|numeric|between:-90,90',
-            'longitude' => 'sometimes|required|numeric|between:-180,180',
-            'volume_cubic_meters' => 'sometimes|required|numeric|min:0',
-            'structure_condition' => 'sometimes|required|string|max:100',
+            'edge_gateway_id' => 'nullable|integer|exists:edge_gateways,id',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'volume_cubic_meters' => 'nullable|numeric|min:0.1',
+            'structure_condition' => 'nullable|string|max:100',
             'lobster_count' => 'nullable|integer|min:0',
             'lobster_age_days' => 'nullable|integer|min:0',
         ]);
@@ -92,6 +95,7 @@ class CageController extends Controller
 
         $data = $request->only([
             'cage_code',
+            'edge_gateway_id',
             'latitude',
             'longitude',
             'volume_cubic_meters',
@@ -100,13 +104,13 @@ class CageController extends Controller
             'lobster_age_days',
         ]);
 
-        if ($request->has('lobster_age_days') && $cage->lobster_age_days !== $request->lobster_age_days) {
+        if ($request->filled('lobster_age_days')) {
             $data['age_last_updated_at'] = now();
         }
 
         $cage->update($data);
 
-        return $this->success('Cage updated successfully', $cage);
+        return $this->success('Cage updated successfully', $cage->load('edgeGateway'));
     }
 
     /**
