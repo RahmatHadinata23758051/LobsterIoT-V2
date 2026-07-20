@@ -63,16 +63,14 @@ class DemoNodeSeeder extends Seeder
             ['serial' => 'LOBSTER-ESP32-003', 'cage' => 'CAGE-A03', 'lat' => -8.6518, 'lng' => 116.3205],
         ];
 
-        $sensorCodes = ['ph', 'tds', 'dissolved_oxygen', 'water_temperature', 'ambient_temperature', 'flow_rate', 'turbidity', 'salinity'];
+        // Valid sensor codes in sensor_types table: ph, tds, water_temperature, dissolved_oxygen, turbidity, flow_rate
         $thresholdDefaults = [
             'ph'                => ['min' => 7.5,  'max' => 8.5],
             'tds'               => ['min' => 800,  'max' => 1000],
             'dissolved_oxygen'  => ['min' => 5.0,  'max' => 8.0],
             'water_temperature' => ['min' => 24.0, 'max' => 28.0],
-            'ambient_temperature'=>['min' => 25.0, 'max' => 35.0],
             'flow_rate'         => ['min' => 0.1,  'max' => 0.5],
             'turbidity'         => ['min' => 0.0,  'max' => 30.0],
-            'salinity'          => ['min' => 0.0,  'max' => 35.0],
         ];
 
         foreach ($nodesToSeed as $nodeItem) {
