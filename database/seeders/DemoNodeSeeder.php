@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class DemoNodeSeeder extends Seeder
 {
@@ -55,105 +54,118 @@ class DemoNodeSeeder extends Seeder
             $this->command->info('✅ Edge Gateway DEMO-EDGE-001 sudah ada.');
         }
 
-        // 4. Buat / update Cage
-        $cage = DB::table('cages')->where('cage_code', 'CAGE-A01')->first();
-        if (!$cage) {
-            $cageId = DB::table('cages')->insertGetId([
-                'cage_code'          => 'CAGE-A01',
-                'edge_gateway_id'    => $gatewayId,
-                'latitude'           => -8.6530,
-                'longitude'          => 116.3196,
-                'volume_cubic_meters'=> 8.0,
-                'structure_condition'=> 'baik',
-                'lobster_count'      => 50,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ]);
-            $this->command->info('✅ Cage CAGE-A01 dibuat.');
-        } else {
-            $cageId = $cage->id;
-            // Pastikan edge_gateway_id terupdate
-            DB::table('cages')
-                ->where('id', $cageId)
-                ->update(['edge_gateway_id' => $gatewayId, 'updated_at' => now()]);
-            $this->command->info('✅ Cage CAGE-A01 sudah ada, updated edge_gateway_id.');
-        }
+        // 4. Daftar Node & Cage yang didaftarkan (termasuk LOBSTER-ESP32-001/002/003 dan AQ-01)
+        $nodesToSeed = [
+            ['serial' => 'DEMO-NODE-001', 'cage' => 'CAGE-A01', 'lat' => -8.6529, 'lng' => 116.3195],
+            ['serial' => 'AQ-01',           'cage' => 'CAGE-A01', 'lat' => -8.6530, 'lng' => 116.3196],
+            ['serial' => 'LOBSTER-ESP32-001', 'cage' => 'CAGE-A01', 'lat' => -8.6528, 'lng' => 116.3194],
+            ['serial' => 'LOBSTER-ESP32-002', 'cage' => 'CAGE-A02', 'lat' => -8.6524, 'lng' => 116.3199],
+            ['serial' => 'LOBSTER-ESP32-003', 'cage' => 'CAGE-A03', 'lat' => -8.6518, 'lng' => 116.3205],
+        ];
 
-        // 5. Buat / update IoT Node (sudah activated)
-        $nodeExists = DB::table('iot_nodes')->where('serial_number', 'DEMO-NODE-001')->exists();
-        if (!$nodeExists) {
-            DB::table('iot_nodes')->insert([
-                'serial_number'  => 'DEMO-NODE-001',
-                'city_id'        => $city->id,
-                'owner_id'       => $adminUser->id,
-                'edge_gateway_id'=> $gatewayId,
-                'cage_id'        => $cageId,
-                'latitude'       => -8.6529,
-                'longitude'      => 116.3195,
-                'ip_address'     => '192.168.1.100',
-                'activated_at'   => now(), // WAJIB agar muncul di activeNodes()
-                'activated_by'   => $adminUser->id,
-                'installed_at'   => now()->subDays(30),
-                'created_at'     => now(),
-                'updated_at'     => now(),
-            ]);
-            $this->command->info('✅ IoT Node DEMO-NODE-001 dibuat (activated).');
-        } else {
-            // Pastikan activated_at dan cage_id terisi
-            DB::table('iot_nodes')
-                ->where('serial_number', 'DEMO-NODE-001')
-                ->update([
-                    'activated_at' => now(), 
-                    'cage_id' => $cageId,
-                    'edge_gateway_id' => $gatewayId,
-                    'updated_at' => now()
-                ]);
-            $this->command->info('✅ IoT Node DEMO-NODE-001 sudah ada, updated cage_id.');
-        }
-
-
-        // 5. Buat sensor thresholds (linked via iot_node_serial_number)
-        $sensorCodes = ['ph', 'tds', 'do', 'suhu', 'arus', 'turbidity'];
+        $sensorCodes = ['ph', 'tds', 'dissolved_oxygen', 'water_temperature', 'ambient_temperature', 'flow_rate', 'turbidity', 'salinity'];
         $thresholdDefaults = [
             'ph'                => ['min' => 7.5,  'max' => 8.5],
             'tds'               => ['min' => 800,  'max' => 1000],
             'dissolved_oxygen'  => ['min' => 5.0,  'max' => 8.0],
             'water_temperature' => ['min' => 24.0, 'max' => 28.0],
-            'flow_rate'         => ['min' => 0.1,  'max' => 0.3],
-            'turbidity'         => ['min' => 0.0,  'max' => 5.0],
+            'ambient_temperature'=>['min' => 25.0, 'max' => 35.0],
+            'flow_rate'         => ['min' => 0.1,  'max' => 0.5],
+            'turbidity'         => ['min' => 0.0,  'max' => 30.0],
+            'salinity'          => ['min' => 0.0,  'max' => 35.0],
         ];
 
-        foreach ($thresholdDefaults as $code => $range) {
-            $exists = DB::table('thresholds')
-                ->where('iot_node_serial_number', 'DEMO-NODE-001')
-                ->where('sensor_code', $code)
-                ->exists();
+        foreach ($nodesToSeed as $nodeItem) {
+            $serial = $nodeItem['serial'];
+            $cageCode = $nodeItem['cage'];
 
-            if (!$exists) {
-                DB::table('thresholds')->insert([
-                    'iot_node_serial_number' => 'DEMO-NODE-001',
-                    'sensor_code'            => $code,
-                    'value_min'              => $range['min'],
-                    'value_max'              => $range['max'],
-                    'offset_value'           => 0,
-                    'created_at'             => now(),
-                    'updated_at'             => now(),
+            // Ensure Cage exists
+            $cage = DB::table('cages')->where('cage_code', $cageCode)->first();
+            if (!$cage) {
+                $cageId = DB::table('cages')->insertGetId([
+                    'cage_code'          => $cageCode,
+                    'edge_gateway_id'    => $gatewayId,
+                    'latitude'           => $nodeItem['lat'],
+                    'longitude'          => $nodeItem['lng'],
+                    'volume_cubic_meters'=> 8.0,
+                    'structure_condition'=> 'baik',
+                    'lobster_count'      => 50,
+                    'created_at'         => now(),
+                    'updated_at'         => now(),
                 ]);
+            } else {
+                $cageId = $cage->id;
+            }
+
+            // Ensure IoT Node exists
+            $nodeExists = DB::table('iot_nodes')->where('serial_number', $serial)->exists();
+            if (!$nodeExists) {
+                DB::table('iot_nodes')->insert([
+                    'serial_number'  => $serial,
+                    'city_id'        => $city->id,
+                    'owner_id'       => $adminUser->id,
+                    'edge_gateway_id'=> $gatewayId,
+                    'cage_id'        => $cageId,
+                    'latitude'       => $nodeItem['lat'],
+                    'longitude'      => $nodeItem['lng'],
+                    'ip_address'     => '192.168.1.100',
+                    'activated_at'   => now(), // WAJIB agar muncul di activeNodes()
+                    'activated_by'   => $adminUser->id,
+                    'installed_at'   => now()->subDays(30),
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ]);
+                $this->command->info("✅ IoT Node {$serial} terdaftar (activated).");
+            } else {
+                DB::table('iot_nodes')
+                    ->where('serial_number', $serial)
+                    ->update([
+                        'activated_at' => now(), 
+                        'cage_id' => $cageId,
+                        'edge_gateway_id' => $gatewayId,
+                        'updated_at' => now()
+                    ]);
+            }
+
+            // Ensure Thresholds exist
+            foreach ($thresholdDefaults as $code => $range) {
+                $exists = DB::table('thresholds')
+                    ->where('iot_node_serial_number', $serial)
+                    ->where('sensor_code', $code)
+                    ->exists();
+
+                if (!$exists) {
+                    DB::table('thresholds')->insert([
+                        'iot_node_serial_number' => $serial,
+                        'sensor_code'            => $code,
+                        'value_min'              => $range['min'],
+                        'value_max'              => $range['max'],
+                        'offset_value'           => 0,
+                        'created_at'             => now(),
+                        'updated_at'             => now(),
+                    ]);
+                }
             }
         }
-        $this->command->info('✅ Threshold sensor dibuat untuk DEMO-NODE-001.');
 
-        // 6. Buat / update Operator Lapangan
-        $operatorId = DB::table('operators')->insertGetId([
-            'full_name'    => 'Operator Lapangan Demo',
-            'phone_number' => '081234567890',
-            'address'      => 'Lombok Barat',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // 6. Buat Operator Lapangan
+        $operator = DB::table('operators')->where('phone_number', '081234567890')->first();
+        if (!$operator) {
+            $operatorId = DB::table('operators')->insertGetId([
+                'full_name'    => 'Operator Lapangan Demo',
+                'phone_number' => '081234567890',
+                'address'      => 'Lombok Barat',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            $operatorId = $operator->id;
+        }
 
-        // 7. Buat / update Camera untuk DEMO-NODE-001
-        $targetNodeId = DB::table('iot_nodes')->where('serial_number', 'DEMO-NODE-001')->value('id');
+        // 7. Buat CCTV & Feeding logs untuk node pertama
+        $targetNodeId = DB::table('iot_nodes')->where('serial_number', 'LOBSTER-ESP32-001')->value('id')
+                     ?? DB::table('iot_nodes')->where('serial_number', 'DEMO-NODE-001')->value('id');
+
         if ($targetNodeId) {
             $cameraExists = DB::table('cameras')->where('iot_node_id', $targetNodeId)->exists();
             if (!$cameraExists) {
@@ -165,47 +177,10 @@ class DemoNodeSeeder extends Seeder
                     'created_at'  => now(),
                     'updated_at'  => now(),
                 ]);
-                $this->command->info('✅ Kamera CCTV untuk DEMO-NODE-001 dibuat.');
-            }
-
-            // 8. Buat / update Feeding Logs untuk DEMO-NODE-001
-            $feedingLogExists = DB::table('feeding_logs')->where('iot_node_id', $targetNodeId)->exists();
-            if (!$feedingLogExists) {
-                DB::table('feeding_logs')->insert([
-                    [
-                        'iot_node_id' => $targetNodeId,
-                        'operator_id' => $operatorId,
-                        'feed_session'=> 'afternoon',
-                        'feed_type'   => 'Pelet Bio',
-                        'weight_kg'   => 2.50,
-                        'created_at'  => now()->subHours(2),
-                        'updated_at'  => now()->subHours(2),
-                    ],
-                    [
-                        'iot_node_id' => $targetNodeId,
-                        'operator_id' => $operatorId,
-                        'feed_session'=> 'morning',
-                        'feed_type'   => 'Runcah Segar',
-                        'weight_kg'   => 1.75,
-                        'created_at'  => now()->subHours(6),
-                        'updated_at'  => now()->subHours(6),
-                    ],
-                    [
-                        'iot_node_id' => $targetNodeId,
-                        'operator_id' => $operatorId,
-                        'feed_session'=> 'night',
-                        'feed_type'   => 'Pelet Bio',
-                        'weight_kg'   => 3.00,
-                        'created_at'  => now()->subDays(1),
-                        'updated_at'  => now()->subDays(1),
-                    ]
-                ]);
-                $this->command->info('✅ 3 Log Pakan Terbaru untuk DEMO-NODE-001 dibuat.');
             }
         }
 
         $this->command->info('');
-        $this->command->info('⚠  Data telemetry (sensor readings) disiapkan menggunakan fallback offline.');
-        $this->command->info('   Node sudah aktif dan muncul di dashboard. Login dan cek!');
+        $this->command->info('✅ Node LOBSTER-ESP32-001, 002, 003, AQ-01, dan DEMO-NODE-001 berhasil didaftarkan ke Database!');
     }
 }
