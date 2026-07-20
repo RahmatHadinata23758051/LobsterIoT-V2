@@ -88,16 +88,10 @@ class MqttSubscribeCommand extends Command
             return;
         }
 
+        // Use real-time server UTC timestamp for exact time synchronization across Website & TSDB
         $timestamp = time();
-        if (isset($data['timestamp'])) {
-            if (is_numeric($data['timestamp'])) {
-                $timestamp = (int) $data['timestamp'];
-            } else {
-                $parsedTime = strtotime($data['timestamp']);
-                if ($parsedTime !== false && $parsedTime > 0) {
-                    $timestamp = $parsedTime;
-                }
-            }
+        if (isset($data['timestamp']) && is_numeric($data['timestamp'])) {
+            $timestamp = (int) $data['timestamp'];
         }
         
         // Support both nested raw_values and flat structures
