@@ -50,17 +50,20 @@ class MqttSubscribeCommand extends Command
             $mqtt->connect($connectionSettings, true);
             $this->info("Connected successfully. Subscribing to topic [{$topic}]...");
 
-            $mqtt->subscribe($topic, function (string $topic, string $message) use ($influxDB, $calibration) {
-                $this->info("[Raw MQTT Message] " . $message);
-                
-                $data = json_decode($message, true);
-                if (!$data) {
-                    $this->warn("Received non-JSON payload: " . $message);
-                    return;
-                }
+            $topics = ['lobsense/telemetry', 'lobsense/telemetry/#'];
+            foreach ($topics as $t) {
+                $mqtt->subscribe($t, function (string $topic, string $message) use ($influxDB, $calibration) {
+                    $this->info("[Raw MQTT Message] " . $message);
+                    
+                    $data = json_decode($message, true);
+                    if (!$data) {
+                        $this->warn("Received non-JSON payload: " . $message);
+                        return;
+                    }
 
-                $this->processTelemetry($data, $influxDB, $calibration);
-            }, 0);
+                    $this->processTelemetry($data, $influxDB, $calibration);
+                }, 0);
+            }
 
             $mqtt->loop(true);
         } catch (\Exception $e) {
