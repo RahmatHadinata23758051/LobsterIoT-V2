@@ -85,7 +85,17 @@ class MqttSubscribeCommand extends Command
             return;
         }
 
-        $timestamp = $data['timestamp'] ?? time();
+        $timestamp = time();
+        if (isset($data['timestamp'])) {
+            if (is_numeric($data['timestamp'])) {
+                $timestamp = (int) $data['timestamp'];
+            } else {
+                $parsedTime = strtotime($data['timestamp']);
+                if ($parsedTime !== false && $parsedTime > 0) {
+                    $timestamp = $parsedTime;
+                }
+            }
+        }
         
         // Support both nested raw_values and flat structures
         $rawValues = $data['raw_values'] ?? null;
