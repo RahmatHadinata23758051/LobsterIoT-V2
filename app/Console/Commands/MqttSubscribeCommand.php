@@ -11,7 +11,7 @@ use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
 use Illuminate\Support\Facades\Log;
 
-#[Signature('mqtt:subscribe {topic=lobsense/telemetry}')]
+#[Signature('mqtt:subscribe {topic=lobsense/telemetry/#}')]
 #[Description('Subscribe to MQTT broker and ingest telemetry data to InfluxDB')]
 class MqttSubscribeCommand extends Command
 {
