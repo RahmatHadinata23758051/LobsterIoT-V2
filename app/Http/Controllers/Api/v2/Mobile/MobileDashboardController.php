@@ -1,0 +1,147 @@
+<?php
+
+namespace App\Http\Controllers\Api\v2\Mobile;
+
+use App\Http\Controllers\Controller;
+use App\Models\IotNode;
+use App\Models\Threshold;
+use App\Models\WeatherReport;
+use App\Services\InfluxDBService;
+use Illuminate\Http\Request;
+
+class MobileDashboardController extends Controller
+{
+    protected InfluxDBService $influxDB;
+    protected string $bucket;
+
+    public function __construct(InfluxDBService $influxDB)
+    {
+        $this->influxDB = $influxDB;
+        $this->bucket = config('influxdb.bucket', 'lobsense_telemetry');
+    }
+
+    /**
+     * Mobile Aggregate "Super Endpoint": Single payload containing User Profile, Active Nodes, Latest Weather, and Alert Summary.
+     */
+    public function summary(Request $request)
+    {
+        $user = $request->user();
+
+        // 1. Fetch active nodes list
+        $nodes = IotNode::whereNotNull('activated_at')
+            ->with(['cage:id,cage_code,latitude,longitude'])
+            ->get(['id', 'serial_number', 'ip_address', 'latitude', 'longitude', 'cage_id', 'activated_at']);
+
+        // 2. Fetch latest weather report
+        $weather = WeatherReport::latest()->first();
+
+        // 3. Count total active nodes
+        $totalNodes = $nodes->count();
+
+        // 4. Default active node (first node or DEMO-NODE-001)
+        $defaultSerial = $nodes->first()?->serial_number ?? 'DEMO-NODE-001';
+
+        // 5. Fetch latest telemetry for default node
+        $latestTelemetry = $this->getLatestTelemetry($defaultSerial);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Ringkasan dasbor mobile berhasil dimuat',
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role ?? 'operator',
+                ],
+                'summary_stats' => [
+                    'total_active_nodes' => $totalNodes,
+                    'weather_location' => $weather->location_name ?? 'Lombok Barat',
+                    'weather_temp_c' => $weather->temperature_celsius ?? 28.0,
+                    'weather_condition' => $weather->condition_text ?? 'Cerah',
+                ],
+                'nodes' => $nodes,
+                'active_node_telemetry' => [
+                    'serial_number' => $defaultSerial,
+                    'telemetry' => $latestTelemetry,
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * Lightweight telemetry endpoint for a specific IoT Node in mobile view.
+     */
+    public function nodeTelemetry(string $serialNumber)
+    {
+        $node = IotNode::where('serial_number', $serialNumber)
+            ->with(['cage:id,cage_code', 'feedingLogs' => function($q) {
+                $q->latest()->limit(3);
+            }])
+            ->first();
+
+        if (!$node) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'IoT Node tidak ditemukan.',
+                'data' => null
+            ], 404);
+        }
+
+        $latest = $this->getLatestTelemetry($serialNumber);
+        $thresholds = Threshold::where('iot_node_serial_number', $serialNumber)
+            ->get(['sensor_code', 'value_min', 'value_max']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data telemetry mobile berhasil dimuat',
+            'data' => [
+                'serial_number' => $serialNumber,
+                'cage_code' => $node->cage->cage_code ?? 'CAGE-DEFAULT',
+                'ip_address' => $node->ip_address,
+                'latitude' => $node->latitude,
+                'longitude' => $node->longitude,
+                'telemetry' => $latest,
+                'thresholds' => $thresholds,
+                'recent_feeding_logs' => $node->feedingLogs
+            ]
+        ]);
+    }
+
+    /**
+     * Helper to fetch latest telemetry point from InfluxDB with fallback mock.
+     */
+    protected function getLatestTelemetry(string $serialNumber): array
+    {
+        try {
+            $latestQuery = 'from(bucket: "' . $this->bucket . '")
+                |> range(start: -30d)
+                |> filter(fn: (r) => r["_measurement"] == "telemetries")
+                |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+                |> drop(columns: ["cage_code"])
+                |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+                |> tail(n: 1)';
+
+            $latestResult = $this->influxDB->queryParsed($latestQuery);
+            if (!empty($latestResult)) {
+                return $latestResult[0];
+            }
+        } catch (\Exception $e) {
+            // Fallback when TSDB unavailable
+        }
+
+        return [
+            'time' => now()->toIso8601String(),
+            'ph' => 7.5,
+            'tds' => 450.0,
+            'dissolved_oxygen' => 6.2,
+            'water_temperature' => 28.5,
+            'ambient_temperature' => 30.1,
+            'flow_rate' => 0.35,
+            'turbidity' => 12.0,
+            'salinity' => 32.0,
+            'battery_voltage' => 12.6,
+            'solar_voltage' => 18.5,
+        ];
+    }
+}

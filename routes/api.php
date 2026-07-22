@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\v2\EdgeGatewayController;
 use App\Http\Controllers\Api\v2\IotNodeController;
 use App\Http\Controllers\Api\v2\SystemSettingController;
 use App\Http\Controllers\Api\v2\ReportController;
+use App\Http\Controllers\Api\v2\Mobile\MobileDashboardController;
+use App\Http\Controllers\Api\v2\Mobile\MobileControlController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -26,6 +28,15 @@ Route::prefix('v2')->group(function () {
 
         Route::put('profile', [AuthController::class, 'updateProfile']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
+
+        // ── Dedicated Mobile API Group ──
+        Route::prefix('mobile')->group(function () {
+            Route::get('summary', [MobileDashboardController::class, 'summary']);
+            Route::get('telemetry/{serial_number}', [MobileDashboardController::class, 'nodeTelemetry']);
+            Route::get('feeding/schedules', [MobileControlController::class, 'index']);
+            Route::post('feeding/schedule', [MobileControlController::class, 'storeSchedule']);
+            Route::post('feeding/trigger', [MobileControlController::class, 'triggerInstant']);
+        });
 
         // Threshold configurations (Read-only)
         Route::get('thresholds', [ThresholdController::class, 'index']);
