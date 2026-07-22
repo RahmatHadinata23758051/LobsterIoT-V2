@@ -83,6 +83,14 @@ export const SystemSettings = ({
             system_city_code: data.data.system_city_code || '',
             system_district_code: data.data.system_district_code || ''
           });
+          if (data.data.system_logo_text) {
+            setLogoText(data.data.system_logo_text);
+            setTempLogo(data.data.system_logo_text);
+          }
+          if (data.data.system_instansi_name) {
+            setInstansiName(data.data.system_instansi_name);
+            setTempInstansi(data.data.system_instansi_name);
+          }
         }
       } catch {
         setErrorMessage('Gagal memuat koordinat tambak dari server.');
@@ -412,13 +420,23 @@ export const SystemSettings = ({
     }));
   };
 
-  const handleBrandingSubmit = (e) => {
+  const handleBrandingSubmit = async (e) => {
     e.preventDefault();
     if (!tempLogo.trim() || !tempInstansi.trim()) return;
     localStorage.setItem('slam_logo_text', tempLogo.trim());
     localStorage.setItem('slam_instansi_name', tempInstansi.trim());
     setLogoText(tempLogo.trim());
     setInstansiName(tempInstansi.trim());
+
+    try {
+      if (api && token) {
+        await api.updateSystemSettings(token, {
+          system_logo_text: tempLogo.trim(),
+          system_instansi_name: tempInstansi.trim()
+        });
+      }
+    } catch {}
+
     if (logActivity) logActivity(`Mengubah branding sistem — Logo: "${tempLogo.trim()}", Instansi: "${tempInstansi.trim()}"`);
     setBrandingSuccess(true);
     setTimeout(() => setBrandingSuccess(false), 3500);
