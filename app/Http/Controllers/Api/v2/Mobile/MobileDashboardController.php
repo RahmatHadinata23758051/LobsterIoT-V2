@@ -137,18 +137,6 @@ class MobileDashboardController extends Controller
             // Fallback when TSDB unavailable
         }
 
-        return [
-            'time' => now()->toIso8601String(),
-            'ph' => 7.5,
-            'tds' => 450.0,
-            'dissolved_oxygen' => 6.2,
-            'water_temperature' => 28.5,
-            'ambient_temperature' => 30.1,
-            'flow_rate' => 0.35,
-            'turbidity' => 12.0,
-            'salinity' => 32.0,
-            'battery_voltage' => 12.6,
-            'solar_voltage' => 18.5,
-        ];
+        return [];
     }
 }
