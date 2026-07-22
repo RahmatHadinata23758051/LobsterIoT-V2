@@ -29,6 +29,8 @@ class SystemSettingController extends Controller
             'system_province_code' => 'nullable|string',
             'system_city_code' => 'nullable|string',
             'system_district_code' => 'nullable|string',
+            'system_logo_text' => 'nullable|string',
+            'system_instansi_name' => 'nullable|string',
         ]);
 
         foreach ($validated as $key => $value) {

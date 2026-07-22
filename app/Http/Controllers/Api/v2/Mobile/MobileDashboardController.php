@@ -51,7 +51,8 @@ class MobileDashboardController extends Controller
             $weather?->province_name
         ])->reject(fn($val) => empty($val) || trim($val) === '--')->first() ?? 'Bojongsoang';
 
-        $appName = \App\Models\SystemSetting::where('key', 'app_name')->value('value')
+        $appName = \App\Models\SystemSetting::where('key', 'system_logo_text')->value('value')
+            ?? \App\Models\SystemSetting::where('key', 'app_name')->value('value')
             ?? \App\Models\SystemSetting::where('key', 'system_name')->value('value')
             ?? 'Lobsense';
 
