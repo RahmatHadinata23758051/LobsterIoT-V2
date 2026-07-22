@@ -44,6 +44,13 @@ class MobileDashboardController extends Controller
         // 5. Fetch latest telemetry for default node
         $latestTelemetry = $this->getLatestTelemetry($defaultSerial);
 
+        $locationName = collect([
+            $weather?->village_name,
+            $weather?->district_name,
+            $weather?->city_name,
+            $weather?->province_name
+        ])->reject(fn($val) => empty($val) || trim($val) === '--')->first() ?? 'Bojongsoang';
+
         return response()->json([
             'status' => 'success',
             'message' => 'Ringkasan dasbor mobile berhasil dimuat',
@@ -56,7 +63,7 @@ class MobileDashboardController extends Controller
                 ],
                 'summary_stats' => [
                     'total_active_nodes' => $totalNodes,
-                    'weather_location' => $weather?->district_name ?? $weather?->village_name ?? $weather?->city_name ?? 'Bojongsoang',
+                    'weather_location' => $locationName,
                     'weather_temp_c' => (float) ($weather?->temperature ?? 28.0),
                     'weather_condition' => $weather?->weather_description ?? 'Cerah',
                 ],
