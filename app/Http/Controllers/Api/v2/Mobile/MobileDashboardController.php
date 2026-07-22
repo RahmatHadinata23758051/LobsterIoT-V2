@@ -56,9 +56,9 @@ class MobileDashboardController extends Controller
                 ],
                 'summary_stats' => [
                     'total_active_nodes' => $totalNodes,
-                    'weather_location' => $weather->location_name ?? 'Lombok Barat',
-                    'weather_temp_c' => $weather->temperature_celsius ?? 28.0,
-                    'weather_condition' => $weather->condition_text ?? 'Cerah',
+                    'weather_location' => $weather?->district_name ?? $weather?->village_name ?? $weather?->city_name ?? 'Bojongsoang',
+                    'weather_temp_c' => (float) ($weather?->temperature ?? 28.0),
+                    'weather_condition' => $weather?->weather_description ?? 'Cerah',
                 ],
                 'nodes' => $nodes,
                 'active_node_telemetry' => [
