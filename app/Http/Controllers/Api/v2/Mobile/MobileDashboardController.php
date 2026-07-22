@@ -51,6 +51,10 @@ class MobileDashboardController extends Controller
             $weather?->province_name
         ])->reject(fn($val) => empty($val) || trim($val) === '--')->first() ?? 'Bojongsoang';
 
+        $appName = \App\Models\SystemSetting::where('key', 'app_name')->value('value')
+            ?? \App\Models\SystemSetting::where('key', 'system_name')->value('value')
+            ?? 'Lobsense';
+
         return response()->json([
             'status' => 'success',
             'message' => 'Ringkasan dasbor mobile berhasil dimuat',
@@ -62,6 +66,7 @@ class MobileDashboardController extends Controller
                     'role' => $user->role ?? 'operator',
                 ],
                 'summary_stats' => [
+                    'app_name' => $appName,
                     'total_active_nodes' => $totalNodes,
                     'weather_location' => $locationName,
                     'weather_temp_c' => (float) ($weather?->temperature ?? 28.0),
