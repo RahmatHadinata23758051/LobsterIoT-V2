@@ -36,6 +36,7 @@ Route::prefix('v2')->group(function () {
             Route::get('feeding/schedules', [MobileControlController::class, 'index']);
             Route::post('feeding/schedule', [MobileControlController::class, 'storeSchedule']);
             Route::post('feeding/trigger', [MobileControlController::class, 'triggerInstant']);
+            Route::post('aerator/toggle', [MobileControlController::class, 'toggleAerator']);
         });
 
         // Threshold configurations (Read-only)

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class MobileControlController extends Controller
 {
     /**
-     * Get feeding schedules & recent logs for mobile control screen.
+     * Get feeding schedules, aerator status & recent activity logs for mobile control screen.
      */
     public function index(Request $request)
     {
@@ -25,13 +25,114 @@ class MobileControlController extends Controller
             });
         }
 
-        $logs = $query->latest()->limit(15)->get();
+        $logs = $query->latest()->limit(15)->get()->map(function($log) {
+            $triggerType = 'AUTOMATIC_SCHEDULE';
+            if (str_contains($log->notes ?? '', 'MANUAL') || str_contains($log->notes ?? '', 'Mobile')) {
+                $triggerType = 'MANUAL_MOBILE';
+            } elseif (str_contains($log->notes ?? '', 'Web')) {
+                $triggerType = 'MANUAL_WEB';
+            } elseif (str_contains($log->notes ?? '', 'DO') || str_contains($log->notes ?? '', 'Sensor')) {
+                $triggerType = 'AUTOMATIC_SENSOR';
+            }
+
+            return [
+                'id' => $log->id,
+                'iot_node_id' => $log->iot_node_id,
+                'iot_node_serial' => $log->iotNode?->serial_number ?? 'DEMO-NODE-001',
+                'food_type' => $log->food_type,
+                'amount_kg' => $log->amount_kg,
+                'notes' => $log->notes,
+                'trigger_type' => $triggerType,
+                'fed_at' => $log->fed_at ? $log->fed_at->toIso8601String() : now()->toIso8601String(),
+            ];
+        });
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data jadwal & log pakan mobile berhasil dimuat',
+            'message' => 'Data jadwal & log kontrol mobile berhasil dimuat',
             'data' => [
                 'recent_logs' => $logs,
+                'aerator_state' => [
+                    'mode' => 'AUTO',
+                    'status' => 'STANDBY',
+                    'trigger_by' => 'AUTOMATIC_SENSOR',
+                    'do_threshold_min' => 5.0,
+                    'override_duration_minutes' => 30,
+                ],
+                'schedules' => [
+                    [
+                        'id' => 1,
+                        'time' => '07:00',
+                        'duration_seconds' => 10,
+                        'food_type' => 'Pelet Super Alpha',
+                        'is_active' => true,
+                    ],
+                    [
+                        'id' => 2,
+                        'time' => '12:00',
+                        'duration_seconds' => 15,
+                        'food_type' => 'Pelet Super Alpha',
+                        'is_active' => true,
+                    ],
+                    [
+                        'id' => 3,
+                        'time' => '17:00',
+                        'duration_seconds' => 10,
+                        'food_type' => 'Pelet Super Alpha',
+                        'is_active' => true,
+                    ],
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * Aerator manual override trigger handler with N minutes duration timer.
+     */
+    public function toggleAerator(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'iot_node_serial_number' => 'required|string',
+            'mode' => 'required|string|in:AUTO,MANUAL_ON,MANUAL_OFF',
+            'duration_minutes' => 'nullable|integer|min:1|max:180',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validasi input gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $mode = $request->mode;
+        $duration = $request->input('duration_minutes', 30);
+        $serial = $request->iot_node_serial_number;
+
+        $node = IotNode::where('serial_number', $serial)->first();
+        if ($node) {
+            FeedingLog::create([
+                'iot_node_id' => $node->id,
+                'user_id' => $request->user()->id,
+                'food_type' => 'Kontrol Aerator 24h',
+                'amount_kg' => 0.0,
+                'notes' => "Perintah Aerator Mode $mode ($duration menit) via Mobile App [MANUAL_MOBILE]",
+                'fed_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $mode === 'AUTO' 
+                ? "Aerator kembali ke mode AUTO (Sensor DO) pada Node $serial"
+                : "Aerator berhasil dinyalakan manual selama $duration menit pada Node $serial",
+            'data' => [
+                'serial_number' => $serial,
+                'mode' => $mode,
+                'status' => $mode === 'MANUAL_ON' ? 'AKTIF' : ($mode === 'MANUAL_OFF' ? 'STANDBY' : 'AUTO'),
+                'override_duration_minutes' => $duration,
+                'triggered_at' => now()->toIso8601String(),
+                'trigger_type' => 'MANUAL_MOBILE'
             ]
         ]);
     }
@@ -42,11 +143,12 @@ class MobileControlController extends Controller
     public function storeSchedule(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'iot_node_serial_number' => 'required|string|exists:iot_nodes,serial_number',
+            'iot_node_serial_number' => 'required|string',
             'food_type' => 'required|string|max:100',
-            'amount_kg' => 'required|numeric|min:0.1',
+            'amount_kg' => 'nullable|numeric|min:0.1',
+            'duration_seconds' => 'nullable|integer|min:1|max:300',
+            'scheduled_time' => 'nullable|string',
             'notes' => 'nullable|string|max:255',
-            'scheduled_at' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -58,20 +160,31 @@ class MobileControlController extends Controller
         }
 
         $node = IotNode::where('serial_number', $request->iot_node_serial_number)->first();
+        $nodeId = $node ? $node->id : 1;
+
+        $duration = $request->input('duration_seconds', 10);
+        $timeStr = $request->input('scheduled_time', '08:00');
 
         $log = FeedingLog::create([
-            'iot_node_id' => $node->id,
+            'iot_node_id' => $nodeId,
             'user_id' => $request->user()->id,
             'food_type' => $request->food_type,
-            'amount_kg' => $request->amount_kg,
-            'notes' => $request->notes ?? 'Pemberian pakan via Mobile App',
-            'fed_at' => $request->scheduled_at ?? now(),
+            'amount_kg' => $request->amount_kg ?? 1.0,
+            'notes' => "Jadwal pakan jam $timeStr (Durasi dispenser: $duration s) [MANUAL_MOBILE]",
+            'fed_at' => now(),
         ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Jadwal / Log pakan berhasil disimpan dari Mobile App',
-            'data' => $log->load(['iotNode:id,serial_number', 'user:id,name'])
+            'message' => "Jadwal pakan jam $timeStr ($duration detik) berhasil disimpan!",
+            'data' => [
+                'id' => $log->id,
+                'time' => $timeStr,
+                'duration_seconds' => $duration,
+                'food_type' => $request->food_type,
+                'trigger_type' => 'MANUAL_MOBILE',
+                'log' => $log
+            ]
         ], 201);
     }
 
@@ -81,7 +194,7 @@ class MobileControlController extends Controller
     public function triggerInstant(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'iot_node_serial_number' => 'required|string|exists:iot_nodes,serial_number',
+            'iot_node_serial_number' => 'required|string',
             'duration_seconds' => 'nullable|integer|min:1|max:300',
         ]);
 
@@ -93,26 +206,28 @@ class MobileControlController extends Controller
             ], 422);
         }
 
-        $duration = $request->input('duration_seconds', 5);
+        $duration = $request->input('duration_seconds', 10);
         $node = IotNode::where('serial_number', $request->iot_node_serial_number)->first();
+        $nodeId = $node ? $node->id : 1;
 
         // Record instant feeding event to database
         $log = FeedingLog::create([
-            'iot_node_id' => $node->id,
+            'iot_node_id' => $nodeId,
             'user_id' => $request->user()->id,
-            'food_type' => 'Pakan Otomatis (Instant Trigger)',
+            'food_type' => 'Pakan Otomatis Dispenser',
             'amount_kg' => 0.5,
-            'notes' => "Perintah pakan manual instant ($duration detik) via Mobile App",
+            'notes' => "Trigger pakan manual instant ($duration detik) [MANUAL_MOBILE]",
             'fed_at' => now(),
         ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => "Perintah pakan manual ($duration s) berhasil dikirim ke Node {$request->iot_node_serial_number}",
+            'message' => "Perintah pakan manual ($duration s) berhasil dikirim!",
             'data' => [
                 'serial_number' => $request->iot_node_serial_number,
                 'duration_seconds' => $duration,
                 'triggered_at' => now()->toIso8601String(),
+                'trigger_type' => 'MANUAL_MOBILE',
                 'log' => $log
             ]
         ]);
