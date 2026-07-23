@@ -21,9 +21,9 @@ use App\Http\Controllers\Api\v2\Mobile\MobileControlController;
 
 Route::prefix('v2')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
+    Route::post('detect', [AiProxyController::class, 'detect']);
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('detect', [AiProxyController::class, 'detect']);
         Route::get('profile', [AuthController::class, 'profile']);
 
         Route::put('profile', [AuthController::class, 'updateProfile']);
