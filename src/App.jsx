@@ -405,6 +405,8 @@ export default function App() {
 
           {activeTab === 'feeding' && (
             <FeedingLogTab
+              token={token}
+              selectedSerial={activeNodeSerial}
               cagesList={cagesList}
               operatorsList={operatorsList}
               feedingLogs={feedingLogs}
