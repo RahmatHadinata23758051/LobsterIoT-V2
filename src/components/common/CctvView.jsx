@@ -59,8 +59,15 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     } else if (!isHls) {
       // Direct stream / MP4 video files
       video.src = streamUrl;
-      setStatus('playing');
-      video.play().catch(() => {});
+      video.onloadeddata = () => {
+        setStatus('playing');
+        video.play().catch(() => {});
+      };
+      video.onerror = () => {
+        // Retry playing directly
+        video.play().then(() => setStatus('playing')).catch(() => setStatus('error'));
+      };
+      video.play().then(() => setStatus('playing')).catch(() => {});
     } else {
       setStatus('error');
     }

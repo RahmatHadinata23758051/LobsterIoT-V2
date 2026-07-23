@@ -170,7 +170,7 @@ export const DashboardTab = ({
   const getCameraStreamUrl = () => {
     // 1. Prioritaskan kamera yang dikembalikan langsung dari dashboardData (terikat dengan IoT Node aktif)
     const activeNodeCameras = dashboardData?.cameras || [];
-    if (activeNodeCameras.length > 0 && activeNodeCameras[0].stream_url) {
+    if (activeNodeCameras.length > 0 && activeNodeCameras[0]?.stream_url) {
       return activeNodeCameras[0].stream_url;
     }
 
@@ -180,15 +180,8 @@ export const DashboardTab = ({
       return cam.stream_url;
     }
 
-    // 3. Fallback mock videos untuk pameran/pengembangan lokal
-    const cageCode = dashboardData.latest?.cage_code || activeNode?.cage?.cage_code || '';
-    const fallbackVideos = {
-      'CAGE-A01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      'CAGE-B01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      'CAGE-C01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      'CAGE-D01': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-    };
-    return fallbackVideos[cageCode] || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    // 3. Fallback video siaran laut / akuakultur underwater yang lancar dan support CORS
+    return 'https://vjs.zencdn.net/v/oceans.mp4';
   };
 
 
