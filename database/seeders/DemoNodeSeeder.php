@@ -170,7 +170,7 @@ class DemoNodeSeeder extends Seeder
                 DB::table('cameras')->insert([
                     'iot_node_id' => $targetNodeId,
                     'camera_code' => 'CAM-DEMO-1',
-                    'stream_url'  => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                    'stream_url'  => 'https://files.catbox.moe/g5214q.mp4',
                     'is_active'   => true,
                     'created_at'  => now(),
                     'updated_at'  => now(),
