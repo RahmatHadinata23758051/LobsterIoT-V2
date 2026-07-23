@@ -180,8 +180,15 @@ export const DashboardTab = ({
       return cam.stream_url;
     }
 
-    // 3. Fallback video siaran laut / akuakultur underwater yang lancar dan support CORS
-    return 'https://vjs.zencdn.net/v/oceans.mp4';
+    // 3. Fallback video lobster asli (catbox.moe)
+    const cageCode = dashboardData.latest?.cage_code || activeNode?.cage?.cage_code || '';
+    const fallbackVideos = {
+      'CAGE-A01': 'https://files.catbox.moe/g5214q.mp4',
+      'CAGE-A02': 'https://files.catbox.moe/qqt2fo.mp4',
+      'CAGE-A03': 'https://files.catbox.moe/m9yd36.mp4',
+      'CAGE-B01': 'https://files.catbox.moe/h26lry.mp4'
+    };
+    return fallbackVideos[cageCode] || 'https://files.catbox.moe/g5214q.mp4';
   };
 
 

@@ -238,7 +238,6 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
         playsInline
         autoPlay
         loop
-        crossOrigin="anonymous"
       />
 
       {/* Render Canvas Overlay on top of playing video element */}
