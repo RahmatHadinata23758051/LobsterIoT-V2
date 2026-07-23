@@ -226,50 +226,48 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     }
 
     predictions.forEach((pred) => {
-      // Parse coordinates from YOLOv8 JSON format (Center-XYWH, Normalized 0..1, or BBox Array)
-      let rawX = 0, rawY = 0, rawW = 0, rawH = 0;
       let label = pred.class || pred.label || pred.class_name || pred.name || 'lobster';
       let confidence = pred.confidence ?? pred.score ?? pred.prob ?? 0.90;
 
+      // Normalized bbox [x1, y1, x2, y2] in 0..1 range (preferred from updated API)
+      let srcLeft, srcTop, sourceW, sourceH;
+
       if (Array.isArray(pred.bbox) && pred.bbox.length === 4) {
-        // Format [x1, y1, x2, y2] or [x, y, w, h]
-        const [b0, b1, b2, b3] = pred.bbox;
-        if (b2 > b0 && b3 > b1) {
-          rawW = b2 - b0;
-          rawH = b3 - b1;
-          rawX = b0 + rawW / 2;
-          rawY = b1 + rawH / 2;
+        const [nx1, ny1, nx2, ny2] = pred.bbox;
+
+        if (nx1 <= 1.0 && ny1 <= 1.0 && nx2 <= 1.0 && ny2 <= 1.0) {
+          // Normalized 0..1 format — map directly to video native resolution
+          srcLeft = nx1 * videoWidth;
+          srcTop = ny1 * videoHeight;
+          sourceW = (nx2 - nx1) * videoWidth;
+          sourceH = (ny2 - ny1) * videoHeight;
+        } else if (nx2 > nx1 && ny2 > ny1) {
+          // Pixel xyxy format
+          srcLeft = (nx1 / (pred.img_width || 640)) * videoWidth;
+          srcTop = (ny1 / (pred.img_height || 360)) * videoHeight;
+          sourceW = ((nx2 - nx1) / (pred.img_width || 640)) * videoWidth;
+          sourceH = ((ny2 - ny1) / (pred.img_height || 360)) * videoHeight;
         } else {
-          rawX = b0 + b2 / 2;
-          rawY = b1 + b3 / 2;
-          rawW = b2;
-          rawH = b3;
+          // Pixel xywh format
+          srcLeft = ((nx1 - nx2 / 2) / (pred.img_width || 640)) * videoWidth;
+          srcTop = ((ny1 - ny2 / 2) / (pred.img_height || 360)) * videoHeight;
+          sourceW = (nx2 / (pred.img_width || 640)) * videoWidth;
+          sourceH = (ny2 / (pred.img_height || 360)) * videoHeight;
         }
       } else {
-        // Standard X, Y, Width, Height from main.py (xywh)
-        rawX = pred.x ?? pred.x_center ?? pred.x_min ?? 320;
-        rawY = pred.y ?? pred.y_center ?? pred.y_min ?? 180;
-        rawW = pred.width ?? pred.w ?? 120;
-        rawH = pred.height ?? pred.h ?? 80;
+        // Legacy center-xywh pixel coords
+        const rawX = pred.x ?? pred.x_center ?? 320;
+        const rawY = pred.y ?? pred.y_center ?? 180;
+        const rawW = pred.width ?? pred.w ?? 120;
+        const rawH = pred.height ?? pred.h ?? 80;
+        const refW = pred.img_width || 640;
+        const refH = pred.img_height || 360;
+
+        srcLeft = ((rawX - rawW / 2) / refW) * videoWidth;
+        srcTop = ((rawY - rawH / 2) / refH) * videoHeight;
+        sourceW = (rawW / refW) * videoWidth;
+        sourceH = (rawH / refH) * videoHeight;
       }
-
-      // Check if normalized 0..1 scale
-      if (rawX <= 1.0 && rawW <= 1.0) {
-        rawX *= 640;
-        rawY *= 360;
-        rawW *= 640;
-        rawH *= 360;
-      }
-
-      // Model predictions are relative to 640x360 frame sizes
-      const sourceX = (rawX / 640) * videoWidth;
-      const sourceY = (rawY / 360) * videoHeight;
-      const sourceW = (rawW / 640) * videoWidth;
-      const sourceH = (rawH / 360) * videoHeight;
-
-      // Top-left coordinate conversion
-      const srcLeft = sourceX - sourceW / 2;
-      const srcTop = sourceY - sourceH / 2;
 
       // Map to visible canvas coordinates
       const left = srcLeft * scale + offsetX;
