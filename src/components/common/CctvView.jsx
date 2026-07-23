@@ -102,17 +102,15 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
         offCtx.drawImage(video, 0, 0, 640, 360);
         const base64Image = offscreenCanvas.toDataURL('image/jpeg', 0.75);
 
-        if (token) {
-          const response = await api.detect(token, base64Image);
-          if (response.ok) {
-            const res = await response.json();
-            if (isMounted && res.status === 'success') {
-              const rawPreds = res.data?.raw_predictions || [];
-              setPredictions(rawPreds);
-              setAiStatusText(`YOLOv8 LIVE (${rawPreds.length} DETECTED)`);
-              setIsAiConnected(true);
-              return;
-            }
+        const response = await api.detect(token || '', base64Image);
+        if (response.ok) {
+          const res = await response.json();
+          if (isMounted && res.status === 'success') {
+            const rawPreds = res.data?.raw_predictions || [];
+            setPredictions(rawPreds);
+            setAiStatusText(`YOLOv8 LIVE (${rawPreds.length} DETECTED)`);
+            setIsAiConnected(true);
+            return;
           }
         }
       } catch (err) {
