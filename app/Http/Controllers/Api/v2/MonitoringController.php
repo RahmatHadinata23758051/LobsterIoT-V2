@@ -59,7 +59,8 @@ class MonitoringController extends Controller
                 |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
                 |> drop(columns: ["cage_code"])
                 |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-                |> tail(n: 1)';
+                |> sort(columns: ["_time"], desc: true)
+                |> limit(n: 1)';
 
             $latestResult = $this->influxDB->queryParsed($latestQuery);
             $latest = !empty($latestResult) ? $latestResult[0] : null;
