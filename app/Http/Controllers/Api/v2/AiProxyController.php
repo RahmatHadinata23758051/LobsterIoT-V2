@@ -34,7 +34,7 @@ class AiProxyController extends Controller
             return $this->error('Format gambar Base64 tidak valid.', null, 422);
         }
 
-        $yoloUrl = config('services.yolo.url', 'http://127.0.0.1:8000/predict');
+        $yoloUrl = config('services.yolo.url', 'http://127.0.0.1:8001/predict');
 
         try {
             // Forward biner data in-memory directly to FastAPI YOLOv8 server
