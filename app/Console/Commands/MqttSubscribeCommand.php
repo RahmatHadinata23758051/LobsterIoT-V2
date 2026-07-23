@@ -94,9 +94,16 @@ class MqttSubscribeCommand extends Command
             if (is_numeric($data['timestamp'])) {
                 $timestamp = (int) $data['timestamp'];
             } elseif (is_string($data['timestamp'])) {
-                $parsed = strtotime($data['timestamp']);
-                if ($parsed !== false) {
-                    $timestamp = $parsed;
+                try {
+                    $parsed = \Carbon\Carbon::parse($data['timestamp']);
+                    // Protect against timezone offset mismatch (e.g. 13:30 local parsed as 13:30 UTC = 20:30 WIB)
+                    if ($parsed->timestamp > (time() + 300)) {
+                        $timestamp = time();
+                    } else {
+                        $timestamp = $parsed->timestamp;
+                    }
+                } catch (\Exception $e) {
+                    $timestamp = time();
                 }
             }
         }
