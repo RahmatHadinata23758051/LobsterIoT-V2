@@ -78,7 +78,7 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     };
   }, [streamUrl]);
 
-  // Frame capture and REAL YOLOv8 inference caller with Dual-Connect (Proxy + Direct)
+  // Frame capture and REAL YOLOv8 inference caller
   useEffect(() => {
     if (status !== 'playing' || !isCameraOnline) {
       setPredictions([]);
@@ -90,21 +90,77 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     const video = videoRef.current;
     let isMounted = true;
 
-    const offscreenCanvas = document.createElement('canvas');
-    offscreenCanvas.width = 640;
-    offscreenCanvas.height = 360;
-    const offCtx = offscreenCanvas.getContext('2d');
+    // Helper: canvas to blob
+    const canvasToBlob = (canvas, type = 'image/jpeg', quality = 0.75) =>
+      new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+
+    // Capture a frame from video as Blob, handling cross-origin tainted canvas
+    const captureFrame = async () => {
+      const c = document.createElement('canvas');
+      c.width = 640;
+      c.height = 360;
+      const ctx = c.getContext('2d');
+
+      try {
+        ctx.drawImage(video, 0, 0, 640, 360);
+      } catch (e) {
+        return null; // drawImage itself can throw for cross-origin
+      }
+
+      // Try toBlob — will fail with SecurityError on tainted canvas
+      try {
+        const blob = await canvasToBlob(c);
+        if (blob && blob.size > 100) return blob;
+      } catch (_) {
+        // Tainted canvas — try fallbacks
+      }
+
+      // Fallback 1: captureStream() + ImageCapture (Chrome/Edge)
+      if (video.captureStream && typeof ImageCapture !== 'undefined') {
+        try {
+          const stream = video.captureStream(0);
+          const track = stream.getVideoTracks()[0];
+          if (track) {
+            const ic = new ImageCapture(track);
+            const bitmap = await ic.grabFrame();
+            const c2 = document.createElement('canvas');
+            c2.width = 640;
+            c2.height = 360;
+            c2.getContext('2d').drawImage(bitmap, 0, 0, 640, 360);
+            bitmap.close();
+            const blob = await canvasToBlob(c2);
+            stream.getTracks().forEach(t => t.stop());
+            if (blob && blob.size > 100) return blob;
+          }
+          stream.getTracks().forEach(t => t.stop());
+        } catch (_) {}
+      }
+
+      return null;
+    };
 
     const captureAndDetect = async () => {
       if (!video || video.paused || video.ended) return;
 
-      try {
-        offCtx.drawImage(video, 0, 0, 640, 360);
-        const base64Image = offscreenCanvas.toDataURL('image/jpeg', 0.75);
+      const frameBlob = await captureFrame();
+      if (!frameBlob) {
+        if (isMounted) {
+          setAiStatusText('CROSS-ORIGIN BLOCKED');
+          setIsAiConnected(false);
+        }
+        return;
+      }
 
+      try {
         // Attempt 1: Laravel Backend Proxy API (/api/v2/detect)
         try {
-          const response = await api.detect(token || '', base64Image);
+          const base64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(frameBlob);
+          });
+
+          const response = await api.detect(token || '', base64);
           if (response.ok) {
             const res = await response.json();
             if (isMounted && res.status === 'success') {
@@ -117,11 +173,10 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
           }
         } catch (_) {}
 
-        // Attempt 2: Direct connection to local Python FastAPI (http://127.0.0.1:8001/predict)
+        // Attempt 2: Direct connection to local Python FastAPI
         try {
-          const blob = await (await fetch(base64Image)).blob();
           const formData = new FormData();
-          formData.append('image', blob, 'frame.jpg');
+          formData.append('image', frameBlob, 'frame.jpg');
 
           const directRes = await fetch('http://127.0.0.1:8001/predict', {
             method: 'POST',
@@ -139,12 +194,11 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
             }
           }
         } catch (_) {}
-
       } catch (err) {
-        console.error('YOLO inference error:', err);
+        console.error('[AI] YOLO inference error:', err);
       }
 
-      // If both AI connections fail
+      // Both failed
       if (isMounted) {
         setPredictions([]);
         setAiStatusText('AI SERVER DISCONNECTED (Jalankan main.py)');
@@ -325,6 +379,7 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     <div className="relative w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden select-none ring-1 ring-slate-800 rounded-lg shadow-inner" style={{ minHeight: '100%' }}>
       <video
         ref={videoRef}
+        crossOrigin="anonymous"
         className={`w-full h-full object-cover outline-none ${status === 'playing' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
         muted
         playsInline
