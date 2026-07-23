@@ -90,8 +90,15 @@ class MqttSubscribeCommand extends Command
 
         // Use real-time server UTC timestamp for exact time synchronization across Website & TSDB
         $timestamp = time();
-        if (isset($data['timestamp']) && is_numeric($data['timestamp'])) {
-            $timestamp = (int) $data['timestamp'];
+        if (isset($data['timestamp'])) {
+            if (is_numeric($data['timestamp'])) {
+                $timestamp = (int) $data['timestamp'];
+            } elseif (is_string($data['timestamp'])) {
+                $parsed = strtotime($data['timestamp']);
+                if ($parsed !== false) {
+                    $timestamp = $parsed;
+                }
+            }
         }
         
         // Support both nested raw_values and flat structures
@@ -153,12 +160,12 @@ class MqttSubscribeCommand extends Command
                 $calibratedFields['ambient_temperature'] = $calibratedValues['ambient_temperature'];
             }
 
-            // Map pH, TDS, DO, Turbidity, Salinity, Flow Rate
-            foreach (['ph', 'tds', 'dissolved_oxygen', 'turbidity', 'salinity', 'flow_rate'] as $metric) {
+            // Map pH, TDS, DO, Turbidity, Salinity, Flow Rate, Solar/Battery metrics
+            foreach (['ph', 'tds', 'dissolved_oxygen', 'turbidity', 'salinity', 'flow_rate', 'solar_voltage', 'solar_current', 'battery_voltage', 'battery_current'] as $metric) {
                 if (isset($calibratedValues[$metric])) {
                     $calibratedFields[$metric] = $calibratedValues[$metric];
                 } elseif ($metric === 'dissolved_oxygen' && isset($calibratedValues['raw_dissolved_oxygen'])) {
-                    $calibratedFields['dissolved_oxygen'] = $calibratedValues['raw_dissolved_oxygen'];
+                    $calibratedFields[$metric] = $calibratedValues['raw_dissolved_oxygen'];
                 }
             }
 
