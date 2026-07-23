@@ -40,7 +40,7 @@ return [
     ],
 
     'yolo' => [
-        'url' => env('YOLO_INFERENCE_URL', 'http://127.0.0.1:8000/predict'),
+        'url' => env('YOLO_INFERENCE_URL', 'http://127.0.0.1:8001/predict'),
     ],
 
 ];

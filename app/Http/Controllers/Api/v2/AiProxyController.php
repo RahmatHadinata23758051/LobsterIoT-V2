@@ -34,17 +34,18 @@ class AiProxyController extends Controller
             return $this->error('Format gambar Base64 tidak valid.', null, 422);
         }
 
-        $yoloUrl = config('services.yolo.url', 'http://127.0.0.1:8001/predict');
+        $yoloUrl = env('YOLO_INFERENCE_URL') ?: config('services.yolo.url') ?: 'http://127.0.0.1:8001/predict';
 
         try {
             // Forward biner data in-memory directly to FastAPI YOLOv8 server
             $response = Http::withoutVerifying()
+                ->timeout(5)
                 ->attach('image', $binary, 'frame.png')
                 ->post($yoloUrl);
 
             if (!$response->successful()) {
-                Log::error("YOLO inference server returned status {$response->status()}");
-                return $this->error('Gagal menghubungi server inferensi AI.', null, 502);
+                Log::error("YOLO inference server at {$yoloUrl} returned status {$response->status()}");
+                return $this->error("Gagal menghubungi server inferensi AI di {$yoloUrl} (Status: {$response->status()}).", null, 502);
             }
 
             $json = $response->json();
