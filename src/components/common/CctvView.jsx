@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Hls from 'hls.js';
-import { CameraOff, WifiOff, Cpu, Scan, CheckCircle2 } from 'lucide-react';
+import { CameraOff, WifiOff, Cpu, Scan, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../../api/api';
 
 export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
@@ -10,7 +10,8 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
   
   const [status, setStatus] = useState('idle'); // idle | loading | playing | error
   const [predictions, setPredictions] = useState([]);
-  const [aiStatusText, setAiStatusText] = useState('OFFLINE');
+  const [aiStatusText, setAiStatusText] = useState('YOLOv8 CONNECTING...');
+  const [isAiConnected, setIsAiConnected] = useState(false);
 
   // HLS/Stream source loader
   useEffect(() => {
@@ -77,11 +78,12 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     };
   }, [streamUrl]);
 
-  // Frame capture and inference caller with fallback generator
+  // Frame capture and REAL YOLOv8 inference caller
   useEffect(() => {
     if (status !== 'playing' || !isCameraOnline) {
       setPredictions([]);
       setAiStatusText('OFFLINE');
+      setIsAiConnected(false);
       return;
     }
 
@@ -92,37 +94,6 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     offscreenCanvas.width = 640;
     offscreenCanvas.height = 360;
     const offCtx = offscreenCanvas.getContext('2d');
-
-    const generateSimulatedBoundingBoxes = () => {
-      const now = Date.now() / 1000;
-      // Generate 2-3 dynamic simulated bounding boxes for lobster detection
-      return [
-        {
-          class: 'aktif',
-          confidence: 0.94,
-          x: 210 + Math.sin(now * 0.8) * 20,
-          y: 140 + Math.cos(now * 0.8) * 15,
-          width: 140,
-          height: 90,
-        },
-        {
-          class: 'pasif',
-          confidence: 0.88,
-          x: 430 + Math.cos(now * 0.5) * 12,
-          y: 200 + Math.sin(now * 0.5) * 10,
-          width: 130,
-          height: 85,
-        },
-        {
-          class: 'makan',
-          confidence: 0.91,
-          x: 120 + Math.sin(now * 0.3) * 8,
-          y: 260 + Math.cos(now * 0.3) * 6,
-          width: 110,
-          height: 75,
-        },
-      ];
-    };
 
     const captureAndDetect = async () => {
       if (!video || video.paused || video.ended) return;
@@ -135,25 +106,28 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
           const response = await api.detect(token, base64Image);
           if (response.ok) {
             const res = await response.json();
-            if (isMounted && res.status === 'success' && Array.isArray(res.data?.raw_predictions) && res.data.raw_predictions.length > 0) {
-              setPredictions(res.data.raw_predictions);
-              setAiStatusText('YOLOv8 LIVE');
+            if (isMounted && res.status === 'success') {
+              const rawPreds = res.data?.raw_predictions || [];
+              setPredictions(rawPreds);
+              setAiStatusText(`YOLOv8 LIVE (${rawPreds.length} DETECTED)`);
+              setIsAiConnected(true);
               return;
             }
           }
         }
       } catch (err) {
-        // Ignore network errors and fallback to dynamic simulation
+        console.error('YOLO inference error:', err);
       }
 
-      // Fallback simulation mode if real YOLO server is offline/unreachable
+      // If AI proxy server is offline / error
       if (isMounted) {
-        setPredictions(generateSimulatedBoundingBoxes());
-        setAiStatusText('YOLOv8 SIMULATION');
+        setPredictions([]);
+        setAiStatusText('AI SERVER DISCONNECTED (Jalankan main.py)');
+        setIsAiConnected(false);
       }
     };
 
-    const interval = setInterval(captureAndDetect, 1500);
+    const interval = setInterval(captureAndDetect, 2000);
     const timeout = setTimeout(captureAndDetect, 500);
 
     return () => {
@@ -227,7 +201,7 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     }
 
     predictions.forEach((pred) => {
-      // Parse coordinates from various JSON formats (Center-XYWH, Normalized 0..1, or BBox Array)
+      // Parse coordinates from YOLOv8 JSON format (Center-XYWH, Normalized 0..1, or BBox Array)
       let rawX = 0, rawY = 0, rawW = 0, rawH = 0;
       let label = pred.class || pred.label || pred.class_name || pred.name || 'lobster';
       let confidence = pred.confidence ?? pred.score ?? pred.prob ?? 0.90;
@@ -247,7 +221,7 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
           rawH = b3;
         }
       } else {
-        // Standard X, Y, Width, Height
+        // Standard X, Y, Width, Height from main.py (xywh)
         rawX = pred.x ?? pred.x_center ?? pred.x_min ?? 320;
         rawY = pred.y ?? pred.y_center ?? pred.y_min ?? 180;
         rawW = pred.width ?? pred.w ?? 120;
@@ -281,7 +255,7 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
       const color = getClassColor(label);
 
       // 1. Semi-transparent bounding box background fill
-      ctx.fillStyle = `${color}20`; // 12% opacity
+      ctx.fillStyle = `${color}25`;
       ctx.fillRect(left, top, width, height);
 
       // 2. Draw outer boundary box
@@ -345,13 +319,13 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
 
       {/* ─── LIVE AI HUD BADGE (TOP RIGHT) ────────────────────────── */}
       {status === 'playing' && isCameraOnline && (
-        <div className="absolute top-3 right-3 z-20 bg-slate-900/80 backdrop-blur-xs border border-slate-700/70 text-white px-2.5 py-1 rounded-lg flex items-center gap-2 text-[10px] font-bold shadow-md">
-          <Cpu className="w-3.5 h-3.5 text-[#0D9D1B] animate-pulse" />
-          <span className="text-slate-300">AI DETECTOR:</span>
-          <span className="text-emerald-400 font-mono font-bold">{aiStatusText}</span>
-          <span className="bg-slate-800 px-1.5 py-0.5 rounded text-[9px] text-slate-300 font-mono">
-            {predictions.length} LOBSTER
-          </span>
+        <div className={`absolute top-3 right-3 z-20 backdrop-blur-xs border px-2.5 py-1 rounded-lg flex items-center gap-2 text-[10px] font-bold shadow-md ${
+          isAiConnected
+            ? 'bg-slate-900/85 border-slate-700 text-white'
+            : 'bg-amber-950/85 border-amber-800 text-amber-200'
+        }`}>
+          <Cpu className={`w-3.5 h-3.5 ${isAiConnected ? 'text-[#0D9D1B] animate-pulse' : 'text-amber-400'}`} />
+          <span className="font-mono">{aiStatusText}</span>
         </div>
       )}
 
