@@ -4,7 +4,7 @@ from ultralytics import YOLO
 from PIL import Image
 import io
 
-app = FastAPI()
+app = FastAPI(title="Lobsense YOLOv8 AI Model Server")
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,9 +16,17 @@ app.add_middleware(
 
 model = YOLO("best2.pt")  # MODEL KAMU
 
+@app.get("/")
+def root():
+    return {
+        "status": "success",
+        "message": "Lobsense YOLOv8 AI Model Server Running",
+        "model": "best2.pt",
+        "endpoint": "/predict (POST)"
+    }
+
 @app.post("/predict")
 async def predict(image: UploadFile = File(...)):
-
     img_bytes = await image.read()
     img = Image.open(io.BytesIO(img_bytes))
 

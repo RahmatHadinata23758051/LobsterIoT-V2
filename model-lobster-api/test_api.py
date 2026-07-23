@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "http://127.0.0.1:8000/predict"
+url = "http://127.0.0.1:8001/predict"
 image_path = "lobster_asli.jpg"
 
 print(f"Mengirim request ke {url} dengan gambar {image_path}...")
