@@ -165,7 +165,7 @@ class DemoNodeSeeder extends Seeder
                      ?? DB::table('iot_nodes')->where('serial_number', 'DEMO-NODE-001')->value('id');
 
         if ($targetNodeId) {
-            $cameraExists = DB::table('cameras')->where('iot_node_id', $targetNodeId)->exists();
+            $cameraExists = DB::table('cameras')->where('camera_code', 'CAM-DEMO-1')->exists();
             if (!$cameraExists) {
                 DB::table('cameras')->insert([
                     'iot_node_id' => $targetNodeId,
