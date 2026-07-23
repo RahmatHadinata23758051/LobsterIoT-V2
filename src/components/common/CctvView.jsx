@@ -78,7 +78,7 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     };
   }, [streamUrl]);
 
-  // Frame capture and REAL YOLOv8 inference caller
+  // Frame capture and REAL YOLOv8 inference caller with Dual-Connect (Proxy + Direct)
   useEffect(() => {
     if (status !== 'playing' || !isCameraOnline) {
       setPredictions([]);
@@ -102,22 +102,49 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
         offCtx.drawImage(video, 0, 0, 640, 360);
         const base64Image = offscreenCanvas.toDataURL('image/jpeg', 0.75);
 
-        const response = await api.detect(token || '', base64Image);
-        if (response.ok) {
-          const res = await response.json();
-          if (isMounted && res.status === 'success') {
-            const rawPreds = res.data?.raw_predictions || [];
-            setPredictions(rawPreds);
-            setAiStatusText(`YOLOv8 LIVE (${rawPreds.length} DETECTED)`);
-            setIsAiConnected(true);
-            return;
+        // Attempt 1: Laravel Backend Proxy API (/api/v2/detect)
+        try {
+          const response = await api.detect(token || '', base64Image);
+          if (response.ok) {
+            const res = await response.json();
+            if (isMounted && res.status === 'success') {
+              const rawPreds = res.data?.raw_predictions || [];
+              setPredictions(rawPreds);
+              setAiStatusText(`YOLOv8 LIVE (${rawPreds.length} DETECTED)`);
+              setIsAiConnected(true);
+              return;
+            }
           }
-        }
+        } catch (_) {}
+
+        // Attempt 2: Direct connection to local Python FastAPI (http://127.0.0.1:8001/predict)
+        try {
+          const blob = await (await fetch(base64Image)).blob();
+          const formData = new FormData();
+          formData.append('image', blob, 'frame.jpg');
+
+          const directRes = await fetch('http://127.0.0.1:8001/predict', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (directRes.ok) {
+            const directJson = await directRes.json();
+            if (isMounted) {
+              const rawPreds = directJson.predictions || [];
+              setPredictions(rawPreds);
+              setAiStatusText(`YOLOv8 LIVE DIRECT (${rawPreds.length} DETECTED)`);
+              setIsAiConnected(true);
+              return;
+            }
+          }
+        } catch (_) {}
+
       } catch (err) {
         console.error('YOLO inference error:', err);
       }
 
-      // If AI proxy server is offline / error
+      // If both AI connections fail
       if (isMounted) {
         setPredictions([]);
         setAiStatusText('AI SERVER DISCONNECTED (Jalankan main.py)');
@@ -125,8 +152,8 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
       }
     };
 
-    const interval = setInterval(captureAndDetect, 2000);
-    const timeout = setTimeout(captureAndDetect, 500);
+    const interval = setInterval(captureAndDetect, 1500);
+    const timeout = setTimeout(captureAndDetect, 400);
 
     return () => {
       isMounted = false;
