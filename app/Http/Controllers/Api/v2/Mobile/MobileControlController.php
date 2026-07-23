@@ -25,13 +25,17 @@ class MobileControlController extends Controller
             });
         }
 
-        $logs = $query->latest()->limit(15)->get()->map(function($log) {
+        $rawLogs = $query->latest()->limit(15)->get();
+
+        $logs = $rawLogs->map(function($log) {
             $triggerType = 'AUTOMATIC_SCHEDULE';
-            if (str_contains($log->notes ?? '', 'MANUAL') || str_contains($log->notes ?? '', 'Mobile')) {
+            $notes = $log->notes ?? '';
+            
+            if (str_contains($notes, 'MANUAL_MOBILE') || str_contains($notes, 'Mobile')) {
                 $triggerType = 'MANUAL_MOBILE';
-            } elseif (str_contains($log->notes ?? '', 'Web')) {
+            } elseif (str_contains($notes, 'MANUAL_WEB') || str_contains($notes, 'Web')) {
                 $triggerType = 'MANUAL_WEB';
-            } elseif (str_contains($log->notes ?? '', 'DO') || str_contains($log->notes ?? '', 'Sensor')) {
+            } elseif (str_contains($notes, 'AUTOMATIC_SENSOR') || str_contains($notes, 'DO') || str_contains($notes, 'Sensor')) {
                 $triggerType = 'AUTOMATIC_SENSOR';
             }
 
@@ -39,11 +43,11 @@ class MobileControlController extends Controller
                 'id' => $log->id,
                 'iot_node_id' => $log->iot_node_id,
                 'iot_node_serial' => $log->iotNode?->serial_number ?? 'DEMO-NODE-001',
-                'food_type' => $log->food_type,
-                'amount_kg' => $log->amount_kg,
-                'notes' => $log->notes,
+                'food_type' => $log->food_type ?? 'Pakan Otomatis Dispenser',
+                'amount_kg' => $log->amount_kg ?? 0.5,
+                'notes' => $log->notes ?? 'Aktivitas berhasil',
                 'trigger_type' => $triggerType,
-                'fed_at' => $log->fed_at ? $log->fed_at->toIso8601String() : now()->toIso8601String(),
+                'fed_at' => $log->fed_at ? $log->fed_at->toIso8601String() : ($log->created_at ? $log->created_at->toIso8601String() : now()->toIso8601String()),
             ];
         });
 
@@ -110,16 +114,17 @@ class MobileControlController extends Controller
         $serial = $request->iot_node_serial_number;
 
         $node = IotNode::where('serial_number', $serial)->first();
-        if ($node) {
-            FeedingLog::create([
-                'iot_node_id' => $node->id,
-                'user_id' => $request->user()->id,
-                'food_type' => 'Kontrol Aerator 24h',
-                'amount_kg' => 0.0,
-                'notes' => "Perintah Aerator Mode $mode ($duration menit) via Mobile App [MANUAL_MOBILE]",
-                'fed_at' => now(),
-            ]);
-        }
+        $nodeId = $node ? $node->id : 1;
+        $userId = $request->user()?->id ?? 1;
+
+        $log = FeedingLog::create([
+            'iot_node_id' => $nodeId,
+            'user_id' => $userId,
+            'food_type' => 'Kontrol Aerator 24h',
+            'amount_kg' => 0.0,
+            'notes' => "Perintah Aerator Mode $mode ($duration menit) via Mobile App [MANUAL_MOBILE]",
+            'fed_at' => now(),
+        ]);
 
         return response()->json([
             'status' => 'success',
@@ -132,7 +137,8 @@ class MobileControlController extends Controller
                 'status' => $mode === 'MANUAL_ON' ? 'AKTIF' : ($mode === 'MANUAL_OFF' ? 'STANDBY' : 'AUTO'),
                 'override_duration_minutes' => $duration,
                 'triggered_at' => now()->toIso8601String(),
-                'trigger_type' => 'MANUAL_MOBILE'
+                'trigger_type' => 'MANUAL_MOBILE',
+                'log' => $log
             ]
         ]);
     }
@@ -161,13 +167,14 @@ class MobileControlController extends Controller
 
         $node = IotNode::where('serial_number', $request->iot_node_serial_number)->first();
         $nodeId = $node ? $node->id : 1;
+        $userId = $request->user()?->id ?? 1;
 
         $duration = $request->input('duration_seconds', 10);
         $timeStr = $request->input('scheduled_time', '08:00');
 
         $log = FeedingLog::create([
             'iot_node_id' => $nodeId,
-            'user_id' => $request->user()->id,
+            'user_id' => $userId,
             'food_type' => $request->food_type,
             'amount_kg' => $request->amount_kg ?? 1.0,
             'notes' => "Jadwal pakan jam $timeStr (Durasi dispenser: $duration s) [MANUAL_MOBILE]",
@@ -209,11 +216,12 @@ class MobileControlController extends Controller
         $duration = $request->input('duration_seconds', 10);
         $node = IotNode::where('serial_number', $request->iot_node_serial_number)->first();
         $nodeId = $node ? $node->id : 1;
+        $userId = $request->user()?->id ?? 1;
 
         // Record instant feeding event to database
         $log = FeedingLog::create([
             'iot_node_id' => $nodeId,
-            'user_id' => $request->user()->id,
+            'user_id' => $userId,
             'food_type' => 'Pakan Otomatis Dispenser',
             'amount_kg' => 0.5,
             'notes' => "Trigger pakan manual instant ($duration detik) [MANUAL_MOBILE]",

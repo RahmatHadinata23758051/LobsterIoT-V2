@@ -4,11 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['iot_node_id', 'operator_id', 'feed_session', 'feed_type', 'weight_kg'])]
 class FeedingLog extends Model
 {
+    protected $guarded = [];
+
+    protected $casts = [
+        'fed_at' => 'datetime',
+        'amount_kg' => 'double',
+        'weight_kg' => 'double',
+    ];
+
     /**
      * Get the IoT Node where the feeding occurred.
      */
@@ -17,12 +23,19 @@ class FeedingLog extends Model
         return $this->belongsTo(IotNode::class);
     }
 
-
     /**
-     * Get the operator who performed the feeding.
+     * Get the operator who performed the feeding (legacy).
      */
     public function operator(): BelongsTo
     {
         return $this->belongsTo(Operator::class);
+    }
+
+    /**
+     * Get the user who triggered/logged the feeding.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
