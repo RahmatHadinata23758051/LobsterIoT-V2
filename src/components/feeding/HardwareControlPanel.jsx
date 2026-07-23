@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Wind, Utensils, Play, RotateCcw, Clock, Plus, Trash2,
-  Droplets, Zap, CheckCircle2, Sparkles, Activity, ShieldCheck
+  Wind, Utensils, Play, Clock, Plus, Trash2,
+  Droplets, Zap, CheckCircle2, ShieldCheck, Activity, ChevronRight
 } from 'lucide-react';
 import { api } from '../../api/api';
 
@@ -155,53 +155,49 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
   };
 
   return (
-    <div className="mb-6 space-y-4">
-      {/* Toast Notification Banner */}
+    <div className="mb-6 space-y-4 font-sans">
+      {/* Toast Notification */}
       {toastMessage && (
-        <div className="p-3.5 bg-gradient-to-r from-emerald-900/90 to-teal-900/90 backdrop-blur-md border border-emerald-500/30 rounded-2xl flex items-center gap-3 text-xs text-emerald-100 font-semibold shadow-lg shadow-emerald-950/20 animate-fade-in">
-          <div className="p-1 rounded-lg bg-emerald-500/20 text-emerald-300">
+        <div className="p-3.5 bg-slate-900 text-white border border-slate-800 rounded-2xl flex items-center gap-3 text-xs font-semibold shadow-xl shadow-slate-950/20 animate-fade-in">
+          <div className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
             <CheckCircle2 className="w-4 h-4" />
           </div>
-          <span>{toastMessage.text}</span>
+          <span className="tracking-wide">{toastMessage.text}</span>
         </div>
       )}
 
       {/* Control Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         
         {/* CARD 1: AERATOR 24H */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm shadow-slate-200/60 hover:shadow-md hover:border-emerald-500/30 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
-          {/* Subtle Top Gradient Bar */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
-
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group">
           <div>
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
+            {/* Card Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 text-[#0D9D1B] border border-emerald-100/80 group-hover:scale-105 transition-transform">
+                <div className="p-2.5 rounded-xl bg-slate-900 text-emerald-400 shadow-sm">
                   <Wind className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
-                    Aerator 24h (Oksigenasi)
-                  </h3>
+                  <h3 className="text-sm font-black text-slate-900 tracking-tight">Aerator 24h (Oksigenasi)</h3>
                   <p className="text-[11px] text-slate-400 font-medium">Kontrol aerasi & pemantauan DO otomatis</p>
                 </div>
               </div>
 
-              <div className={`px-3 py-1 text-[10px] font-extrabold rounded-full border flex items-center gap-1.5 shadow-xs ${
+              {/* Status Pill */}
+              <div className={`px-3 py-1 text-[10px] font-black rounded-full border flex items-center gap-1.5 uppercase tracking-wider ${
                 aeratorMode === 'MANUAL_ON'
-                  ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300/60'
                   : aeratorMode === 'AUTO'
-                  ? 'bg-blue-500/10 text-blue-700 border-blue-500/30'
-                  : 'bg-rose-500/10 text-rose-700 border-rose-500/30'
+                  ? 'bg-slate-100 text-slate-700 border-slate-200/80'
+                  : 'bg-rose-50 text-rose-700 border-rose-200'
               }`}>
                 <span className="relative flex h-2 w-2">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                    aeratorMode === 'MANUAL_ON' ? 'bg-emerald-400' : (aeratorMode === 'AUTO' ? 'bg-blue-400' : 'bg-rose-400')
+                    aeratorMode === 'MANUAL_ON' ? 'bg-emerald-400' : (aeratorMode === 'AUTO' ? 'bg-slate-400' : 'bg-rose-400')
                   }`}></span>
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                    aeratorMode === 'MANUAL_ON' ? 'bg-emerald-500' : (aeratorMode === 'AUTO' ? 'bg-blue-500' : 'bg-rose-500')
+                    aeratorMode === 'MANUAL_ON' ? 'bg-emerald-500' : (aeratorMode === 'AUTO' ? 'bg-slate-700' : 'bg-rose-500')
                   }`}></span>
                 </span>
                 <span>
@@ -214,38 +210,40 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
               </div>
             </div>
 
-            {/* DO Telemetry Card */}
-            <div className="bg-gradient-to-r from-blue-50/70 via-slate-50 to-emerald-50/50 border border-slate-200/80 rounded-xl p-3.5 mb-4 flex items-center justify-between shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600">
-                  <Droplets className="w-4 h-4" />
+            {/* High-End Digital Readout Telemetry Display */}
+            <div className="bg-slate-900 text-white rounded-2xl p-4 mb-5 shadow-inner border border-slate-800 flex items-center justify-between relative overflow-hidden">
+              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
+              <div className="flex items-center gap-3.5 z-10">
+                <div className="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                  <Droplets className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Kadar DO Saat Ini</span>
-                  <span className="text-base font-extrabold text-slate-900 font-mono tracking-tight">{currentDoValue} mg/L</span>
+                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest block">Kadar DO Saat Ini</span>
+                  <span className="text-xl font-black text-white font-mono tracking-tight">{currentDoValue} <span className="text-xs text-slate-400 font-normal">mg/L</span></span>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Threshold Min DO</span>
-                <span className="text-xs font-bold text-emerald-600 font-mono">{minDoThreshold} mg/L</span>
+
+              <div className="text-right z-10">
+                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest block">Threshold Min</span>
+                <span className="text-sm font-bold text-emerald-400 font-mono">{minDoThreshold} mg/L</span>
               </div>
             </div>
 
-            {/* Duration Selector */}
-            <div className="mb-4">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+            {/* Segmented Pill Duration Selector */}
+            <div className="mb-5">
+              <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">
                 Durasi Override Manual:
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="bg-slate-100/80 p-1 rounded-xl border border-slate-200/70 grid grid-cols-4 gap-1">
                 {[15, 30, 45, 60].map((mins) => (
                   <button
                     key={mins}
                     type="button"
                     onClick={() => setSelectedDurationMin(mins)}
-                    className={`py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                    className={`py-2 text-xs font-black rounded-lg transition-all duration-200 cursor-pointer ${
                       selectedDurationMin === mins
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm shadow-slate-900/20 ring-2 ring-slate-900/10 scale-[1.02]'
-                        : 'bg-slate-50/80 text-slate-600 border-slate-200/80 hover:bg-slate-100'
+                        ? 'bg-slate-900 text-white shadow-sm font-bold scale-[1.02]'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                     }`}
                   >
                     {mins}m
@@ -256,14 +254,14 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
             <button
               type="button"
               disabled={loadingAerator}
               onClick={() => handleToggleAerator('MANUAL_ON')}
-              className="flex-1 py-2.5 bg-gradient-to-r from-[#0D9D1B] to-emerald-600 hover:from-emerald-600 hover:to-[#0D9D1B] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-md shadow-green-600/20 active:scale-[0.99] disabled:opacity-50"
+              className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-emerald-400 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer border border-slate-800 shadow-md hover:shadow-slate-950/20 active:scale-[0.99] disabled:opacity-50 tracking-wide"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
+              <Play className="w-4 h-4 fill-current" />
               <span>{aeratorMode === 'MANUAL_ON' ? 'Perbarui Manual Timer' : 'Nyalakan Manual'}</span>
             </button>
 
@@ -272,7 +270,7 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
                 type="button"
                 disabled={loadingAerator}
                 onClick={() => handleToggleAerator('AUTO')}
-                className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer border border-slate-200"
+                className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer border border-slate-200"
               >
                 Kembali ke AUTO
               </button>
@@ -281,45 +279,42 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
         </div>
 
         {/* CARD 2: SMART FEEDER (PAKAN OTOMATIS) */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm shadow-slate-200/60 hover:shadow-md hover:border-amber-500/30 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
-          {/* Subtle Top Gradient Bar */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500" />
-
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group">
           <div>
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
+            {/* Card Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 text-amber-600 border border-amber-100/80 group-hover:scale-105 transition-transform">
+                <div className="p-2.5 rounded-xl bg-slate-900 text-emerald-400 shadow-sm">
                   <Utensils className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">Pakan Otomatis (Smart Feeder)</h3>
+                  <h3 className="text-sm font-black text-slate-900 tracking-tight">Pakan Otomatis (Smart Feeder)</h3>
                   <p className="text-[11px] text-slate-400 font-medium">Jadwal harian & pakan manual instan</p>
                 </div>
               </div>
             </div>
 
-            {/* Instant Feeding Section */}
-            <div className="bg-gradient-to-r from-amber-50/60 via-slate-50 to-orange-50/40 border border-amber-200/50 rounded-xl p-3.5 mb-4 space-y-3 shadow-xs">
+            {/* Instant Feeder Trigger Card */}
+            <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-4 mb-5 space-y-3.5 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                <span className="text-xs font-extrabold text-slate-900 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-emerald-600 fill-current" />
                   Beri Pakan Sekarang (Manual Trigger)
                 </span>
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Durasi Motor:</span>
-                <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Durasi Motor:</span>
+                <div className="bg-slate-200/60 p-0.5 rounded-xl flex items-center gap-1">
                   {[5, 10, 15, 20, 30].map((dur) => (
                     <button
                       key={dur}
                       type="button"
                       onClick={() => setInstantDurationSec(dur)}
-                      className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-all cursor-pointer ${
+                      className={`px-2.5 py-1 text-[11px] font-black rounded-lg transition-all cursor-pointer ${
                         instantDurationSec === dur
-                          ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                          ? 'bg-slate-900 text-emerald-400 shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       {dur}s
@@ -332,22 +327,22 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
                 type="button"
                 disabled={loadingFeeder}
                 onClick={handleTriggerInstantFeeder}
-                className="w-full py-2.5 bg-gradient-to-r from-[#0D9D1B] to-emerald-600 hover:from-emerald-600 hover:to-[#0D9D1B] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-md shadow-green-600/20 active:scale-[0.99] disabled:opacity-50"
+                className="w-full py-3 bg-[#059669] hover:bg-[#047857] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-md shadow-emerald-900/15 active:scale-[0.99] disabled:opacity-50 tracking-wide"
               >
-                <Zap className="w-3.5 h-3.5 fill-current" />
+                <Zap className="w-4 h-4 fill-current" />
                 <span>Beri Pakan Sekarang ({instantDurationSec} Detik)</span>
               </button>
             </div>
 
             {/* Schedules Section Header */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-extrabold text-slate-800 tracking-tight">Jadwal Pakan Harian (By Time)</span>
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-xs font-black text-slate-900 tracking-tight uppercase">Jadwal Pakan Harian (By Time)</span>
               <button
                 type="button"
                 onClick={() => setShowAddModal(true)}
-                className="text-[11px] font-bold text-[#0D9D1B] hover:text-emerald-700 flex items-center gap-1 cursor-pointer transition-colors"
+                className="text-[11px] font-extrabold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer transition-colors"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Tambah Jadwal</span>
               </button>
             </div>
@@ -357,15 +352,15 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
               {schedules.map((sch) => (
                 <div
                   key={sch.id}
-                  className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-2.5 flex items-center justify-between text-xs hover:bg-slate-100/80 transition-colors"
+                  className="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex items-center justify-between text-xs hover:bg-slate-100/70 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600">
+                    <div className="p-1.5 rounded-lg bg-slate-900 text-emerald-400">
                       <Clock className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <span className="font-extrabold text-slate-900 font-mono text-sm block leading-none mb-1">{sch.time}</span>
-                      <span className="text-[10px] text-slate-400 font-medium">
+                      <span className="font-black text-slate-900 font-mono text-sm block leading-none mb-1">{sch.time}</span>
+                      <span className="text-[10px] text-slate-500 font-medium">
                         Durasi: {sch.duration_seconds}s • {sch.food_type}
                       </span>
                     </div>
@@ -386,13 +381,11 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
 
       {/* MODAL: TAMBAH JADWAL PAKAN */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0D9D1B] to-teal-500" />
-
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#0D9D1B]" />
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
+              <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-emerald-600" />
                 Tambah Jadwal Pakan Harian
               </h3>
               <button
@@ -406,7 +399,7 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
 
             <form onSubmit={handleAddSchedule} className="space-y-4 text-xs">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">
                   Waktu Pakan (Jam:Menit)
                 </label>
                 <input
@@ -414,12 +407,12 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
                   required
                   value={newScheduleTime}
                   onChange={(e) => setNewScheduleTime(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-bold text-sm focus:outline-none focus:border-[#0D9D1B] font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-black text-sm focus:outline-none focus:border-slate-900 font-mono"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1.5">
                   Durasi Motor Dispenser (Detik)
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -428,9 +421,9 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
                       key={dur}
                       type="button"
                       onClick={() => setNewScheduleDuration(dur)}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition cursor-pointer ${
+                      className={`flex-1 py-2 text-xs font-black rounded-xl border transition cursor-pointer ${
                         newScheduleDuration === dur
-                          ? 'bg-[#0D9D1B] text-white border-[#0D9D1B]'
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                           : 'bg-slate-50 text-slate-700 border-slate-200'
                       }`}
                     >
@@ -441,7 +434,7 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">
                   Jenis Pakan
                 </label>
                 <input
@@ -449,7 +442,7 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
                   required
                   value={newScheduleFoodType}
                   onChange={(e) => setNewScheduleFoodType(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-semibold focus:outline-none focus:border-slate-900"
                 />
               </div>
 
@@ -457,13 +450,13 @@ export const HardwareControlPanel = ({ token, selectedSerial = 'DEMO-NODE-001' }
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl"
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#0D9D1B] hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md shadow-green-600/20 cursor-pointer"
+                  className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 font-extrabold rounded-xl shadow-md cursor-pointer tracking-wide"
                 >
                   Simpan Jadwal
                 </button>
