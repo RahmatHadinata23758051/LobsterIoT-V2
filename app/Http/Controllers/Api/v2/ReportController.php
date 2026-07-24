@@ -103,7 +103,7 @@ class ReportController extends Controller
 
         $flux .= ' |> drop(columns: ["cage_code"])
             |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-            |> limit(n: 500)';
+            |> limit(n: 5000)';
 
         $telemetries = $this->influxDB->queryParsed($flux);
 
