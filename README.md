@@ -1,148 +1,181 @@
-# 🦞 Lobsense V2.0 - Backend Service API
+# Lobsense V2 - Backend API & System Infrastructure
 
-Selamat datang di repositori **Backend Service Lobsense V2.0**. Repository ini merupakan pusat layanan API (Application Programming Interface), pemrosesan data telemetri IoT real-time, manajemen master data tambak, ekspor laporan, dan gateway inferensi AI untuk platform pengawasan budidaya lobster modern **Edge Lobsense / Lobster Sensing System**.
-
----
-
-## 📐 Arsitektur Sistem & Spesifikasi Teknologi
-
-Sistem backend Lobsense V2 dibangun dengan arsitektur hibrida (*hybrid persistence*) yang menggabungkan *Relational Database* untuk data transaksional/master data dan *Time-Series Database* untuk skalabilitas penyimpanan telemetri data sensor frekuensi tinggi.
-
-### Tech Stack & Dependensi Utama:
-- **Framework Core**: Laravel 11.x (PHP 8.2+)
-- **Relational Database**: MySQL 8.0 / PostgreSQL 15 (Master data, user, otentikasi, log pakan & pemeliharaan)
-- **Time-Series Database**: InfluxDB v2 (`lobsense_telemetry` bucket untuk data historis pH, TDS, DO, Suhu, Salinitas, Turbiditas)
-- **AI Inference Engine**: FastAPI + PyTorch YOLOv8 (Running pada Port 8001 untuk deteksi perilaku lobster dari frame CCTV)
-- **API Documentation**: OpenAPI 3.0 dengan Swagger UI via `darkaonline/l5-swagger`
-- **Otentikasi & Keamanan**: Laravel Sanctum (Token-based Bearer Authentication) & Role-Based Access Control (RBAC)
-- **Protokol Komunikasi**: RESTful API (JSON / Multipart), MQTT (Penerima stream telemetri dari Edge Gateway), WebSocket
+Backend Service Lobsense V2 merupakan pusat pemrosesan data, manajemen master data tambak, pengolahan telemetri sensor real-time, ekspor laporan, dan gateway inferensi Artificial Intelligence (AI) untuk platform pemantauan budidaya lobster **Lobster Sensing System**.
 
 ---
 
-## 🗄️ Skema Database & Model Data
+## 1. Arsitektur Sistem & Spesifikasi Teknologi
 
-### Diagram Relasi Entitas (ERD)
+Sistem backend menggunakan arsitektur hibrida (*hybrid persistence architecture*) untuk memisahkan penyimpanan data transaksional terstruktur dengan data telemetri waktu (*time-series data*) frekuensi tinggi.
 
-![Database Schema ERD](docs/images/database_schema.png)
+### 1.1 Stack Teknologi Core
+- **Application Framework**: Laravel 11.x (PHP 8.2+)
+- **Relational Database**: MySQL 8.0 / PostgreSQL 15 (Master data, user, otentikasi, log pakan, dan servis)
+- **Time-Series Database**: InfluxDB v2 (Penyimpanan instan dan agregasi historis sensor pH, DO, TDS, Suhu, Salinitas, Turbiditas)
+- **AI Inference Gateway**: FastAPI + PyTorch YOLOv8 (Inference server independen pada port 8001)
+- **API Documentation**: OpenAPI 3.0 Specification via L5-Swagger (`darkaonline/l5-swagger`)
+- **Authentication**: Laravel Sanctum (Token-based Bearer Authentication)
+- **Protocols**: RESTful API (JSON / Multipart), MQTT Listener, WebSockets
 
-### Penjelasan Struktur Tabel Utama:
-1. **`users`**: Menyimpan kredensial pengguna, profil, dan hak akses (*role*).
-2. **`provinces`**, **`cities`**, **`districts`**: Master wilayah Indonesia untuk pemetaan lokasi geografis tambak & Edge Gateway.
-3. **`edge_gateways`**: Data perangkat keras Edge Gateway pusat di lokasi tambak yang menghubungkan banyak IoT Node.
-4. **`cages` (Keramba Jaring Apung / KJA)**: Data fisik lokasi keramba, jumlah lobster, volume air, dan estimasi umur lobster.
-5. **`iot_nodes`**: Perangkat sensor & aktuator lapangan yang terpasang di setiap keramba dan terhubung ke Edge Gateway.
-6. **`cameras`**: Konfigurasi URL streaming RTSP/HLS kamera CCTV bawah air yang terhubung ke IoT Node.
-7. **`sensor_types`** & **`thresholds`**: Definisi batas aman (*min/max*) dan offset kalibrasi sensor per node.
-8. **`feeding_logs`**: Catatan riwayat pakan (otomatis maupun manual via mobile/web).
-9. **`maintenances`**: Log servis, foto bukti pemeliharaan, dan tanda tangan digital operator.
-10. **`system_settings`**: Pengaturan nama instansi, logo, dan koordinat tambak utama.
-
----
-
-## 🔗 Diagram Relasi Fitur (KJA ↔ Edge Gateway ↔ IoT Node)
-
-Berikut adalah diagram alir dan hirarki hubungan antara entitas **Keramba (KJA)**, **Edge Gateway**, dan **IoT Node**:
+### 1.2 Diagram Arsitektur Data & Alur Komunikasi
 
 ```mermaid
-graph TD
-    subgraph Wilayah & Tambak Utama
-        City[📍 City / Wilayah Tambak]
-        Setting[⚙️ System Settings & Cuaca BMKG]
+flowchart TD
+    subgraph Layer Lapangan & Perangkat
+        Sensors[Sensor pH, DO, TDS, Suhu] -->|Raw Data| Node[IoT Node Master]
+        Cam[Kamera CCTV Bawah Air] -->|Video Stream| Node
+        Node -->|LoRa Wireless / RS-485| Edge[Edge Gateway Desktop]
     end
 
-    subgraph Infrastruktur Edge Gateway
-        Edge[🖥️ Edge Gateway Pusat<br/>Raspberry Pi / Mini PC]
+    subgraph Layer Edge & Sync
+        Edge -->|Local SQLite Buffer| Edge
+        Edge -->|REST API / MQTT Sync| Backend[Backend Service Laravel 11]
     end
 
-    subgraph Keramba Jaring Apung KJA
-        Cage1[🦞 Keramba A - CAGE-A01]
-        Cage2[🦞 Keramba B - CAGE-B01]
+    subgraph Layer Backend & Database
+        Backend -->|Transactional Data| RDB[(MySQL / PostgreSQL)]
+        Backend -->|Telemetry Series| TSDB[(InfluxDB v2)]
+        Backend -->|HTTP Biner Proxy| AI[FastAPI YOLOv8 AI Server]
     end
 
-    subgraph Perangkat IoT Node & Sensor
-        Node1[📡 IoT Node #1<br/>LoRa Transmitter]
-        Node2[📡 IoT Node #2<br/>LoRa Transmitter]
-        Node3[📡 IoT Node #3<br/>LoRa Transmitter]
+    subgraph Layer Klien
+        Backend -->|REST API| WebClient[Frontend Web App]
+        Backend -->|Dedicated Mobile API| MobileClient[Mobile App]
+        Backend -->|OpenAPI 3.0| Swagger[Swagger UI Documentation]
     end
-
-    subgraph Aktuator & Pengawas
-        Cam1[📷 CCTV Bawah Air]
-        Feeder[🌀 Dispenser Pakan Relay]
-        Aerator[💨 Aerator Oksigen Relay]
-        Sensors[🧪 Sensor Array: pH, DO, TDS, Temp]
-    end
-
-    City --> Edge
-    Edge --> Cage1
-    Edge --> Cage2
-    Cage1 --> Node1
-    Cage1 --> Node2
-    Cage2 --> Node3
-
-    Node1 --> Sensors
-    Node1 --> Cam1
-    Node1 --> Feeder
-    Node1 --> Aerator
 ```
 
 ---
 
-## 👥 Manajemen Hak Akses (Role-Based Access Control)
+## 2. Skema Database & Relasi Tabel
 
-Backend menerapkan pembatasan hak akses berbasis peranan (*Role*):
+### 2.1 Entity Relationship Diagram (ERD)
 
-| Role | Akses API & Fitur |
-| :--- | :--- |
-| **`admin`** | **Akses Penuh (Full Access)**: Memiliki wewenang CRUD penuh pada seluruh entitas, pengelolaan user, aktivasi perangkat, bulk update ambang batas, serta pembaruan pengaturan sistem & logo instansi. |
-| **`management`** | **Pengawasan & Pelaporan**: Melihat seluruh dasbor monitoring, grafik telemetri, riwayat pemeliharaan, serta mengekspor dokumen laporan (PDF, CSV, Excel). Memiliki akses terbatas untuk mengedit data keramba & node. |
-| **`operator`** | **Operasional Lapangan**: Melakukan registrasi & aktivasi perangkat baru, mengunggah foto bukti pemeliharaan & tanda tangan digital, mencatat pakan manual, serta memicu relai dispenser/aerator via Mobile App. |
+![Database Schema ERD](docs/images/database_schema.png)
+
+### 2.2 Penjelasan Struktur Tabel Utama
+
+- **`users`**: Menyimpan kredensial pengguna, profil, dan peranan (*role*).
+- **`provinces`**, **`cities`**, **`districts`**: Master data wilayah administrasi Indonesia untuk lokasi tambak dan Edge Gateway.
+- **`edge_gateways`**: Data spesifikasi teknis dan lokasi Edge Gateway di stasion darat.
+- **`cages` (Keramba Jaring Apung / KJA)**: Data fisik lokasi keramba, koordinat geografis, volume air, populasi, dan estimasi umur lobster.
+- **`iot_nodes`**: Data master unit IoT Node yang terpasang pada masing-masing keramba.
+- **`cameras`**: Konfigurasi URL stream RTSP/HLS kamera CCTV bawah air per node.
+- **`sensor_types`** & **`thresholds`**: Konfigurasi batas kritis (*min/max*) dan nilai offset kalibrasi sensor per node.
+- **`feeding_logs`**: Catatan riwayat pemberian pakan otomatis maupun manual.
+- **`maintenances`**: Log pemeliharaan perangkat, foto servis, dan tanda tangan digital operator.
+- **`system_settings`**: Konfigurasi global sistem, nama instansi, logo, dan koordinat tambak utama.
 
 ---
 
-## 🌐 Dokumentasi API Interaktif (Swagger UI)
+## 3. Diagram Topologi & Relasi Fitur (Keramba - Edge Gateway - IoT Node)
 
-Backend telah dilengkapi dengan portal dokumentasi OpenAPI 3.0 interaktif yang dapat diakses secara langsung saat server berjalan:
+Berikut adalah struktur hubungan hirarki dan keterkaitan data antara Keramba (KJA), Edge Gateway, dan IoT Node:
 
-- **Portal Utama Swagger UI**: `http://localhost:8000/api/documentation`
-- **Endpoint Alias**: `http://localhost:8000/api-documentation`
-- **Spesifikasi JSON**: `http://localhost:8000/docs/api-docs.json`
+```mermaid
+graph LR
+    subgraph Wilayah Administrasi
+        City[City / Kabupaten]
+    end
+
+    subgraph Edge Gateway Layer
+        EdgeGW[Edge Gateway<br/>Serial: EDGE-GW-001]
+    end
+
+    subgraph Keramba Jaring Apung (KJA)
+        CageA[Keramba A<br/>Code: CAGE-A01]
+        CageB[Keramba B<br/>Code: CAGE-B01]
+    end
+
+    subgraph IoT Node Layer
+        Node1[IoT Node 1<br/>Serial: LOB-NODE-001]
+        Node2[IoT Node 2<br/>Serial: LOB-NODE-002]
+        Node3[IoT Node 3<br/>Serial: LOB-NODE-003]
+    end
+
+    subgraph Sensor & Actuator Layer
+        Sensors1[Sensor Array: pH, DO, TDS, Temp]
+        Feeder1[Relay Dispenser Pakan]
+        Aerator1[Relay Aerator Oksigen]
+        Cam1[CCTV Stream URL]
+    end
+
+    City -->|1 to N| EdgeGW
+    EdgeGW -->|1 to N| CageA
+    EdgeGW -->|1 to N| CageB
+
+    CageA -->|1 to N| Node1
+    CageA -->|1 to N| Node2
+    CageB -->|1 to N| Node3
+
+    Node1 --> Sensors1
+    Node1 --> Feeder1
+    Node1 --> Aerator1
+    Node1 --> Cam1
+```
 
 ---
 
-## ⚙️ Panduan Instalasi & Pengoperasian Local
+## 4. Matriks Hak Akses Pengguna (Role-Based Access Control)
 
-### 1. Prasyarat Sistem
-- PHP `>= 8.2` (dengan ekstensi `pdo`, `mbstring`, `gd`, `xml`, `curl`)
+Backend menerapkan kontrol akses berbasis peranan untuk mengamankan endpoint API:
+
+| Modul / Endpoint Group | User Role: `admin` | User Role: `management` | User Role: `operator` |
+| :--- | :---: | :---: | :---: |
+| **Authentication & Profile** | Full Access | Full Access | Full Access |
+| **Monitoring Telemetry Read** | Full Access | Full Access | Read-Only |
+| **Master Data (Cages, Nodes, Gateways, Cameras)** | Full Access (CRUD) | Read-Only | Read-Only |
+| **Device Activation & Maintenance Submit** | Full Access | Read-Only | Create & Read |
+| **Threshold Configuration & System Settings** | Full Access (Update) | Read-Only | Read-Only |
+| **Feeding Logs & Manual Control** | Full Access | Read-Only | Create & Read |
+| **Reports Data & File Export (PDF/CSV/Excel)** | Full Access | Full Access (Export) | Read-Only |
+
+---
+
+## 5. Dokumentasi API Interaktif (OpenAPI 3.0 / Swagger)
+
+Dokumentasi API lengkap dengan skema request/response dan pengujian interaktif dapat diakses saat server berjalan:
+
+- **Swagger UI Portal**: `http://localhost:8000/api/documentation`
+- **Swagger UI Alias**: `http://localhost:8000/api-documentation`
+- **OpenAPI 3.0 JSON Spec**: `http://localhost:8000/docs/api-docs.json`
+
+---
+
+## 6. Panduan Instalasi & Konfigurasi Lokal
+
+### 6.1 Prasyarat Lingkungan
+- PHP `>= 8.2` (Ekstensi: `pdo`, `mbstring`, `gd`, `xml`, `curl`, `zip`)
 - Composer `>= 2.5`
 - Database Server: MySQL 8.0+ atau PostgreSQL
-- InfluxDB v2 (Opsional untuk data time-series lokal, fallback mock otomatis aktif jika offline)
+- InfluxDB v2 (Opsional, fallback otomatis aktif jika server TSDB offline)
 
-### 2. Langkah-Langkah Instalasi
+### 6.2 Langkah Instalasi
 
 ```bash
 # 1. Masuk ke direktori Backend
 cd Backend
 
-# 2. Install dependensi composer
+# 2. Install dependensi PHP via Composer
 composer install
 
-# 3. Salin file lingkungan .env
+# 3. Buat file konfigurasi lingkungan
 cp .env.example .env
 
-# 4. Generate Application Key
+# 4. Generate Application Encryption Key
 php artisan key:generate
 
-# 5. Buat tautan direktori penyimpanan publik (storage link)
+# 5. Buat symbolic link untuk direktori storage
 php artisan storage:link
 
-# 6. Jalankan Migrasi Database & Seeder Data Awal
+# 6. Jalankan migrasi database dan penyemaian data awal
 php artisan migrate:fresh --seed
 
-# 7. Generate Dokumentasi Swagger OpenAPI
+# 7. Generate dokumentasi Swagger OpenAPI
 php artisan l5-swagger:generate
 
-# 8. Jalankan Server Lokal Laravel
+# 8. Jalankan server lokal Laravel
 php artisan serve --port=8000
 ```
 
-Backend API siap diakses di `http://localhost:8000/api/v2`.
+Layanan Backend API akan berjalan pada `http://localhost:8000`.
