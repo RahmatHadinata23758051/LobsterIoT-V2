@@ -113,6 +113,7 @@ Route::prefix('v2')->group(function () {
         Route::middleware('role:admin,management')->group(function () {
             // Settings and thresholds modifications
             Route::put('system-settings', [SystemSettingController::class, 'update']);
+            Route::post('system-settings', [SystemSettingController::class, 'update']);
             Route::post('thresholds/bulk-update', [ThresholdController::class, 'bulkUpdate']);
 
             // Cages (KJA) modifications

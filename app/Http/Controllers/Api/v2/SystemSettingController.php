@@ -13,7 +13,13 @@ class SystemSettingController extends Controller
      */
     public function index()
     {
-        $settings = SystemSetting::pluck('value', 'key');
+        $settings = SystemSetting::pluck('value', 'key')->toArray();
+        if (!empty($settings['system_logo_image'])) {
+            $settings['system_logo_url'] = asset('storage/' . $settings['system_logo_image']);
+        } else {
+            $settings['system_logo_url'] = null;
+        }
+
         return $this->success('System settings retrieved successfully', $settings);
     }
 
@@ -23,20 +29,37 @@ class SystemSettingController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'system_latitude' => 'nullable|numeric',
-            'system_longitude' => 'nullable|numeric',
+            'system_latitude' => 'nullable',
+            'system_longitude' => 'nullable',
             'system_city_name' => 'nullable|string',
             'system_province_code' => 'nullable|string',
             'system_city_code' => 'nullable|string',
             'system_district_code' => 'nullable|string',
             'system_logo_text' => 'nullable|string',
             'system_instansi_name' => 'nullable|string',
+            'system_logo_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
+            'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
         ]);
 
         foreach ($validated as $key => $value) {
+            if ($key === 'system_logo_file' || $key === 'logo_file') {
+                continue;
+            }
+            if ($value !== null) {
+                SystemSetting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => (string) $value]
+                );
+            }
+        }
+
+        // Handle image file upload for system logo
+        if ($request->hasFile('system_logo_file') || $request->hasFile('logo_file')) {
+            $file = $request->file('system_logo_file') ?? $request->file('logo_file');
+            $path = $file->store('branding', 'public');
             SystemSetting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value]
+                ['key' => 'system_logo_image'],
+                ['value' => $path]
             );
         }
 
@@ -54,7 +77,13 @@ class SystemSettingController extends Controller
             }
         }
 
-        $settings = SystemSetting::pluck('value', 'key');
+        $settings = SystemSetting::pluck('value', 'key')->toArray();
+        if (!empty($settings['system_logo_image'])) {
+            $settings['system_logo_url'] = asset('storage/' . $settings['system_logo_image']);
+        } else {
+            $settings['system_logo_url'] = null;
+        }
+
         return $this->success('System settings updated successfully', $settings);
     }
 

@@ -75,11 +75,28 @@ class AiProxyController extends Controller
                 'raw_predictions' => $predictions
             ]);
 
+        } catch (\Illuminate\Http\Client\ConnectionException | \GuzzleHttp\Exception\ConnectException $connEx) {
+            Log::warning("AI Inference Server at {$yoloUrl} is offline: " . $connEx->getMessage());
+            return response()->json([
+                'status' => 'offline',
+                'message' => 'Server inferensi AI (Port 8001) sedang tidak terhubung.',
+                'data' => [
+                    'total' => 0,
+                    'classes' => [],
+                    'raw_predictions' => []
+                ]
+            ], 200);
         } catch (\Exception $e) {
-            Log::error('AI Proxy Inference Error: ' . $e->getMessage(), [
-                'exception' => $e
-            ]);
-            return $this->error('Terjadi kesalahan saat memproses deteksi AI.', null, 500);
+            Log::error('AI Proxy Inference Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'offline',
+                'message' => 'Server AI sedang tidak aktif.',
+                'data' => [
+                    'total' => 0,
+                    'classes' => [],
+                    'raw_predictions' => []
+                ]
+            ], 200);
         }
     }
 
