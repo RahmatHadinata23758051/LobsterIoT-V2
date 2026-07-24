@@ -7,11 +7,24 @@ use Illuminate\Http\Request;
 use App\Models\Operator;
 use Illuminate\Support\Facades\Validator;
 
+use OpenApi\Attributes as OA;
+
 class OperatorController extends Controller
 {
     /**
      * Display a listing of the operators.
      */
+    #[OA\Get(
+        path: "/api/v2/operators",
+        summary: "Daftar Semua Operator",
+        description: "Mengambil seluruh data operator lapangan yang terdaftar.",
+        tags: ["Operators"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Daftar operator berhasil diambil"),
+            new OA\Response(response: 401, description: "Tidak terautentikasi")
+        ]
+    )]
     public function index()
     {
         $operators = Operator::all();
@@ -21,6 +34,28 @@ class OperatorController extends Controller
     /**
      * Store a newly created operator in storage.
      */
+    #[OA\Post(
+        path: "/api/v2/operators",
+        summary: "Tambah Operator Baru",
+        description: "Mendaftarkan operator lapangan baru ke dalam sistem.",
+        tags: ["Operators"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["full_name", "phone_number", "address"],
+                properties: [
+                    new OA\Property(property: "full_name", type: "string", example: "Budi Setiawan"),
+                    new OA\Property(property: "phone_number", type: "string", example: "081234567890"),
+                    new OA\Property(property: "address", type: "string", example: "Jl. Pantai Indah No. 12, Mataram")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Operator berhasil ditambahkan"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -45,6 +80,20 @@ class OperatorController extends Controller
     /**
      * Display the specified operator.
      */
+    #[OA\Get(
+        path: "/api/v2/operators/{id}",
+        summary: "Detail Operator",
+        description: "Mengambil detail data satu operator berdasarkan ID.",
+        tags: ["Operators"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer", example: 1))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Detail operator berhasil diambil"),
+            new OA\Response(response: 404, description: "Operator tidak ditemukan")
+        ]
+    )]
     public function show($id)
     {
         $operator = Operator::find($id);
@@ -59,6 +108,31 @@ class OperatorController extends Controller
     /**
      * Update the specified operator in storage.
      */
+    #[OA\Put(
+        path: "/api/v2/operators/{id}",
+        summary: "Update Operator",
+        description: "Memperbarui data operator lapangan yang sudah ada.",
+        tags: ["Operators"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer", example: 1))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "full_name", type: "string", example: "Budi Setiawan"),
+                    new OA\Property(property: "phone_number", type: "string", example: "081234567890"),
+                    new OA\Property(property: "address", type: "string", example: "Jl. Pantai Indah No. 15, Mataram")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Operator berhasil diperbarui"),
+            new OA\Response(response: 404, description: "Operator tidak ditemukan"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function update(Request $request, $id)
     {
         $operator = Operator::find($id);
@@ -89,6 +163,20 @@ class OperatorController extends Controller
     /**
      * Remove the specified operator from storage.
      */
+    #[OA\Delete(
+        path: "/api/v2/operators/{id}",
+        summary: "Hapus Operator",
+        description: "Menghapus data operator berdasarkan ID.",
+        tags: ["Operators"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer", example: 1))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Operator berhasil dihapus"),
+            new OA\Response(response: 404, description: "Operator tidak ditemukan")
+        ]
+    )]
     public function destroy($id)
     {
         $operator = Operator::find($id);

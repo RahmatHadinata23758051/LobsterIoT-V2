@@ -143,6 +143,25 @@ class MonitoringController extends Controller
     /**
      * Query historical telemetry range for a node.
      */
+    #[OA\Get(
+        path: "/api/v2/monitoring/history/{serial_number}",
+        summary: "Riwayat Telemetri Historis",
+        description: "Mengambil data telemetri historis untuk IoT Node tertentu dengan rentang tanggal dan resolusi yang dapat dikonfigurasi.",
+        tags: ["Monitoring & Telemetry"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "serial_number", in: "path", required: true, schema: new OA\Schema(type: "string", example: "DEMO-NODE-001")),
+            new OA\Parameter(name: "startDate", in: "query", required: true, description: "Tanggal awal (YYYY-MM-DD)", schema: new OA\Schema(type: "string", format: "date", example: "2026-07-01")),
+            new OA\Parameter(name: "endDate", in: "query", required: true, description: "Tanggal akhir (YYYY-MM-DD)", schema: new OA\Schema(type: "string", format: "date", example: "2026-07-24")),
+            new OA\Parameter(name: "limit", in: "query", required: false, schema: new OA\Schema(type: "integer", example: 100)),
+            new OA\Parameter(name: "resolution", in: "query", required: false, description: "Resolusi agregasi data", schema: new OA\Schema(type: "string", enum: ["raw", "5m", "15m", "1h", "6h", "12h", "1d"], example: "1h"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Data historis berhasil diambil"),
+            new OA\Response(response: 404, description: "IoT Node tidak ditemukan"),
+            new OA\Response(response: 422, description: "Validasi tanggal gagal")
+        ]
+    )]
     public function history(Request $request, string $serialNumber)
     {
         $nodeExists = IotNode::where('serial_number', $serialNumber)->exists();

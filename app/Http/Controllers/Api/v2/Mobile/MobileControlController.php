@@ -7,12 +7,26 @@ use App\Models\FeedingLog;
 use App\Models\IotNode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use OpenApi\Attributes as OA;
 
 class MobileControlController extends Controller
 {
     /**
      * Get feeding schedules, aerator status & recent activity logs for mobile control screen.
      */
+    #[OA\Get(
+        path: "/api/v2/mobile/feeding/schedules",
+        summary: "Jadwal Pakan & Status Aerator Mobile",
+        description: "Mengambil data jadwal pemberian pakan, status aerator, dan riwayat log pakan/aerator terbaru untuk layar kontrol mobile.",
+        tags: ["Mobile Dedicated API"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "serial_number", in: "query", required: false, schema: new OA\Schema(type: "string", example: "DEMO-NODE-001"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Data jadwal & log kontrol mobile berhasil dimuat")
+        ]
+    )]
     public function index(Request $request)
     {
         $serialNumber = $request->query('serial_number');
@@ -93,6 +107,28 @@ class MobileControlController extends Controller
     /**
      * Aerator manual override trigger handler with N minutes duration timer.
      */
+    #[OA\Post(
+        path: "/api/v2/mobile/aerator/toggle",
+        summary: "Kontrol Manual Aerator Mobile",
+        description: "Mengaktifkan/mematikan sakelar relai aerator secara manual atau mengembalikan ke mode AUTO.",
+        tags: ["Mobile Dedicated API"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["iot_node_serial_number", "mode"],
+                properties: [
+                    new OA\Property(property: "iot_node_serial_number", type: "string", example: "DEMO-NODE-001"),
+                    new OA\Property(property: "mode", type: "string", enum: ["AUTO", "MANUAL_ON", "MANUAL_OFF"], example: "MANUAL_ON"),
+                    new OA\Property(property: "duration_minutes", type: "integer", example: 30)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Status aerator berhasil diperbarui"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function toggleAerator(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -146,6 +182,31 @@ class MobileControlController extends Controller
     /**
      * Store new feeding schedule / record from mobile.
      */
+    #[OA\Post(
+        path: "/api/v2/mobile/feeding/schedule",
+        summary: "Tambah Jadwal Pakan Mobile",
+        description: "Menyimpan jadwal pemberian pakan baru melalui aplikasi mobile.",
+        tags: ["Mobile Dedicated API"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["iot_node_serial_number", "food_type"],
+                properties: [
+                    new OA\Property(property: "iot_node_serial_number", type: "string", example: "DEMO-NODE-001"),
+                    new OA\Property(property: "food_type", type: "string", example: "Pelet Super Alpha"),
+                    new OA\Property(property: "amount_kg", type: "number", example: 1.0),
+                    new OA\Property(property: "duration_seconds", type: "integer", example: 15),
+                    new OA\Property(property: "scheduled_time", type: "string", example: "08:00"),
+                    new OA\Property(property: "notes", type: "string", example: "Jadwal pagi mobile")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Jadwal pakan berhasil disimpan"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function storeSchedule(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -198,6 +259,27 @@ class MobileControlController extends Controller
     /**
      * Trigger instant manual feeding / emergency relay switch from mobile.
      */
+    #[OA\Post(
+        path: "/api/v2/mobile/feeding/trigger",
+        summary: "Pakan Instan Dispenser Mobile",
+        description: "Memicu pemberian pakan instan langsung melalui relai dispenser otomatis.",
+        tags: ["Mobile Dedicated API"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["iot_node_serial_number"],
+                properties: [
+                    new OA\Property(property: "iot_node_serial_number", type: "string", example: "DEMO-NODE-001"),
+                    new OA\Property(property: "duration_seconds", type: "integer", example: 10)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Perintah pakan manual berhasil dikirim"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function triggerInstant(Request $request)
     {
         $validator = Validator::make($request->all(), [

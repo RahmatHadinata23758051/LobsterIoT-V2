@@ -8,11 +8,27 @@ use App\Models\Threshold;
 use App\Models\IotNode;
 use Illuminate\Support\Facades\Validator;
 
+use OpenApi\Attributes as OA;
+
 class ThresholdController extends Controller
 {
     /**
      * Retrieve threshold configurations for a given IoT Node.
      */
+    #[OA\Get(
+        path: "/api/v2/thresholds",
+        summary: "Daftar Ambang Batas Sensor",
+        description: "Mengambil konfigurasi ambang batas sensor untuk IoT Node tertentu berdasarkan serial number.",
+        tags: ["Thresholds"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "iot_node_serial_number", in: "query", required: true, schema: new OA\Schema(type: "string", example: "DEMO-NODE-001"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Daftar ambang batas berhasil diambil"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -31,6 +47,39 @@ class ThresholdController extends Controller
     /**
      * Bulk update threshold configurations.
      */
+    #[OA\Post(
+        path: "/api/v2/thresholds/bulk-update",
+        summary: "Bulk Update Ambang Batas Sensor",
+        description: "Memperbarui atau membuat ambang batas sensor secara massal untuk satu IoT Node.",
+        tags: ["Thresholds"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["iot_node_serial_number", "thresholds"],
+                properties: [
+                    new OA\Property(property: "iot_node_serial_number", type: "string", example: "DEMO-NODE-001"),
+                    new OA\Property(
+                        property: "thresholds",
+                        type: "array",
+                        items: new OA\Items(
+                            properties: [
+                                new OA\Property(property: "sensor_code", type: "string", example: "ph"),
+                                new OA\Property(property: "value_min", type: "number", example: 6.5),
+                                new OA\Property(property: "value_max", type: "number", example: 8.5),
+                                new OA\Property(property: "offset_value", type: "number", example: 0.1),
+                                new OA\Property(property: "filter_rules", type: "string", example: "moving_average")
+                            ]
+                        )
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Ambang batas berhasil diperbarui"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function bulkUpdate(Request $request)
     {
         $validator = Validator::make($request->all(), [

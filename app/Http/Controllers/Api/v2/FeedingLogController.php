@@ -8,12 +8,31 @@ use App\Models\FeedingLog;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
+use OpenApi\Attributes as OA;
+
 class FeedingLogController extends Controller
 {
     /**
      * Display a listing of feeding logs.
      * Supports filtering by date, cage_id, and operator_id.
      */
+    #[OA\Get(
+        path: "/api/v2/feeding-logs",
+        summary: "Daftar Log Pemberian Pakan",
+        description: "Mengambil seluruh log pemberian pakan dengan filter opsional berdasarkan tanggal, IoT Node, keramba, atau operator.",
+        tags: ["Feeding Logs"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "date", in: "query", required: false, description: "Filter tanggal (YYYY-MM-DD)", schema: new OA\Schema(type: "string", format: "date", example: "2026-07-24")),
+            new OA\Parameter(name: "iot_node_id", in: "query", required: false, schema: new OA\Schema(type: "integer", example: 1)),
+            new OA\Parameter(name: "cage_id", in: "query", required: false, schema: new OA\Schema(type: "integer", example: 1)),
+            new OA\Parameter(name: "operator_id", in: "query", required: false, schema: new OA\Schema(type: "integer", example: 1))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Daftar log pakan berhasil diambil"),
+            new OA\Response(response: 401, description: "Tidak terautentikasi")
+        ]
+    )]
     public function index(Request $request)
     {
         $query = FeedingLog::with(['iotNode.cage', 'operator']);
@@ -53,6 +72,30 @@ class FeedingLogController extends Controller
     /**
      * Store a newly created feeding log.
      */
+    #[OA\Post(
+        path: "/api/v2/feeding-logs",
+        summary: "Catat Log Pakan Baru",
+        description: "Mencatat pemberian pakan baru untuk IoT Node tertentu.",
+        tags: ["Feeding Logs"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["iot_node_id", "operator_id", "feed_session", "feed_type", "weight_kg"],
+                properties: [
+                    new OA\Property(property: "iot_node_id", type: "integer", example: 1),
+                    new OA\Property(property: "operator_id", type: "integer", example: 1),
+                    new OA\Property(property: "feed_session", type: "string", enum: ["morning", "afternoon", "night"], example: "morning"),
+                    new OA\Property(property: "feed_type", type: "string", example: "Pelet Premium"),
+                    new OA\Property(property: "weight_kg", type: "number", format: "double", example: 2.5)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Log pakan berhasil dicatat"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -82,6 +125,20 @@ class FeedingLogController extends Controller
     /**
      * Remove the specified feeding log.
      */
+    #[OA\Delete(
+        path: "/api/v2/feeding-logs/{id}",
+        summary: "Hapus Log Pakan",
+        description: "Menghapus log pemberian pakan berdasarkan ID.",
+        tags: ["Feeding Logs"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer", example: 1))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Log pakan berhasil dihapus"),
+            new OA\Response(response: 404, description: "Log pakan tidak ditemukan")
+        ]
+    )]
     public function destroy(string $id)
     {
         $log = FeedingLog::find($id);

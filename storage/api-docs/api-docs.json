@@ -99,6 +99,552 @@
                 }
             }
         },
+        "/api/v2/profile": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Profil Pengguna Aktif",
+                "description": "Mengambil data profil pengguna yang sedang terautentikasi.",
+                "operationId": "81decbb811eb6f5e8827dd15fe539293",
+                "responses": {
+                    "200": {
+                        "description": "Profil berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update Profil Pengguna",
+                "description": "Mengubah nama dan email pengguna yang sedang terautentikasi.",
+                "operationId": "21157df311c96a26c1932cb1cc84ddf6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Rahmat Hadinata"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@lobsense.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout Pengguna",
+                "description": "Mencabut token akses pengguna (logout sesi aktif).",
+                "operationId": "b6532ccdf956e6170afe6f77bb1149cf",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil logout"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cages": {
+            "get": {
+                "tags": [
+                    "Cages (KJA)"
+                ],
+                "summary": "Daftar Semua Keramba (KJA)",
+                "description": "Mengambil seluruh data keramba jaring apung yang terdaftar dalam sistem.",
+                "operationId": "59868a9d4c911311e4d0013551549391",
+                "responses": {
+                    "200": {
+                        "description": "Daftar keramba berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Cages (KJA)"
+                ],
+                "summary": "Tambah Keramba Baru",
+                "description": "Membuat data keramba jaring apung (KJA) baru.",
+                "operationId": "cad60a320efa4de9be8ec13516f0936a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cage_code"
+                                ],
+                                "properties": {
+                                    "cage_code": {
+                                        "type": "string",
+                                        "example": "CAGE-B02"
+                                    },
+                                    "edge_gateway_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.123
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 115.456
+                                    },
+                                    "volume_cubic_meters": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 12.5
+                                    },
+                                    "structure_condition": {
+                                        "type": "string",
+                                        "example": "Baik"
+                                    },
+                                    "lobster_count": {
+                                        "type": "integer",
+                                        "example": 250
+                                    },
+                                    "lobster_age_days": {
+                                        "type": "integer",
+                                        "example": 45
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Keramba berhasil dibuat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cages/{id}": {
+            "get": {
+                "tags": [
+                    "Cages (KJA)"
+                ],
+                "summary": "Detail Keramba",
+                "description": "Mengambil detail data satu keramba berdasarkan ID.",
+                "operationId": "20faff927168460dadc8926121f9b1bf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail keramba berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Keramba tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Cages (KJA)"
+                ],
+                "summary": "Update Keramba",
+                "description": "Memperbarui data keramba jaring apung yang sudah ada.",
+                "operationId": "0764e35856d82cbc729aad6f29be5a76",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "cage_code": {
+                                        "type": "string",
+                                        "example": "CAGE-B02"
+                                    },
+                                    "edge_gateway_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.123
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 115.456
+                                    },
+                                    "volume_cubic_meters": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 12.5
+                                    },
+                                    "structure_condition": {
+                                        "type": "string",
+                                        "example": "Baik"
+                                    },
+                                    "lobster_count": {
+                                        "type": "integer",
+                                        "example": 300
+                                    },
+                                    "lobster_age_days": {
+                                        "type": "integer",
+                                        "example": 60
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Keramba berhasil diperbarui"
+                    },
+                    "404": {
+                        "description": "Keramba tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Cages (KJA)"
+                ],
+                "summary": "Hapus Keramba",
+                "description": "Menghapus data keramba jaring apung berdasarkan ID.",
+                "operationId": "11f58c364c8c69dc044496c099ecf461",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Keramba berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Keramba tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cameras": {
+            "get": {
+                "tags": [
+                    "Cameras"
+                ],
+                "summary": "Daftar Semua Kamera",
+                "description": "Mengambil seluruh data kamera pengawas yang terdaftar beserta relasi IoT Node & Cage.",
+                "operationId": "b6a6a99c97e4050d3f3afcb4520d1a63",
+                "responses": {
+                    "200": {
+                        "description": "Daftar kamera berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Cameras"
+                ],
+                "summary": "Tambah Kamera Baru",
+                "description": "Mendaftarkan kamera pengawas baru dan menghubungkannya ke IoT Node.",
+                "operationId": "55bb27e31e98d1fbe8b60e47c8bc52ac",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "camera_code",
+                                    "iot_node_id"
+                                ],
+                                "properties": {
+                                    "camera_code": {
+                                        "type": "string",
+                                        "example": "CAM-A01"
+                                    },
+                                    "iot_node_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "stream_url": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "rtsp://192.168.1.100:554/stream"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Kamera berhasil ditambahkan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cameras/{id}": {
+            "get": {
+                "tags": [
+                    "Cameras"
+                ],
+                "summary": "Detail Kamera",
+                "description": "Mengambil detail data satu kamera berdasarkan ID.",
+                "operationId": "66584f6784071b7489e8ac91f84a955a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail kamera berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Kamera tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Cameras"
+                ],
+                "summary": "Update Kamera",
+                "description": "Memperbarui data kamera pengawas yang sudah ada.",
+                "operationId": "dd3917d9e33e0f3127e48d5864a086aa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "camera_code": {
+                                        "type": "string",
+                                        "example": "CAM-B02"
+                                    },
+                                    "iot_node_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "stream_url": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "rtsp://192.168.1.101:554/stream"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Kamera berhasil diperbarui"
+                    },
+                    "404": {
+                        "description": "Kamera tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Cameras"
+                ],
+                "summary": "Hapus Kamera",
+                "description": "Menghapus data kamera pengawas berdasarkan ID.",
+                "operationId": "f2dfedefed8a50450858935cdba47776",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Kamera berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Kamera tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v2/devices/validate-serial": {
             "post": {
                 "tags": [
@@ -128,6 +674,10 @@
                                     "serial_number": {
                                         "type": "string",
                                         "example": "LOB-NODE-001"
+                                    },
+                                    "is_maintenance": {
+                                        "type": "boolean",
+                                        "example": false
                                     }
                                 },
                                 "type": "object"
@@ -141,6 +691,1081 @@
                     },
                     "404": {
                         "description": "Nomor seri tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/devices/activate": {
+            "post": {
+                "tags": [
+                    "Device Operations"
+                ],
+                "summary": "Aktivasi Perangkat IoT",
+                "description": "Mengaktivasi perangkat IoT Node atau Edge Gateway dengan upload foto dan tanda tangan.",
+                "operationId": "38eda3a9bc2e7a4592eacaea14c9cc3a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "category",
+                                    "id",
+                                    "picture",
+                                    "signature",
+                                    "latitude",
+                                    "longitude"
+                                ],
+                                "properties": {
+                                    "category": {
+                                        "type": "string",
+                                        "enum": [
+                                            "iot_node",
+                                            "edge_gateway"
+                                        ]
+                                    },
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "picture": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "signature": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.123
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 115.456
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perangkat berhasil diaktivasi"
+                    },
+                    "404": {
+                        "description": "Perangkat tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/maintenances": {
+            "get": {
+                "tags": [
+                    "Device Operations"
+                ],
+                "summary": "Daftar Log Pemeliharaan",
+                "description": "Mengambil seluruh riwayat log pemeliharaan perangkat beserta relasi IoT Node dan Operator.",
+                "operationId": "d5e21763988a55ff8be8d4d9486d533b",
+                "responses": {
+                    "200": {
+                        "description": "Daftar log pemeliharaan berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Device Operations"
+                ],
+                "summary": "Catat Log Pemeliharaan",
+                "description": "Mengirimkan laporan pemeliharaan perangkat IoT beserta foto dan tanda tangan operator.",
+                "operationId": "bea82b85862f3fdc91eb684198827fcd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "iot_node_id",
+                                    "description",
+                                    "signature",
+                                    "latitude",
+                                    "longitude"
+                                ],
+                                "properties": {
+                                    "iot_node_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Pembersihan sensor pH dan kalibrasi ulang"
+                                    },
+                                    "picture": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "signature": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.123
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 115.456
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Log pemeliharaan berhasil dicatat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/edge-gateways": {
+            "get": {
+                "tags": [
+                    "Edge Gateways"
+                ],
+                "summary": "Daftar Semua Edge Gateway",
+                "description": "Mengambil seluruh data Edge Gateway beserta relasi kota.",
+                "operationId": "80303193b26e54c0fe0cbf5dca43519b",
+                "responses": {
+                    "200": {
+                        "description": "Daftar Edge Gateway berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Edge Gateways"
+                ],
+                "summary": "Tambah Edge Gateway Baru",
+                "description": "Mendaftarkan perangkat Edge Gateway baru ke dalam sistem.",
+                "operationId": "4400b5c48d566d9dbaee660d95ae1a8a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "serial_number"
+                                ],
+                                "properties": {
+                                    "serial_number": {
+                                        "type": "string",
+                                        "example": "EDGE-GW-002"
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 5201
+                                    },
+                                    "ram_memory": {
+                                        "type": "string",
+                                        "example": "4GB"
+                                    },
+                                    "cpu_speed": {
+                                        "type": "string",
+                                        "example": "1.8GHz"
+                                    },
+                                    "operating_system": {
+                                        "type": "string",
+                                        "example": "Raspbian OS"
+                                    },
+                                    "runtime_framework": {
+                                        "type": "string",
+                                        "example": "Flutter 3.24"
+                                    },
+                                    "power_supply_type": {
+                                        "type": "string",
+                                        "example": "Solar"
+                                    },
+                                    "voltage_level": {
+                                        "type": "string",
+                                        "example": "12V"
+                                    },
+                                    "ip_address": {
+                                        "type": "string",
+                                        "example": "192.168.1.100"
+                                    },
+                                    "gateway_ip": {
+                                        "type": "string",
+                                        "example": "192.168.1.1"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.123
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 115.456
+                                    },
+                                    "max_connected_nodes": {
+                                        "type": "integer",
+                                        "example": 8
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Edge Gateway berhasil dibuat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/edge-gateways/{id}": {
+            "get": {
+                "tags": [
+                    "Edge Gateways"
+                ],
+                "summary": "Detail Edge Gateway",
+                "description": "Mengambil detail data satu Edge Gateway berdasarkan ID.",
+                "operationId": "406f76ada9f90557fc92517c675ca695",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail Edge Gateway berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Edge Gateway tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Edge Gateways"
+                ],
+                "summary": "Update Edge Gateway",
+                "description": "Memperbarui data Edge Gateway yang sudah ada.",
+                "operationId": "0b4a401221d8d53c34ade43a3e02fe36",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "serial_number": {
+                                        "type": "string",
+                                        "example": "EDGE-GW-002"
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 5201
+                                    },
+                                    "ram_memory": {
+                                        "type": "string",
+                                        "example": "8GB"
+                                    },
+                                    "cpu_speed": {
+                                        "type": "string",
+                                        "example": "2.4GHz"
+                                    },
+                                    "ip_address": {
+                                        "type": "string",
+                                        "example": "192.168.1.200"
+                                    },
+                                    "max_connected_nodes": {
+                                        "type": "integer",
+                                        "example": 16
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Edge Gateway berhasil diperbarui"
+                    },
+                    "404": {
+                        "description": "Edge Gateway tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Edge Gateways"
+                ],
+                "summary": "Hapus Edge Gateway",
+                "description": "Menghapus data Edge Gateway berdasarkan ID.",
+                "operationId": "e87d6cde16d2ae50192a25310d2f5530",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Edge Gateway berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Edge Gateway tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/feeding-logs": {
+            "get": {
+                "tags": [
+                    "Feeding Logs"
+                ],
+                "summary": "Daftar Log Pemberian Pakan",
+                "description": "Mengambil seluruh log pemberian pakan dengan filter opsional berdasarkan tanggal, IoT Node, keramba, atau operator.",
+                "operationId": "357d79d6b664203fd5ed46b0cc7efa0f",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Filter tanggal (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-24"
+                        }
+                    },
+                    {
+                        "name": "iot_node_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "cage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "operator_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar log pakan berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Feeding Logs"
+                ],
+                "summary": "Catat Log Pakan Baru",
+                "description": "Mencatat pemberian pakan baru untuk IoT Node tertentu.",
+                "operationId": "5d4335820c4731e4a2016cb31b1de9f8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "iot_node_id",
+                                    "operator_id",
+                                    "feed_session",
+                                    "feed_type",
+                                    "weight_kg"
+                                ],
+                                "properties": {
+                                    "iot_node_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "operator_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "feed_session": {
+                                        "type": "string",
+                                        "example": "morning",
+                                        "enum": [
+                                            "morning",
+                                            "afternoon",
+                                            "night"
+                                        ]
+                                    },
+                                    "feed_type": {
+                                        "type": "string",
+                                        "example": "Pelet Premium"
+                                    },
+                                    "weight_kg": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 2.5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Log pakan berhasil dicatat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/feeding-logs/{id}": {
+            "delete": {
+                "tags": [
+                    "Feeding Logs"
+                ],
+                "summary": "Hapus Log Pakan",
+                "description": "Menghapus log pemberian pakan berdasarkan ID.",
+                "operationId": "beefe5e1eba67593e8da728b85f3a668",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Log pakan berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Log pakan tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/iot-nodes-master": {
+            "get": {
+                "tags": [
+                    "IoT Nodes Master"
+                ],
+                "summary": "Daftar Semua IoT Node (Master)",
+                "description": "Mengambil seluruh data IoT Node master beserta relasi kota, Edge Gateway, dan Keramba.",
+                "operationId": "55398303d5ce977e766b126c675528d7",
+                "responses": {
+                    "200": {
+                        "description": "Daftar IoT Node berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "IoT Nodes Master"
+                ],
+                "summary": "Tambah IoT Node Baru",
+                "description": "Mendaftarkan IoT Node baru ke dalam sistem. Node akan otomatis diaktivasi saat dibuat melalui panel manajemen.",
+                "operationId": "89faa06276feea1a5e9ab8d77f62c51f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "serial_number",
+                                    "city_id"
+                                ],
+                                "properties": {
+                                    "serial_number": {
+                                        "type": "string",
+                                        "example": "LOB-NODE-003"
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 5201
+                                    },
+                                    "edge_gateway_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "cage_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "gateway_channel_number": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "ip_address": {
+                                        "type": "string",
+                                        "example": "192.168.1.50"
+                                    },
+                                    "gateway_ip": {
+                                        "type": "string",
+                                        "example": "192.168.1.1"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.123
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 115.456
+                                    },
+                                    "owner_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "IoT Node berhasil dibuat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/iot-nodes-master/{id}": {
+            "get": {
+                "tags": [
+                    "IoT Nodes Master"
+                ],
+                "summary": "Detail IoT Node",
+                "description": "Mengambil detail data satu IoT Node berdasarkan ID.",
+                "operationId": "e2cd77decdb44e564784d6fa80869a38",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail IoT Node berhasil diambil"
+                    },
+                    "404": {
+                        "description": "IoT Node tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "IoT Nodes Master"
+                ],
+                "summary": "Update IoT Node",
+                "description": "Memperbarui data IoT Node yang sudah ada. Jika belum teraktivasi, akan otomatis diaktivasi saat update.",
+                "operationId": "349619a803918d8d53e1ec7740c4a57b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "serial_number": {
+                                        "type": "string",
+                                        "example": "LOB-NODE-003"
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 5201
+                                    },
+                                    "edge_gateway_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "cage_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "ip_address": {
+                                        "type": "string",
+                                        "example": "192.168.1.55"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.125
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 115.458
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "IoT Node berhasil diperbarui"
+                    },
+                    "404": {
+                        "description": "IoT Node tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "IoT Nodes Master"
+                ],
+                "summary": "Hapus IoT Node",
+                "description": "Menghapus data IoT Node berdasarkan ID.",
+                "operationId": "ec1e89d7dcf090f8a829910a1e5c92ae",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "IoT Node berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "IoT Node tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/mobile/feeding/schedules": {
+            "get": {
+                "tags": [
+                    "Mobile Dedicated API"
+                ],
+                "summary": "Jadwal Pakan & Status Aerator Mobile",
+                "description": "Mengambil data jadwal pemberian pakan, status aerator, dan riwayat log pakan/aerator terbaru untuk layar kontrol mobile.",
+                "operationId": "a51f7f9c00726c4ec3fddd80dc61d039",
+                "parameters": [
+                    {
+                        "name": "serial_number",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "DEMO-NODE-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data jadwal & log kontrol mobile berhasil dimuat"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/mobile/aerator/toggle": {
+            "post": {
+                "tags": [
+                    "Mobile Dedicated API"
+                ],
+                "summary": "Kontrol Manual Aerator Mobile",
+                "description": "Mengaktifkan/mematikan sakelar relai aerator secara manual atau mengembalikan ke mode AUTO.",
+                "operationId": "fc0efc1cce9a2e22e9020b32fe53b236",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "iot_node_serial_number",
+                                    "mode"
+                                ],
+                                "properties": {
+                                    "iot_node_serial_number": {
+                                        "type": "string",
+                                        "example": "DEMO-NODE-001"
+                                    },
+                                    "mode": {
+                                        "type": "string",
+                                        "example": "MANUAL_ON",
+                                        "enum": [
+                                            "AUTO",
+                                            "MANUAL_ON",
+                                            "MANUAL_OFF"
+                                        ]
+                                    },
+                                    "duration_minutes": {
+                                        "type": "integer",
+                                        "example": 30
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status aerator berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/mobile/feeding/schedule": {
+            "post": {
+                "tags": [
+                    "Mobile Dedicated API"
+                ],
+                "summary": "Tambah Jadwal Pakan Mobile",
+                "description": "Menyimpan jadwal pemberian pakan baru melalui aplikasi mobile.",
+                "operationId": "9acf8b2a1ee9ce6bafdf4f777a7abba9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "iot_node_serial_number",
+                                    "food_type"
+                                ],
+                                "properties": {
+                                    "iot_node_serial_number": {
+                                        "type": "string",
+                                        "example": "DEMO-NODE-001"
+                                    },
+                                    "food_type": {
+                                        "type": "string",
+                                        "example": "Pelet Super Alpha"
+                                    },
+                                    "amount_kg": {
+                                        "type": "number",
+                                        "example": 1
+                                    },
+                                    "duration_seconds": {
+                                        "type": "integer",
+                                        "example": 15
+                                    },
+                                    "scheduled_time": {
+                                        "type": "string",
+                                        "example": "08:00"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Jadwal pagi mobile"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Jadwal pakan berhasil disimpan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/mobile/feeding/trigger": {
+            "post": {
+                "tags": [
+                    "Mobile Dedicated API"
+                ],
+                "summary": "Pakan Instan Dispenser Mobile",
+                "description": "Memicu pemberian pakan instan langsung melalui relai dispenser otomatis.",
+                "operationId": "33bbfdc8a32cde1085cd6565adef4cd2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "iot_node_serial_number"
+                                ],
+                                "properties": {
+                                    "iot_node_serial_number": {
+                                        "type": "string",
+                                        "example": "DEMO-NODE-001"
+                                    },
+                                    "duration_seconds": {
+                                        "type": "integer",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perintah pakan manual berhasil dikirim"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/mobile/summary": {
+            "get": {
+                "tags": [
+                    "Mobile Dedicated API"
+                ],
+                "summary": "Ringkasan Dasbor Mobile App",
+                "description": "Super endpoint mobile yang mengembalikan profil pengguna, daftar node aktif, cuaca terbaru, dan telemetri node utama secara sekaligus.",
+                "operationId": "774181cb34235e0a78536bfd49652684",
+                "responses": {
+                    "200": {
+                        "description": "Ringkasan dasbor mobile berhasil dimuat"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/mobile/telemetry/{serial_number}": {
+            "get": {
+                "tags": [
+                    "Mobile Dedicated API"
+                ],
+                "summary": "Telemetri Node Mobile",
+                "description": "Mengambil data telemetri ringan, ambang batas, dan log pakan terbaru untuk satu IoT Node di tampilan aplikasi mobile.",
+                "operationId": "c682d905307792bb8255d3b89afe74d6",
+                "parameters": [
+                    {
+                        "name": "serial_number",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "DEMO-NODE-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data telemetri mobile berhasil dimuat"
+                    },
+                    "404": {
+                        "description": "IoT Node tidak ditemukan"
                     }
                 },
                 "security": [
@@ -203,6 +1828,1202 @@
                     }
                 ]
             }
+        },
+        "/api/v2/monitoring/history/{serial_number}": {
+            "get": {
+                "tags": [
+                    "Monitoring & Telemetry"
+                ],
+                "summary": "Riwayat Telemetri Historis",
+                "description": "Mengambil data telemetri historis untuk IoT Node tertentu dengan rentang tanggal dan resolusi yang dapat dikonfigurasi.",
+                "operationId": "540cde8b09fb7b03f26a2aecf0146ff1",
+                "parameters": [
+                    {
+                        "name": "serial_number",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "DEMO-NODE-001"
+                        }
+                    },
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "description": "Tanggal awal (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-01"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "description": "Tanggal akhir (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-24"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 100
+                        }
+                    },
+                    {
+                        "name": "resolution",
+                        "in": "query",
+                        "description": "Resolusi agregasi data",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "1h",
+                            "enum": [
+                                "raw",
+                                "5m",
+                                "15m",
+                                "1h",
+                                "6h",
+                                "12h",
+                                "1d"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data historis berhasil diambil"
+                    },
+                    "404": {
+                        "description": "IoT Node tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi tanggal gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/operators": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Daftar Semua Operator",
+                "description": "Mengambil seluruh data operator lapangan yang terdaftar.",
+                "operationId": "e5cd01e017f789d7fe9c48925c5fd0dc",
+                "responses": {
+                    "200": {
+                        "description": "Daftar operator berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terautentikasi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Tambah Operator Baru",
+                "description": "Mendaftarkan operator lapangan baru ke dalam sistem.",
+                "operationId": "1a186a04aa3fbe0af514b880e7faba21",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "full_name",
+                                    "phone_number",
+                                    "address"
+                                ],
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "Budi Setiawan"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Jl. Pantai Indah No. 12, Mataram"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Operator berhasil ditambahkan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/operators/{id}": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Detail Operator",
+                "description": "Mengambil detail data satu operator berdasarkan ID.",
+                "operationId": "a5a6c8ba7a55c7571dbf6d6c64df1b7f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail operator berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Operator tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Update Operator",
+                "description": "Memperbarui data operator lapangan yang sudah ada.",
+                "operationId": "3e980c32dfb29526817816ba5d9bb58f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "Budi Setiawan"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Jl. Pantai Indah No. 15, Mataram"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operator berhasil diperbarui"
+                    },
+                    "404": {
+                        "description": "Operator tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Hapus Operator",
+                "description": "Menghapus data operator berdasarkan ID.",
+                "operationId": "df8e019959328cc6ed3c0033dcea5b4a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operator berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Operator tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/provinces": {
+            "get": {
+                "tags": [
+                    "Regions"
+                ],
+                "summary": "Daftar Provinsi",
+                "description": "Mengambil seluruh data provinsi Indonesia.",
+                "operationId": "5b37fb21dfe2e242613fab3d89746bf7",
+                "responses": {
+                    "200": {
+                        "description": "Daftar provinsi berhasil diambil"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cities": {
+            "get": {
+                "tags": [
+                    "Regions"
+                ],
+                "summary": "Daftar Kota/Kabupaten",
+                "description": "Mengambil data kota/kabupaten dengan filter opsional berdasarkan provinsi.",
+                "operationId": "f6b2a763d446f09d787a1cacb3418953",
+                "parameters": [
+                    {
+                        "name": "province_code",
+                        "in": "query",
+                        "description": "Kode provinsi untuk filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "52"
+                        }
+                    },
+                    {
+                        "name": "province_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar kota berhasil diambil"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/districts": {
+            "get": {
+                "tags": [
+                    "Regions"
+                ],
+                "summary": "Daftar Kecamatan",
+                "description": "Mengambil data kecamatan dengan filter opsional berdasarkan kode kota.",
+                "operationId": "92ebd2c1f8b269c7f304185dc9b4b8c4",
+                "parameters": [
+                    {
+                        "name": "city_code",
+                        "in": "query",
+                        "description": "Kode kota untuk filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "5201"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar kecamatan berhasil diambil"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Preview Data Laporan",
+                "description": "Mengambil data mentah laporan untuk preview tabel interaktif. Mendukung tipe: node-registration, telemetry, maintenance, feeding.",
+                "operationId": "fdab9f6feaaa3f0aa7db4c77485e1fde",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Tipe laporan",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "telemetry",
+                            "enum": [
+                                "node-registration",
+                                "telemetry",
+                                "maintenance",
+                                "feeding"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-01"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-24"
+                        }
+                    },
+                    {
+                        "name": "iot_node_serial_number",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "DEMO-NODE-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data laporan berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Tipe laporan tidak valid"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/node-registration/pdf": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Registrasi Node (PDF)",
+                "description": "5. Exports: Node Registration",
+                "operationId": "aa60ca4caab43d27e1e1aedb8b505b12",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File PDF berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/node-registration/csv": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Registrasi Node (CSV)",
+                "operationId": "908581ea8c46aed084e5a22117c799e3",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File CSV berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/node-registration/excel": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Registrasi Node (Excel)",
+                "operationId": "5a82ed0de4ffac84c7e9644cd6fbedf9",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/telemetry/pdf": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Telemetri Sensor (PDF)",
+                "description": "6. Exports: Telemetry",
+                "operationId": "e9fb89c85c7d66b94c9e2553772d7b97",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "serial_number",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File PDF berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/telemetry/csv": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Telemetri Sensor (CSV)",
+                "operationId": "77bd3c8868476f053a20fb33a775d0cf",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "serial_number",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File CSV berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/telemetry/excel": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Telemetri Sensor (Excel)",
+                "operationId": "342cec06f3a6dff70b97cfcaf04473af",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "serial_number",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/maintenance/pdf": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Log Pemeliharaan (PDF)",
+                "description": "7. Exports: Maintenance",
+                "operationId": "2410676d7fa87a71365896f54e19ed70",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File PDF berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/maintenance/csv": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Log Pemeliharaan (CSV)",
+                "operationId": "1074d74895201fd7a395f8ab83413518",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File CSV berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/maintenance/excel": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Log Pemeliharaan (Excel)",
+                "operationId": "5123c8420ccb981af2514d141964b90c",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/feeding/pdf": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Log Pemberian Pakan (PDF)",
+                "description": "8. Exports: Feeding",
+                "operationId": "e1c9807588e7b55962b33ff384e8b8fc",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File PDF berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/feeding/csv": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Log Pemberian Pakan (CSV)",
+                "operationId": "1dd64a8a43bfa5286e8b7d9c27feb922",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File CSV berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/reports/feeding/excel": {
+            "get": {
+                "tags": [
+                    "Reports & Exports"
+                ],
+                "summary": "Ekspor Log Pemberian Pakan (Excel)",
+                "operationId": "b1ca1cc79d6c118edbf112ec9cd5b271",
+                "parameters": [
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel berhasil diunduh"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/sensor-types": {
+            "get": {
+                "tags": [
+                    "Sensor Types"
+                ],
+                "summary": "Daftar Tipe Sensor",
+                "description": "Mengambil seluruh tipe sensor yang tersedia dalam sistem (pH, TDS, DO, Suhu, dll).",
+                "operationId": "b86395983527f1df4280ee9c82857fc4",
+                "responses": {
+                    "200": {
+                        "description": "Daftar tipe sensor berhasil diambil"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/system-settings": {
+            "get": {
+                "tags": [
+                    "System Settings"
+                ],
+                "summary": "Pengaturan Sistem",
+                "description": "Mengambil seluruh pengaturan sistem termasuk lokasi, logo, dan konfigurasi.",
+                "operationId": "ba81ffb5fe7b23d90ab5b8e70083cfe9",
+                "responses": {
+                    "200": {
+                        "description": "Pengaturan sistem berhasil diambil"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "System Settings"
+                ],
+                "summary": "Update Pengaturan Sistem",
+                "description": "Memperbarui pengaturan sistem termasuk lokasi, nama instansi, dan upload logo.",
+                "operationId": "6c004d7da411bbbdcd444c72de24d20f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "system_latitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": -8.583
+                                    },
+                                    "system_longitude": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 116.116
+                                    },
+                                    "system_city_name": {
+                                        "type": "string",
+                                        "example": "Lombok Barat"
+                                    },
+                                    "system_province_code": {
+                                        "type": "string",
+                                        "example": "52"
+                                    },
+                                    "system_city_code": {
+                                        "type": "string",
+                                        "example": "5201"
+                                    },
+                                    "system_district_code": {
+                                        "type": "string",
+                                        "example": "520101"
+                                    },
+                                    "system_logo_text": {
+                                        "type": "string",
+                                        "example": "Lobsense"
+                                    },
+                                    "system_instansi_name": {
+                                        "type": "string",
+                                        "example": "PT Lobster Sensing Indonesia"
+                                    },
+                                    "system_logo_file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "logo_file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pengaturan berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/thresholds": {
+            "get": {
+                "tags": [
+                    "Thresholds"
+                ],
+                "summary": "Daftar Ambang Batas Sensor",
+                "description": "Mengambil konfigurasi ambang batas sensor untuk IoT Node tertentu berdasarkan serial number.",
+                "operationId": "136dc1a702dd5e7c6474a7c3951370b2",
+                "parameters": [
+                    {
+                        "name": "iot_node_serial_number",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "DEMO-NODE-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar ambang batas berhasil diambil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/thresholds/bulk-update": {
+            "post": {
+                "tags": [
+                    "Thresholds"
+                ],
+                "summary": "Bulk Update Ambang Batas Sensor",
+                "description": "Memperbarui atau membuat ambang batas sensor secara massal untuk satu IoT Node.",
+                "operationId": "e253d697fa462a52a66253d0b71d83fb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "iot_node_serial_number",
+                                    "thresholds"
+                                ],
+                                "properties": {
+                                    "iot_node_serial_number": {
+                                        "type": "string",
+                                        "example": "DEMO-NODE-001"
+                                    },
+                                    "thresholds": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "sensor_code": {
+                                                    "type": "string",
+                                                    "example": "ph"
+                                                },
+                                                "value_min": {
+                                                    "type": "number",
+                                                    "example": 6.5
+                                                },
+                                                "value_max": {
+                                                    "type": "number",
+                                                    "example": 8.5
+                                                },
+                                                "offset_value": {
+                                                    "type": "number",
+                                                    "example": 0.1
+                                                },
+                                                "filter_rules": {
+                                                    "type": "string",
+                                                    "example": "moving_average"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ambang batas berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/weather/latest": {
+            "get": {
+                "tags": [
+                    "Weather"
+                ],
+                "summary": "Data Cuaca Terbaru",
+                "description": "Mengambil laporan cuaca terbaru dengan filter opsional berdasarkan kode kota.",
+                "operationId": "e6bcce13714499ef11e4e5e41643c581",
+                "parameters": [
+                    {
+                        "name": "city_code",
+                        "in": "query",
+                        "description": "Kode kota untuk filter cuaca",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "5201"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data cuaca terbaru berhasil diambil"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -226,12 +3047,64 @@
             "description": "Authentication"
         },
         {
+            "name": "Cages (KJA)",
+            "description": "Cages (KJA)"
+        },
+        {
+            "name": "Cameras",
+            "description": "Cameras"
+        },
+        {
             "name": "Device Operations",
             "description": "Device Operations"
         },
         {
+            "name": "Edge Gateways",
+            "description": "Edge Gateways"
+        },
+        {
+            "name": "Feeding Logs",
+            "description": "Feeding Logs"
+        },
+        {
+            "name": "IoT Nodes Master",
+            "description": "IoT Nodes Master"
+        },
+        {
+            "name": "Mobile Dedicated API",
+            "description": "Mobile Dedicated API"
+        },
+        {
             "name": "Monitoring & Telemetry",
             "description": "Monitoring & Telemetry"
+        },
+        {
+            "name": "Operators",
+            "description": "Operators"
+        },
+        {
+            "name": "Regions",
+            "description": "Regions"
+        },
+        {
+            "name": "Reports & Exports",
+            "description": "Reports & Exports"
+        },
+        {
+            "name": "Sensor Types",
+            "description": "Sensor Types"
+        },
+        {
+            "name": "System Settings",
+            "description": "System Settings"
+        },
+        {
+            "name": "Thresholds",
+            "description": "Thresholds"
+        },
+        {
+            "name": "Weather",
+            "description": "Weather"
         }
     ]
 }

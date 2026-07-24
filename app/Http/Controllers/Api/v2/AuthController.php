@@ -79,6 +79,17 @@ class AuthController extends Controller
     /**
      * Retrieve currently authenticated user context.
      */
+    #[OA\Get(
+        path: "/api/v2/profile",
+        summary: "Profil Pengguna Aktif",
+        description: "Mengambil data profil pengguna yang sedang terautentikasi.",
+        tags: ["Authentication"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Profil berhasil diambil"),
+            new OA\Response(response: 401, description: "Tidak terautentikasi")
+        ]
+    )]
     public function profile(Request $request)
     {
         $user = $request->user();
@@ -95,6 +106,28 @@ class AuthController extends Controller
     /**
      * Update authenticated user profile details.
      */
+    #[OA\Put(
+        path: "/api/v2/profile",
+        summary: "Update Profil Pengguna",
+        description: "Mengubah nama dan email pengguna yang sedang terautentikasi.",
+        tags: ["Authentication"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["name", "email"],
+                properties: [
+                    new OA\Property(property: "name", type: "string", example: "Rahmat Hadinata"),
+                    new OA\Property(property: "email", type: "string", example: "admin@lobsense.com")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Profil berhasil diperbarui"),
+            new OA\Response(response: 422, description: "Validasi gagal"),
+            new OA\Response(response: 401, description: "Tidak terautentikasi")
+        ]
+    )]
     public function updateProfile(Request $request)
     {
         $user = $request->user();
@@ -127,6 +160,17 @@ class AuthController extends Controller
     /**
      * Revoke authenticated user token (Logout).
      */
+    #[OA\Post(
+        path: "/api/v2/auth/logout",
+        summary: "Logout Pengguna",
+        description: "Mencabut token akses pengguna (logout sesi aktif).",
+        tags: ["Authentication"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Berhasil logout"),
+            new OA\Response(response: 401, description: "Tidak terautentikasi")
+        ]
+    )]
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

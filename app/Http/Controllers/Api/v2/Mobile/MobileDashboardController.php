@@ -8,6 +8,7 @@ use App\Models\Threshold;
 use App\Models\WeatherReport;
 use App\Services\InfluxDBService;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class MobileDashboardController extends Controller
 {
@@ -23,6 +24,17 @@ class MobileDashboardController extends Controller
     /**
      * Mobile Aggregate "Super Endpoint": Single payload containing User Profile, Active Nodes, Latest Weather, and Alert Summary.
      */
+    #[OA\Get(
+        path: "/api/v2/mobile/summary",
+        summary: "Ringkasan Dasbor Mobile App",
+        description: "Super endpoint mobile yang mengembalikan profil pengguna, daftar node aktif, cuaca terbaru, dan telemetri node utama secara sekaligus.",
+        tags: ["Mobile Dedicated API"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Ringkasan dasbor mobile berhasil dimuat"),
+            new OA\Response(response: 401, description: "Tidak terautentikasi")
+        ]
+    )]
     public function summary(Request $request)
     {
         $user = $request->user();
@@ -85,6 +97,20 @@ class MobileDashboardController extends Controller
     /**
      * Lightweight telemetry endpoint for a specific IoT Node in mobile view.
      */
+    #[OA\Get(
+        path: "/api/v2/mobile/telemetry/{serial_number}",
+        summary: "Telemetri Node Mobile",
+        description: "Mengambil data telemetri ringan, ambang batas, dan log pakan terbaru untuk satu IoT Node di tampilan aplikasi mobile.",
+        tags: ["Mobile Dedicated API"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "serial_number", in: "path", required: true, schema: new OA\Schema(type: "string", example: "DEMO-NODE-001"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Data telemetri mobile berhasil dimuat"),
+            new OA\Response(response: 404, description: "IoT Node tidak ditemukan")
+        ]
+    )]
     public function nodeTelemetry(string $serialNumber)
     {
         $node = IotNode::where('serial_number', $serialNumber)

@@ -12,6 +12,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Response;
 
+use OpenApi\Attributes as OA;
+
 class ReportController extends Controller
 {
     protected InfluxDBService $influxDB;
@@ -26,6 +28,23 @@ class ReportController extends Controller
     /**
      * Retrieve report raw data for interactive table preview.
      */
+    #[OA\Get(
+        path: "/api/v2/reports",
+        summary: "Preview Data Laporan",
+        description: "Mengambil data mentah laporan untuk preview tabel interaktif. Mendukung tipe: node-registration, telemetry, maintenance, feeding.",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "type", in: "query", required: false, description: "Tipe laporan", schema: new OA\Schema(type: "string", enum: ["node-registration", "telemetry", "maintenance", "feeding"], example: "telemetry")),
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date", example: "2026-07-01")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date", example: "2026-07-24")),
+            new OA\Parameter(name: "iot_node_serial_number", in: "query", required: false, schema: new OA\Schema(type: "string", example: "DEMO-NODE-001"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Data laporan berhasil diambil"),
+            new OA\Response(response: 400, description: "Tipe laporan tidak valid")
+        ]
+    )]
     public function index(Request $request)
     {
         $type = $request->query('type', 'telemetry');
@@ -334,6 +353,17 @@ class ReportController extends Controller
     /**
      * 5. Exports: Node Registration
      */
+    #[OA\Get(
+        path: "/api/v2/reports/node-registration/pdf",
+        summary: "Ekspor Registrasi Node (PDF)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File PDF berhasil diunduh")]
+    )]
     public function nodeRegistrationPDF(Request $request)
     {
         $nodes = $this->getNodeRegistrationData($request);
@@ -341,6 +371,17 @@ class ReportController extends Controller
         return $this->generatePdfResponse('Laporan Registrasi Node IoT', $html);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/node-registration/csv",
+        summary: "Ekspor Registrasi Node (CSV)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File CSV berhasil diunduh")]
+    )]
     public function nodeRegistrationCSV(Request $request)
     {
         $nodes = $this->getNodeRegistrationData($request);
@@ -362,6 +403,17 @@ class ReportController extends Controller
         return $this->generateCsvResponse('Laporan_Registrasi_Node.csv', $headers, $rows);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/node-registration/excel",
+        summary: "Ekspor Registrasi Node (Excel)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File Excel berhasil diunduh")]
+    )]
     public function nodeRegistrationExcel(Request $request)
     {
         $nodes = $this->getNodeRegistrationData($request);
@@ -411,6 +463,18 @@ class ReportController extends Controller
     /**
      * 6. Exports: Telemetry
      */
+    #[OA\Get(
+        path: "/api/v2/reports/telemetry/pdf",
+        summary: "Ekspor Telemetri Sensor (PDF)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "serial_number", in: "query", required: false, schema: new OA\Schema(type: "string"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File PDF berhasil diunduh")]
+    )]
     public function telemetryPDF(Request $request)
     {
         $telemetries = $this->getTelemetryData($request);
@@ -418,6 +482,18 @@ class ReportController extends Controller
         return $this->generatePdfResponse('Laporan Telemetri Sensor', $html);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/telemetry/csv",
+        summary: "Ekspor Telemetri Sensor (CSV)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "serial_number", in: "query", required: false, schema: new OA\Schema(type: "string"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File CSV berhasil diunduh")]
+    )]
     public function telemetryCSV(Request $request)
     {
         $telemetries = $this->getTelemetryData($request);
@@ -440,6 +516,18 @@ class ReportController extends Controller
         return $this->generateCsvResponse('Laporan_Telemetri.csv', $headers, $rows);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/telemetry/excel",
+        summary: "Ekspor Telemetri Sensor (Excel)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "serial_number", in: "query", required: false, schema: new OA\Schema(type: "string"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File Excel berhasil diunduh")]
+    )]
     public function telemetryExcel(Request $request)
     {
         $telemetries = $this->getTelemetryData($request);
@@ -490,6 +578,17 @@ class ReportController extends Controller
     /**
      * 7. Exports: Maintenance
      */
+    #[OA\Get(
+        path: "/api/v2/reports/maintenance/pdf",
+        summary: "Ekspor Log Pemeliharaan (PDF)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File PDF berhasil diunduh")]
+    )]
     public function maintenancePDF(Request $request)
     {
         $maintenances = $this->getMaintenanceData($request);
@@ -497,6 +596,17 @@ class ReportController extends Controller
         return $this->generatePdfResponse('Laporan Log Pemeliharaan Perangkat', $html);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/maintenance/csv",
+        summary: "Ekspor Log Pemeliharaan (CSV)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File CSV berhasil diunduh")]
+    )]
     public function maintenanceCSV(Request $request)
     {
         $maintenances = $this->getMaintenanceData($request);
@@ -516,6 +626,17 @@ class ReportController extends Controller
         return $this->generateCsvResponse('Laporan_Log_Pemeliharaan.csv', $headers, $rows);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/maintenance/excel",
+        summary: "Ekspor Log Pemeliharaan (Excel)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File Excel berhasil diunduh")]
+    )]
     public function maintenanceExcel(Request $request)
     {
         $maintenances = $this->getMaintenanceData($request);
@@ -561,6 +682,17 @@ class ReportController extends Controller
     /**
      * 8. Exports: Feeding
      */
+    #[OA\Get(
+        path: "/api/v2/reports/feeding/pdf",
+        summary: "Ekspor Log Pemberian Pakan (PDF)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File PDF berhasil diunduh")]
+    )]
     public function feedingPDF(Request $request)
     {
         $logs = $this->getFeedingData($request);
@@ -568,6 +700,17 @@ class ReportController extends Controller
         return $this->generatePdfResponse('Laporan Log Pemberian Pakan', $html);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/feeding/csv",
+        summary: "Ekspor Log Pemberian Pakan (CSV)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File CSV berhasil diunduh")]
+    )]
     public function feedingCSV(Request $request)
     {
         $logs = $this->getFeedingData($request);
@@ -587,6 +730,17 @@ class ReportController extends Controller
         return $this->generateCsvResponse('Laporan_Log_Pemberian_Pakan.csv', $headers, $rows);
     }
 
+    #[OA\Get(
+        path: "/api/v2/reports/feeding/excel",
+        summary: "Ekspor Log Pemberian Pakan (Excel)",
+        tags: ["Reports & Exports"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "startDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date")),
+            new OA\Parameter(name: "endDate", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"))
+        ],
+        responses: [new OA\Response(response: 200, description: "File Excel berhasil diunduh")]
+    )]
     public function feedingExcel(Request $request)
     {
         $logs = $this->getFeedingData($request);

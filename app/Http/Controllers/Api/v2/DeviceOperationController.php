@@ -27,7 +27,8 @@ class DeviceOperationController extends Controller
                 required: ["category", "serial_number"],
                 properties: [
                     new OA\Property(property: "category", type: "string", enum: ["iot_node", "edge_gateway"], example: "iot_node"),
-                    new OA\Property(property: "serial_number", type: "string", example: "LOB-NODE-001")
+                    new OA\Property(property: "serial_number", type: "string", example: "LOB-NODE-001"),
+                    new OA\Property(property: "is_maintenance", type: "boolean", example: false)
                 ]
             )
         ),
@@ -79,6 +80,35 @@ class DeviceOperationController extends Controller
     /**
      * Register & activate device.
      */
+    #[OA\Post(
+        path: "/api/v2/devices/activate",
+        summary: "Aktivasi Perangkat IoT",
+        description: "Mengaktivasi perangkat IoT Node atau Edge Gateway dengan upload foto dan tanda tangan.",
+        tags: ["Device Operations"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    required: ["category", "id", "picture", "signature", "latitude", "longitude"],
+                    properties: [
+                        new OA\Property(property: "category", type: "string", enum: ["iot_node", "edge_gateway"]),
+                        new OA\Property(property: "id", type: "integer", example: 1),
+                        new OA\Property(property: "picture", type: "string", format: "binary"),
+                        new OA\Property(property: "signature", type: "string", format: "binary"),
+                        new OA\Property(property: "latitude", type: "number", format: "double", example: -8.123),
+                        new OA\Property(property: "longitude", type: "number", format: "double", example: 115.456)
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Perangkat berhasil diaktivasi"),
+            new OA\Response(response: 404, description: "Perangkat tidak ditemukan"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function activate(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -126,6 +156,34 @@ class DeviceOperationController extends Controller
     /**
      * Submit Maintenance log.
      */
+    #[OA\Post(
+        path: "/api/v2/maintenances",
+        summary: "Catat Log Pemeliharaan",
+        description: "Mengirimkan laporan pemeliharaan perangkat IoT beserta foto dan tanda tangan operator.",
+        tags: ["Device Operations"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    required: ["iot_node_id", "description", "signature", "latitude", "longitude"],
+                    properties: [
+                        new OA\Property(property: "iot_node_id", type: "integer", example: 1),
+                        new OA\Property(property: "description", type: "string", example: "Pembersihan sensor pH dan kalibrasi ulang"),
+                        new OA\Property(property: "picture", type: "string", format: "binary"),
+                        new OA\Property(property: "signature", type: "string", format: "binary"),
+                        new OA\Property(property: "latitude", type: "number", format: "double", example: -8.123),
+                        new OA\Property(property: "longitude", type: "number", format: "double", example: 115.456)
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Log pemeliharaan berhasil dicatat"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function submitMaintenance(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -163,6 +221,17 @@ class DeviceOperationController extends Controller
     /**
      * Display a listing of maintenance logs.
      */
+    #[OA\Get(
+        path: "/api/v2/maintenances",
+        summary: "Daftar Log Pemeliharaan",
+        description: "Mengambil seluruh riwayat log pemeliharaan perangkat beserta relasi IoT Node dan Operator.",
+        tags: ["Device Operations"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Daftar log pemeliharaan berhasil diambil"),
+            new OA\Response(response: 401, description: "Tidak terautentikasi")
+        ]
+    )]
     public function indexMaintenance()
     {
         $maintenances = Maintenance::with(['iotNode', 'operator'])->orderBy('created_at', 'desc')->get();

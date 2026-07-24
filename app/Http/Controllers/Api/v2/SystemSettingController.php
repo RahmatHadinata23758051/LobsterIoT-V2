@@ -6,11 +6,23 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SystemSetting;
 
+use OpenApi\Attributes as OA;
+
 class SystemSettingController extends Controller
 {
     /**
      * Get all system settings.
      */
+    #[OA\Get(
+        path: "/api/v2/system-settings",
+        summary: "Pengaturan Sistem",
+        description: "Mengambil seluruh pengaturan sistem termasuk lokasi, logo, dan konfigurasi.",
+        tags: ["System Settings"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Pengaturan sistem berhasil diambil")
+        ]
+    )]
     public function index()
     {
         $settings = SystemSetting::pluck('value', 'key')->toArray();
@@ -26,6 +38,37 @@ class SystemSettingController extends Controller
     /**
      * Update system settings.
      */
+    #[OA\Post(
+        path: "/api/v2/system-settings",
+        summary: "Update Pengaturan Sistem",
+        description: "Memperbarui pengaturan sistem termasuk lokasi, nama instansi, dan upload logo.",
+        tags: ["System Settings"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: "system_latitude", type: "number", format: "double", example: -8.583),
+                        new OA\Property(property: "system_longitude", type: "number", format: "double", example: 116.116),
+                        new OA\Property(property: "system_city_name", type: "string", example: "Lombok Barat"),
+                        new OA\Property(property: "system_province_code", type: "string", example: "52"),
+                        new OA\Property(property: "system_city_code", type: "string", example: "5201"),
+                        new OA\Property(property: "system_district_code", type: "string", example: "520101"),
+                        new OA\Property(property: "system_logo_text", type: "string", example: "Lobsense"),
+                        new OA\Property(property: "system_instansi_name", type: "string", example: "PT Lobster Sensing Indonesia"),
+                        new OA\Property(property: "system_logo_file", type: "string", format: "binary"),
+                        new OA\Property(property: "logo_file", type: "string", format: "binary")
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Pengaturan berhasil diperbarui"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function update(Request $request)
     {
         $validated = $request->validate([
