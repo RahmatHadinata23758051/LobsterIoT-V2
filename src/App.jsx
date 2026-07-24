@@ -2,13 +2,14 @@ import React from 'react';
 import {
   RotateCcw, LogOut, AlertCircle, ChevronDown, ChevronRight,
   LayoutDashboard, Settings, Clock, CheckCircle, AlertTriangle,
-  Cpu, WifiOff, Wrench, Calendar,
+  Cpu, WifiOff, Wrench, Calendar, Wind,
   Anchor, Video, User, Layers, Droplet, UserRound, FileDown
 } from 'lucide-react';
 import { LoginPage } from './components/auth/LoginPage';
 import { DashboardTab } from './components/dashboard/DashboardTab';
 import { FeedingLogTab } from './components/feeding/FeedingLogTab';
-import { SystemActivityTab } from './components/feeding/SystemActivityTab';
+import { AeratorLogsTab } from './components/feeding/AeratorLogsTab';
+import { ActivityLogsTab } from './components/feeding/ActivityLogsTab';
 import { DeviceTab } from './components/devices/DeviceTab';
 import { SystemSettings } from './components/settings/SystemSettings';
 import { AccountProfile } from './components/settings/AccountProfile';
@@ -33,6 +34,7 @@ const SENSOR_MAP = [
 const PATH_TO_TAB = {
   '/dashboard': 'dashboard',
   '/log-pakan': 'feeding',
+  '/log-aerator': 'aerator_logs',
   '/log-aktivitas': 'activity_logs',
   '/laporan-ekspor': 'reports',
   '/data-master/edge-computing': 'edge_computing',
@@ -49,6 +51,7 @@ const PATH_TO_TAB = {
 function getPathFromTab(tab) {
   if (tab === 'dashboard') return '/dashboard';
   if (tab === 'feeding') return '/log-pakan';
+  if (tab === 'aerator_logs') return '/log-aerator';
   if (tab === 'activity_logs') return '/log-aktivitas';
   if (tab === 'reports') return '/laporan-ekspor';
   if (tab === 'edge_computing') return '/data-master/edge-computing';
@@ -185,6 +188,7 @@ export default function App() {
       items: [
         { id: 'dashboard',     label: 'Dasbor Utama',      icon: LayoutDashboard },
         { id: 'feeding',       label: 'Log Pakan',          icon: Calendar },
+        { id: 'aerator_logs',  label: 'Log Aerator',        icon: Wind },
         { id: 'activity_logs', label: 'Log Aktivitas',      icon: Clock },
         { id: 'reports',       label: 'Laporan & Ekspor',   icon: FileDown },
       ]
@@ -417,8 +421,16 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'aerator_logs' && (
+            <AeratorLogsTab
+              token={token}
+              selectedSerial={activeNodeSerial}
+              activityLogs={activityLogs}
+            />
+          )}
+
           {activeTab === 'activity_logs' && (
-            <SystemActivityTab
+            <ActivityLogsTab
               activityLogs={activityLogs}
             />
           )}

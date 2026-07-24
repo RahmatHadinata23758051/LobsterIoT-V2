@@ -88,14 +88,20 @@ export const useLobsense = () => {
     }
   });
 
-  const logActivity = (action) => {
+  const logActivity = (action, actorName = null, actorRole = null) => {
+    const now = new Date();
+    const formattedTime = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' +
+                          now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const newLog = {
       id: Date.now(),
-      time: new Date().toLocaleTimeString('id-ID'),
+      time: formattedTime,
+      formattedTime: formattedTime,
+      userName: actorName || user?.name || 'Sistem / Operator',
+      role: actorRole || user?.role || 'operator',
       action: action
     };
     setActivityLogs(prev => {
-      const updated = [newLog, ...prev].slice(0, 10);
+      const updated = [newLog, ...prev].slice(0, 100);
       localStorage.setItem('lobsense_activities', JSON.stringify(updated));
       return updated;
     });

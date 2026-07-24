@@ -67,11 +67,21 @@ export const FeedingLogTab = ({
   };
 
   return (
-    <div className="space-y-6 animate-[fadeIn_0.4s_ease-out]">
-      {/* ── TOP SECTION: INTERACTIVE HARDWARE CONTROL PANEL ── */}
-      <HardwareControlPanel token={token} selectedSerial={selectedSerial} />
+    <div className="space-y-6 animate-[fadeIn_0.4s_ease-out] font-sans">
+      {/* ── HEADER ── */}
+      <div className="border-b border-slate-200 pb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+            <Calendar className="h-6 w-6 text-[#0D9D1B]" />
+            <span>Log Pemberian Pakan Lobster</span>
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Pencatatan pemberian pakan harian, jenis pakan, dan bobot pakan (kg) pada keramba jaring apung (KJA)
+          </p>
+        </div>
+      </div>
 
-      {/* ── BOTTOM SECTION: FEEDING LOG & AUDIT TRAIL ── */}
+      {/* ── MAIN SECTION: FORM & FEEDING LOG TABLE ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
         {/* Form Input */}
