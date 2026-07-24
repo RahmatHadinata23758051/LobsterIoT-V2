@@ -8,11 +8,32 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
+use OpenApi\Attributes as OA;
+
 class AiProxyController extends Controller
 {
     /**
      * Proxy Base64 frame to YOLOv8 inference server.
      */
+    #[OA\Post(
+        path: "/api/v2/detect",
+        summary: "Inferensi Computer Vision Perilaku Lobster",
+        tags: ["AI Prediction Proxy"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["image"],
+                properties: [
+                    new OA\Property(property: "image", type: "string", description: "Base64 Encoded Frame Image String")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Hasil inferensi deteksi tindakan (agresif, aktif, makan, pasif)"),
+            new OA\Response(response: 422, description: "Validasi gambar gagal")
+        ]
+    )]
     public function detect(Request $request)
     {
         $validator = Validator::make($request->all(), [

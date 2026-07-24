@@ -9,6 +9,8 @@ use App\Services\InfluxDBService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+use OpenApi\Attributes as OA;
+
 class MonitoringController extends Controller
 {
     protected InfluxDBService $influxDB;
@@ -23,6 +25,15 @@ class MonitoringController extends Controller
     /**
      * List all activated IoT Nodes with their city.
      */
+    #[OA\Get(
+        path: "/api/v2/iot-nodes",
+        summary: "Daftar Unit IoT Node Aktif",
+        tags: ["Monitoring & Telemetry"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Daftar unit IoT Node aktif retrieved")
+        ]
+    )]
     public function activeNodes()
     {
         $nodes = IotNode::whereNotNull('activated_at')
@@ -39,6 +50,19 @@ class MonitoringController extends Controller
     /**
      * Compile latest, 24h series, and thresholds for a specific IoT Node.
      */
+    #[OA\Get(
+        path: "/api/v2/monitoring/dashboard/{serial_number}",
+        summary: "Data Telemetri Dasbor Real-time",
+        tags: ["Monitoring & Telemetry"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "serial_number", in: "path", required: true, schema: new OA\Schema(type: "string", example: "DEMO-NODE-001"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Data telemetri terbaru, grafik 24 jam, dan ambang batas sensor"),
+            new OA\Response(response: 404, description: "IoT Node tidak ditemukan")
+        ]
+    )]
     public function dashboard(string $serialNumber)
     {
         $node = IotNode::where('serial_number', $serialNumber)

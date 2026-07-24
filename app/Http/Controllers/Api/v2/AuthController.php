@@ -9,11 +9,33 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
+use OpenApi\Attributes as OA;
+
 class AuthController extends Controller
 {
     /**
      * Authenticate user and issue Sanctum token.
      */
+    #[OA\Post(
+        path: "/api/v2/auth/login",
+        summary: "Login Pengguna",
+        tags: ["Authentication"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["email", "password"],
+                properties: [
+                    new OA\Property(property: "email", type: "string", example: "admin@lobsense.com"),
+                    new OA\Property(property: "password", type: "string", example: "password123")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Login Berhasil"),
+            new OA\Response(response: 411, description: "Email atau password tidak valid"),
+            new OA\Response(response: 422, description: "Validasi gagal")
+        ]
+    )]
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [

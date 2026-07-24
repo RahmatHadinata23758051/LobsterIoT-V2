@@ -1,0 +1,237 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Lobsense IoT V2 API Documentation",
+        "description": "Dokumentasi resmi API sistem monitoring, telemetri sensor tambak, pengontrolan aerator/feeder, inferensi AI, dan manajemen perangkat Lobsense V2.",
+        "version": "2.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Lobsense API Local Server"
+        }
+    ],
+    "paths": {
+        "/api/v2/detect": {
+            "post": {
+                "tags": [
+                    "AI Prediction Proxy"
+                ],
+                "summary": "Inferensi Computer Vision Perilaku Lobster",
+                "description": "Proxy Base64 frame to YOLOv8 inference server.",
+                "operationId": "07e4cecfbfac12fefe85528131537262",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "image"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "Base64 Encoded Frame Image String",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Hasil inferensi deteksi tindakan (agresif, aktif, makan, pasif)"
+                    },
+                    "422": {
+                        "description": "Validasi gambar gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login Pengguna",
+                "description": "Authenticate user and issue Sanctum token.",
+                "operationId": "78e356b4f1ee8903d0c1220bcb93d680",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@lobsense.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login Berhasil"
+                    },
+                    "411": {
+                        "description": "Email atau password tidak valid"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/api/v2/devices/validate-serial": {
+            "post": {
+                "tags": [
+                    "Device Operations"
+                ],
+                "summary": "Validasi Nomor Seri Perangkat Pabrikan",
+                "description": "Validate serial number.",
+                "operationId": "93af057062c6b71d7bc212fd48f89142",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "category",
+                                    "serial_number"
+                                ],
+                                "properties": {
+                                    "category": {
+                                        "type": "string",
+                                        "example": "iot_node",
+                                        "enum": [
+                                            "iot_node",
+                                            "edge_gateway"
+                                        ]
+                                    },
+                                    "serial_number": {
+                                        "type": "string",
+                                        "example": "LOB-NODE-001"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Hasil validasi keabsahan nomor seri"
+                    },
+                    "404": {
+                        "description": "Nomor seri tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/iot-nodes": {
+            "get": {
+                "tags": [
+                    "Monitoring & Telemetry"
+                ],
+                "summary": "Daftar Unit IoT Node Aktif",
+                "description": "List all activated IoT Nodes with their city.",
+                "operationId": "5b54e521c7ee62d9278ed6f921ac1d2f",
+                "responses": {
+                    "200": {
+                        "description": "Daftar unit IoT Node aktif retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/monitoring/dashboard/{serial_number}": {
+            "get": {
+                "tags": [
+                    "Monitoring & Telemetry"
+                ],
+                "summary": "Data Telemetri Dasbor Real-time",
+                "description": "Compile latest, 24h series, and thresholds for a specific IoT Node.",
+                "operationId": "7cba2d656d5cd23b6da0c2315cb65fa2",
+                "parameters": [
+                    {
+                        "name": "serial_number",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "DEMO-NODE-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data telemetri terbaru, grafik 24 jam, dan ambang batas sensor"
+                    },
+                    "404": {
+                        "description": "IoT Node tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "Authorization",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "AI Prediction Proxy",
+            "description": "AI Prediction Proxy"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Device Operations",
+            "description": "Device Operations"
+        },
+        {
+            "name": "Monitoring & Telemetry",
+            "description": "Monitoring & Telemetry"
+        }
+    ]
+}

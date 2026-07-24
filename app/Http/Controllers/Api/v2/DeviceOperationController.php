@@ -9,11 +9,33 @@ use App\Models\EdgeGateway;
 use App\Models\Maintenance;
 use Illuminate\Support\Facades\Validator;
 
+use OpenApi\Attributes as OA;
+
 class DeviceOperationController extends Controller
 {
     /**
      * Validate serial number.
      */
+    #[OA\Post(
+        path: "/api/v2/devices/validate-serial",
+        summary: "Validasi Nomor Seri Perangkat Pabrikan",
+        tags: ["Device Operations"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["category", "serial_number"],
+                properties: [
+                    new OA\Property(property: "category", type: "string", enum: ["iot_node", "edge_gateway"], example: "iot_node"),
+                    new OA\Property(property: "serial_number", type: "string", example: "LOB-NODE-001")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Hasil validasi keabsahan nomor seri"),
+            new OA\Response(response: 404, description: "Nomor seri tidak ditemukan")
+        ]
+    )]
     public function validateSerial(Request $request)
     {
         $validator = Validator::make($request->all(), [
