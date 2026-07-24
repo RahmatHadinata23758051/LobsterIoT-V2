@@ -19,33 +19,33 @@ Repositori ini berisi kode sumber antarmuka web Single Page Application (SPA) be
 
 ```mermaid
 flowchart TD
-    subgraph State Management & Context
-        AuthCtx[Auth Context<br/>Token Sanctum & User Profile]
-        LobsenseHook[useLobsense Custom Hook<br/>Polling & State Sync]
+    subgraph State_Layer["State Management & Context"]
+        AuthCtx["Auth Context<br/>Token Sanctum & User Profile"]
+        LobsenseHook["useLobsense Custom Hook<br/>Polling & State Sync"]
     end
 
-    subgraph Service Layer
-        ApiClient[Axios API Client<br/>BaseURL: /api/v2]
+    subgraph Service_Layer["Service Layer"]
+        ApiClient["Axios API Client<br/>BaseURL: /api/v2"]
     end
 
-    subgraph Component Hierarchy
-        App[App.jsx] --> Router[Router Switch]
-        Router --> Login[LoginModal.jsx]
-        Router --> MainLayout[Main Layout]
+    subgraph Component_Layer["Component Hierarchy"]
+        App["App.jsx"] --> Router["Router Switch"]
+        Router --> Login["LoginModal.jsx"]
+        Router --> MainLayout["Main Layout"]
 
-        MainLayout --> Header[Header.jsx & WeatherCard.jsx]
-        MainLayout --> Dashboard[Dashboard.jsx]
-        MainLayout --> Analytics[TelemetryChart.jsx]
-        MainLayout --> CCTV[CctvView.jsx]
-        MainLayout --> Cages[CageManagement.jsx]
-        MainLayout --> Nodes[NodeManagement.jsx]
-        MainLayout --> Reports[ReportExport.jsx]
+        MainLayout --> Header["Header.jsx & WeatherCard.jsx"]
+        MainLayout --> Dashboard["Dashboard.jsx"]
+        MainLayout --> Analytics["TelemetryChart.jsx"]
+        MainLayout --> CCTV["CctvView.jsx"]
+        MainLayout --> Cages["CageManagement.jsx"]
+        MainLayout --> Nodes["NodeManagement.jsx"]
+        MainLayout --> Reports["ReportExport.jsx"]
     end
 
     Dashboard --> LobsenseHook
     CCTV --> ApiClient
     LobsenseHook --> ApiClient
-    ApiClient -->|HTTP REST| BackendAPI[Laravel Backend API]
+    ApiClient -->|HTTP REST| BackendAPI["Laravel Backend API"]
 ```
 
 ---
