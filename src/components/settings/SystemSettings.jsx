@@ -7,6 +7,7 @@ export const SystemSettings = ({
   setLogoText,
   instansiName,
   setInstansiName,
+  setLogoUrl,
   logActivity,
   token,
   api
@@ -16,7 +17,48 @@ export const SystemSettings = ({
   // Branding States
   const [tempLogo, setTempLogo] = useState(logoText);
   const [tempInstansi, setTempInstansi] = useState(instansiName);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
   const [brandingSuccess, setBrandingSuccess] = useState(false);
+
+  const handleBrandingSubmit = async (e) => {
+    e.preventDefault();
+    if (!tempLogo.trim() || !tempInstansi.trim()) return;
+    localStorage.setItem('slam_logo_text', tempLogo.trim());
+    localStorage.setItem('slam_instansi_name', tempInstansi.trim());
+    setLogoText(tempLogo.trim());
+    setInstansiName(tempInstansi.trim());
+
+    try {
+      if (api && token) {
+        if (logoFile) {
+          const formData = new FormData();
+          formData.append('system_logo_text', tempLogo.trim());
+          formData.append('system_instansi_name', tempInstansi.trim());
+          formData.append('logo_file', logoFile);
+          
+          const r = await api.updateSystemSettings(token, formData);
+          const resData = await r.json();
+          if (r.ok && resData.data && resData.data.system_logo_url) {
+            localStorage.setItem('lobsense_logo_url', resData.data.system_logo_url);
+            if (setLogoUrl) setLogoUrl(resData.data.system_logo_url);
+            window.dispatchEvent(new Event('storage'));
+          }
+        } else {
+          await api.updateSystemSettings(token, {
+            system_logo_text: tempLogo.trim(),
+            system_instansi_name: tempInstansi.trim()
+          });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    if (logActivity) logActivity(`Mengubah branding sistem — Logo: "${tempLogo.trim()}", Instansi: "${tempInstansi.trim()}"`);
+    setBrandingSuccess(true);
+    setTimeout(() => setBrandingSuccess(false), 3500);
+  };
 
   // Weather Coordinates & Regional States
   const [coords, setCoords] = useState({
@@ -420,28 +462,6 @@ export const SystemSettings = ({
     }));
   };
 
-  const handleBrandingSubmit = async (e) => {
-    e.preventDefault();
-    if (!tempLogo.trim() || !tempInstansi.trim()) return;
-    localStorage.setItem('slam_logo_text', tempLogo.trim());
-    localStorage.setItem('slam_instansi_name', tempInstansi.trim());
-    setLogoText(tempLogo.trim());
-    setInstansiName(tempInstansi.trim());
-
-    try {
-      if (api && token) {
-        await api.updateSystemSettings(token, {
-          system_logo_text: tempLogo.trim(),
-          system_instansi_name: tempInstansi.trim()
-        });
-      }
-    } catch {}
-
-    if (logActivity) logActivity(`Mengubah branding sistem — Logo: "${tempLogo.trim()}", Instansi: "${tempInstansi.trim()}"`);
-    setBrandingSuccess(true);
-    setTimeout(() => setBrandingSuccess(false), 3500);
-  };
-
   const handleCoordsSubmit = async (e) => {
     e.preventDefault();
     if (!coords.system_latitude || !coords.system_longitude || !coords.system_city_name) {
@@ -548,6 +568,28 @@ export const SystemSettings = ({
 
                 <div>
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                    Upload Gambar / Logo Sistem (PNG / JPG / SVG)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setLogoFile(file);
+                        setLogoPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#0D9D1B] hover:file:bg-emerald-100 cursor-pointer border border-slate-200 rounded-lg bg-slate-50 p-1"
+                  />
+                  <p className="text-[9px] text-slate-400 mt-1 flex items-center gap-1">
+                    <Info className="h-3.5 w-3.5 shrink-0" />
+                    Logo disinkronkan otomatis antara Website dan Mobile App
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
                     Nama Lengkap Instansi
                   </label>
                   <input
@@ -567,20 +609,27 @@ export const SystemSettings = ({
                 {brandingSuccess && (
                   <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-[10px] font-bold">
                     <CheckCircle className="h-3.5 w-3.5 shrink-0 text-[#0D9D1B]" />
-                    Konfigurasi branding sistem berhasil diperbarui secara instan!
+                    Konfigurasi branding & logo sistem berhasil diperbarui secara instan!
                   </div>
                 )}
 
                 {/* Preview */}
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pratinjau</p>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="bg-[#0D9D1B] p-1 rounded-md">
-                      <img src="/Icon.png" alt="Logo" className="h-3.5 w-3.5 rounded-sm object-cover" />
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pratinjau Logo & Identitas</p>
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <div className="bg-[#0D9D1B] p-1 rounded-md shrink-0">
+                      <img 
+                        src={logoPreview || localStorage.getItem('lobsense_logo_url') || "/Icon.png"} 
+                        alt="Logo" 
+                        className="h-6 w-6 rounded-sm object-cover bg-white" 
+                      />
                     </div>
-                    <span className="text-[12px] font-bold text-slate-900">{tempLogo || 'LOBSENSE 1.0'}</span>
+                    <div>
+                      <span className="text-[12px] font-bold text-slate-900 block leading-tight">{tempLogo || 'LOBSENSE 1.0'}</span>
+                      <span className="text-[9px] text-slate-400 uppercase font-semibold">LOBSTER SENSING SYSTEM</span>
+                    </div>
                   </div>
-                  <p className="text-[9px] text-slate-400">
+                  <p className="text-[9px] text-slate-400 mt-2">
                     Footer: <span className="font-semibold text-slate-600">
                       {tempLogo || 'LOBSENSE 1.0'} © 2026 · {tempInstansi || 'Balai Akuakultur Nusantara'}
                     </span>

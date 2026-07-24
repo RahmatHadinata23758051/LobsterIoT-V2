@@ -59,6 +59,17 @@ export const devicesApi = (BACKEND_URL, getHeaders) => ({
   },
 
   async updateSystemSettings(token, settings) {
+    if (settings instanceof FormData) {
+      return fetch(`${BACKEND_URL}/api/v2/system-settings`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+        body: settings,
+      });
+    }
+
     return fetch(`${BACKEND_URL}/api/v2/system-settings`, {
       method: 'PUT',
       headers: getHeaders(token),

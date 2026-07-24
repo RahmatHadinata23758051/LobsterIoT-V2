@@ -72,6 +72,7 @@ export default function App() {
     user, setUser,
     logoText, setLogoText,
     instansiName, setInstansiName,
+    logoUrl, setLogoUrl,
     activeTab, setActiveTab,
     currentTime,
     nodeDropdownOpen, setNodeDropdownOpen, dropdownRef,
@@ -228,9 +229,9 @@ export default function App() {
         {/* Left Side: Logo & Brand Name */}
         <div className="flex items-center gap-3 select-none">
           <img
-            src="/Icon.png"
+            src={logoUrl || "/Icon.png"}
             alt="LOBSENSE Logo"
-            className="h-9 w-9 rounded-xl object-cover shadow-sm flex-shrink-0"
+            className="h-9 w-9 rounded-xl object-cover shadow-sm flex-shrink-0 bg-white"
           />
           <div>
             <p className="text-[14px] font-bold leading-none text-slate-900 tracking-tight">{logoText}</p>
@@ -549,6 +550,7 @@ export default function App() {
               setLogoText={setLogoText}
               instansiName={instansiName}
               setInstansiName={setInstansiName}
+              setLogoUrl={setLogoUrl}
               logActivity={logActivity}
               token={token}
               api={api}

@@ -26,6 +26,35 @@ export const useLobsense = () => {
 
   const [logoText, setLogoText] = useState(() => localStorage.getItem('slam_logo_text') || 'LOBSENSE 1.0');
   const [instansiName, setInstansiName] = useState(() => localStorage.getItem('slam_instansi_name') || 'Balai Akuakultur Nusantara');
+  const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('lobsense_logo_url') || null);
+
+  // Fetch System Settings on startup to sync Logo URL & Branding
+  useEffect(() => {
+    if (!token) return;
+    const loadSystemSettings = async () => {
+      try {
+        const r = await api.fetchSystemSettings(token);
+        const data = await r.json();
+        if (r.ok && data.status === 'success' && data.data) {
+          if (data.data.system_logo_text) {
+            setLogoText(data.data.system_logo_text);
+            localStorage.setItem('slam_logo_text', data.data.system_logo_text);
+          }
+          if (data.data.system_instansi_name) {
+            setInstansiName(data.data.system_instansi_name);
+            localStorage.setItem('slam_instansi_name', data.data.system_instansi_name);
+          }
+          if (data.data.system_logo_url) {
+            setLogoUrl(data.data.system_logo_url);
+            localStorage.setItem('lobsense_logo_url', data.data.system_logo_url);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadSystemSettings();
+  }, [token]);
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -791,6 +820,7 @@ export const useLobsense = () => {
     user, setUser,
     logoText, setLogoText,
     instansiName, setInstansiName,
+    logoUrl, setLogoUrl,
     activeTab, setActiveTab,
     currentTime,
     nodeDropdownOpen, setNodeDropdownOpen, dropdownRef,
