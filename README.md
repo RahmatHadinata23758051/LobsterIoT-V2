@@ -21,27 +21,27 @@ Sistem backend menggunakan arsitektur hibrida (*hybrid persistence architecture*
 
 ```mermaid
 flowchart TD
-    subgraph Layer Lapangan & Perangkat
-        Sensors[Sensor pH, DO, TDS, Suhu] -->|Raw Data| Node[IoT Node Master]
-        Cam[Kamera CCTV Bawah Air] -->|Video Stream| Node
-        Node -->|LoRa Wireless / RS-485| Edge[Edge Gateway Desktop]
+    subgraph Layer_Perangkat["Layer Lapangan & Perangkat"]
+        Sensors["Sensor pH, DO, TDS, Suhu"] -->|Raw Data| Node["IoT Node Master"]
+        Cam["Kamera CCTV Bawah Air"] -->|Video Stream| Node
+        Node -->|LoRa Wireless / RS-485| Edge["Edge Gateway Desktop"]
     end
 
-    subgraph Layer Edge & Sync
+    subgraph Layer_Edge["Layer Edge & Sync"]
         Edge -->|Local SQLite Buffer| Edge
-        Edge -->|REST API / MQTT Sync| Backend[Backend Service Laravel 11]
+        Edge -->|REST API / MQTT Sync| Backend["Backend Service Laravel 11"]
     end
 
-    subgraph Layer Backend & Database
-        Backend -->|Transactional Data| RDB[(MySQL / PostgreSQL)]
-        Backend -->|Telemetry Series| TSDB[(InfluxDB v2)]
-        Backend -->|HTTP Biner Proxy| AI[FastAPI YOLOv8 AI Server]
+    subgraph Layer_Backend["Layer Backend & Database"]
+        Backend -->|Transactional Data| RDB[("MySQL / PostgreSQL")]
+        Backend -->|Telemetry Series| TSDB[("InfluxDB v2")]
+        Backend -->|HTTP Biner Proxy| AI["FastAPI YOLOv8 AI Server"]
     end
 
-    subgraph Layer Klien
-        Backend -->|REST API| WebClient[Frontend Web App]
-        Backend -->|Dedicated Mobile API| MobileClient[Mobile App]
-        Backend -->|OpenAPI 3.0| Swagger[Swagger UI Documentation]
+    subgraph Layer_Klien["Layer Klien"]
+        Backend -->|REST API| WebClient["Frontend Web App"]
+        Backend -->|Dedicated Mobile API| MobileClient["Mobile App"]
+        Backend -->|OpenAPI 3.0| Swagger["Swagger UI Documentation"]
     end
 ```
 
@@ -74,39 +74,39 @@ Berikut adalah struktur hubungan hirarki dan keterkaitan data antara Keramba (KJ
 
 ```mermaid
 graph LR
-    subgraph Wilayah Administrasi
-        City[City / Kabupaten]
+    subgraph Region_Layer["Wilayah Administrasi"]
+        City["City / Kabupaten"]
     end
 
-    subgraph Edge Gateway Layer
-        EdgeGW[Edge Gateway<br/>Serial: EDGE-GW-001]
+    subgraph Edge_Layer["Edge Gateway Layer"]
+        EdgeGW["Edge Gateway<br/>Serial: EDGE-GW-001"]
     end
 
-    subgraph Keramba Jaring Apung (KJA)
-        CageA[Keramba A<br/>Code: CAGE-A01]
-        CageB[Keramba B<br/>Code: CAGE-B01]
+    subgraph Cage_Layer["Keramba Jaring Apung (KJA)"]
+        CageA["Keramba A<br/>Code: CAGE-A01"]
+        CageB["Keramba B<br/>Code: CAGE-B01"]
     end
 
-    subgraph IoT Node Layer
-        Node1[IoT Node 1<br/>Serial: LOB-NODE-001]
-        Node2[IoT Node 2<br/>Serial: LOB-NODE-002]
-        Node3[IoT Node 3<br/>Serial: LOB-NODE-003]
+    subgraph Node_Layer["IoT Node Layer"]
+        Node1["IoT Node 1<br/>Serial: LOB-NODE-001"]
+        Node2["IoT Node 2<br/>Serial: LOB-NODE-002"]
+        Node3["IoT Node 3<br/>Serial: LOB-NODE-003"]
     end
 
-    subgraph Sensor & Actuator Layer
-        Sensors1[Sensor Array: pH, DO, TDS, Temp]
-        Feeder1[Relay Dispenser Pakan]
-        Aerator1[Relay Aerator Oksigen]
-        Cam1[CCTV Stream URL]
+    subgraph Sensor_Layer["Sensor & Actuator Layer"]
+        Sensors1["Sensor Array: pH, DO, TDS, Temp"]
+        Feeder1["Relay Dispenser Pakan"]
+        Aerator1["Relay Aerator Oksigen"]
+        Cam1["CCTV Stream URL"]
     end
 
-    City -->|1 to N| EdgeGW
-    EdgeGW -->|1 to N| CageA
-    EdgeGW -->|1 to N| CageB
+    City --> EdgeGW
+    EdgeGW --> CageA
+    EdgeGW --> CageB
 
-    CageA -->|1 to N| Node1
-    CageA -->|1 to N| Node2
-    CageB -->|1 to N| Node3
+    CageA --> Node1
+    CageA --> Node2
+    CageB --> Node3
 
     Node1 --> Sensors1
     Node1 --> Feeder1
