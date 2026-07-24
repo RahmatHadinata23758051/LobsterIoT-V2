@@ -77,14 +77,14 @@ Tabel berikut menjelaskan pemetaan antara komponen antarmuka web dengan endpoint
 ### 4.1 Tangkapan Layar Halaman Login
 > Silakan simpan file screenshot halaman login dengan nama `login_page.png` pada lokasi: `Frontend/docs/screenshots/login_page.png`.
 
-![Tangkapan Layar Halaman Login](docs/screenshots/login_page.png)
+![Tangkapan Layar Halaman Login]![alt text](image.png)
 
 *Keterangan*: Halaman login mendukung autentikasi bertingkat berbasis peranan (*admin*, *management*, *operator*).
 
 ### 4.2 Tangkapan Layar Halaman Dasbor Utama
 > Silakan simpan file screenshot halaman dasbor utama dengan nama `dashboard_page.png` pada lokasi: `Frontend/docs/screenshots/dashboard_page.png`.
 
-![Tangkapan Layar Halaman Dasbor Utama](docs/screenshots/dashboard_page.png)
+![Tangkapan Layar Halaman Dasbor Utama]![alt text](image-1.png)
 
 *Keterangan*: Tampilan pusat kontrol pemantauan KJA real-time yang mencakup indikator parameter air, widget cuaca BMKG, player stream CCTV dengan overlay AI, kontrol sakelar aerator/feeder, dan tabel log aktivitas.
 
