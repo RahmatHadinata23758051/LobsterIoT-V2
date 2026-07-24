@@ -24,6 +24,10 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
     excel: false,
   });
 
+  // Pagination State (50 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 50;
+
   // Fetch data with AbortController for race-safe updates
   const fetchReportData = async (currentType = reportType, currentFilters = filters) => {
     setLoading(true);
@@ -31,6 +35,7 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
     try {
       const data = await api.getReportData(token, currentType, currentFilters);
       setReportData(data);
+      setCurrentPage(1);
     } catch (err) {
       console.error(err);
       setError('Gagal memuat data laporan. Silakan coba lagi.');
@@ -95,6 +100,12 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
       default: return 'Laporan Data';
     }
   };
+
+  // Calculate pagination
+  const totalItems = reportData.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedData = reportData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.4s_ease-out] font-sans">
@@ -248,7 +259,7 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
             
             <div>
               <h2 className="text-sm font-bold text-slate-800 tracking-tight">{getReportTitle()}</h2>
-              <p className="text-[10px] text-slate-400">Menampilkan hingga 500 data terbaru yang terfilter</p>
+              <p className="text-[10px] text-slate-400">Paginasi {ITEMS_PER_PAGE} data per halaman • Ekspor mengambil seluruh data terfilter</p>
             </div>
           </div>
 
@@ -258,7 +269,7 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
               onClick={() => handleDownload('pdf')}
               disabled={downloading.pdf || reportData.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 disabled:opacity-50 text-slate-700 font-bold border border-slate-200 rounded-lg text-xs transition cursor-pointer"
-              title="Unduh PDF Resmi"
+              title="Unduh PDF Resmi (Seluruh Data Terfilter)"
             >
               <FileText className="h-3.5 w-3.5 text-red-500" />
               <span>{downloading.pdf ? 'Proses...' : 'PDF'}</span>
@@ -268,7 +279,7 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
               onClick={() => handleDownload('excel')}
               disabled={downloading.excel || reportData.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 disabled:opacity-50 text-slate-700 font-bold border border-slate-200 rounded-lg text-xs transition cursor-pointer"
-              title="Unduh Excel Spreadsheet"
+              title="Unduh Excel Spreadsheet (Seluruh Data Terfilter)"
             >
               <FileDown className="h-3.5 w-3.5 text-green-600" />
               <span>{downloading.excel ? 'Proses...' : 'Excel'}</span>
@@ -278,7 +289,7 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
               onClick={() => handleDownload('csv')}
               disabled={downloading.csv || reportData.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D9D1B] hover:bg-[#0A8516] disabled:opacity-50 text-white font-bold rounded-lg text-xs shadow-sm shadow-green-500/10 transition cursor-pointer"
-              title="Unduh CSV Murni"
+              title="Unduh CSV Murni (Seluruh Data Terfilter)"
             >
               <Download className="h-3.5 w-3.5" />
               <span>{downloading.csv ? 'Proses...' : 'CSV'}</span>
@@ -357,11 +368,11 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
                 )}
               </thead>
 
-              {/* Report-Specific Table Body */}
+              {/* Report-Specific Table Body (Paginated 50 per page) */}
               <tbody className="divide-y divide-slate-100">
-                {reportType === 'telemetry' && reportData.map((row, idx) => (
+                {reportType === 'telemetry' && paginatedData.map((row, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/50 transition">
-                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{idx + 1}</td>
+                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{startIndex + idx + 1}</td>
                     <td className="px-4 py-2.5 font-semibold text-slate-900">{row.iot_node_serial_number || '-'}</td>
                     <td className="px-4 py-2.5 text-center text-slate-500">{formatTime(row._time)}</td>
                     <td className="px-4 py-2.5 text-right font-medium">{row.temperature !== undefined ? Number(row.temperature).toFixed(2) + ' °C' : '-'}</td>
@@ -373,9 +384,9 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
                   </tr>
                 ))}
 
-                {reportType === 'node-registration' && reportData.map((row, idx) => (
+                {reportType === 'node-registration' && paginatedData.map((row, idx) => (
                   <tr key={row.id || idx} className="hover:bg-slate-50/50 transition">
-                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{idx + 1}</td>
+                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{startIndex + idx + 1}</td>
                     <td className="px-4 py-2.5 font-semibold text-slate-900">{row.serial_number}</td>
                     <td className="px-4 py-2.5 text-slate-600 font-medium">{row.owner?.name || '-'}</td>
                     <td className="px-4 py-2.5 text-slate-500 font-mono">{row.edge_gateway?.serial_number || '-'}</td>
@@ -387,9 +398,9 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
                   </tr>
                 ))}
 
-                {reportType === 'maintenance' && reportData.map((row, idx) => (
+                {reportType === 'maintenance' && paginatedData.map((row, idx) => (
                   <tr key={row.id || idx} className="hover:bg-slate-50/50 transition">
-                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{idx + 1}</td>
+                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{startIndex + idx + 1}</td>
                     <td className="px-4 py-2.5 font-semibold text-slate-900">{row.iot_node?.serial_number || '-'}</td>
                     <td className="px-4 py-2.5 text-slate-600 font-medium">{row.operator?.name || '-'}</td>
                     <td className="px-4 py-2.5 text-slate-500 max-w-xs truncate" title={row.description}>{row.description || '-'}</td>
@@ -399,9 +410,9 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
                   </tr>
                 ))}
 
-                {reportType === 'feeding' && reportData.map((row, idx) => (
+                {reportType === 'feeding' && paginatedData.map((row, idx) => (
                   <tr key={row.id || idx} className="hover:bg-slate-50/50 transition">
-                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{idx + 1}</td>
+                    <td className="px-4 py-2.5 text-center font-medium text-slate-400">{startIndex + idx + 1}</td>
                     <td className="px-4 py-2.5 font-semibold text-slate-900">{row.cage?.cage_code || '-'}</td>
                     <td className="px-4 py-2.5 text-slate-600 font-medium">{row.operator?.full_name || '-'}</td>
                     <td className="px-4 py-2.5 text-center">
@@ -422,7 +433,57 @@ export const ReportsTab = ({ token, nodes = [], cagesList = [] }) => {
             </table>
           )}
         </div>
+
+        {/* Pagination Bar */}
+        {reportData.length > 0 && (
+          <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="text-slate-500 font-medium">
+              Menampilkan <span className="font-bold text-slate-800">{totalItems > 0 ? startIndex + 1 : 0}</span>–<span className="font-bold text-slate-800">{Math.min(startIndex + ITEMS_PER_PAGE, totalItems)}</span> dari <span className="font-bold text-slate-800">{totalItems}</span> data
+              <span className="text-[10px] text-slate-400 ml-2">(Halaman {currentPage} dari {totalPages})</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition"
+              >
+                Sebelumnya
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+                .map((page, idx, array) => {
+                  const showEllipsis = idx > 0 && page - array[idx - 1] > 1;
+                  return (
+                    <React.Fragment key={page}>
+                      {showEllipsis && <span className="px-1.5 text-slate-400">...</span>}
+                      <button
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-7 h-7 rounded-lg text-xs font-bold transition ${
+                          currentPage === page
+                            ? 'bg-[#0D9D1B] text-white shadow-sm'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition"
+              >
+                Selanjutnya
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
