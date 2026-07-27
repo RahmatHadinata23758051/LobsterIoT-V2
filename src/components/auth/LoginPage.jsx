@@ -111,6 +111,13 @@ export const LoginPage = ({ onLoginSuccess }) => {
 
           {/* ── Heading ── */}
           <div className="mb-10">
+            {/* Institution Logos */}
+            <div className="flex items-center justify-center gap-5 mb-8">
+              <img src="/logo-unikom.png" alt="UNIKOM" className="h-8 w-auto object-contain" />
+              <img src="/logo-nusamandiri.png" alt="Nusa Mandiri" className="h-8 w-auto object-contain" />
+              <img src="/logo-brin.png" alt="BRIN" className="h-8 w-auto object-contain" />
+            </div>
+
             <p className="text-[10px] font-semibold tracking-[0.35em] uppercase text-slate-400 mb-3">
               LOBSENSE 1.0
             </p>
