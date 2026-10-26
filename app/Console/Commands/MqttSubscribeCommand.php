@@ -167,13 +167,18 @@ class MqttSubscribeCommand extends Command
                 $calibratedFields['ambient_temperature'] = $calibratedValues['ambient_temperature'];
             }
 
-            // Map pH, TDS, DO, Turbidity, Salinity, Flow Rate, Solar/Battery metrics
-            foreach (['ph', 'tds', 'dissolved_oxygen', 'turbidity', 'salinity', 'flow_rate', 'solar_voltage', 'solar_current', 'battery_voltage', 'battery_current'] as $metric) {
+            // Map pH, TDS, DO, Turbidity, Salinity, Flow Rate, Solar/Battery metrics, and Actuator status
+            foreach (['ph', 'tds', 'dissolved_oxygen', 'turbidity', 'salinity', 'flow_rate', 'solar_voltage', 'solar_current', 'battery_voltage', 'battery_current', 'pump_status'] as $metric) {
                 if (isset($calibratedValues[$metric])) {
-                    $calibratedFields[$metric] = $calibratedValues[$metric];
+                    $calibratedFields[$metric] = $metric === 'pump_status' ? (int) $calibratedValues[$metric] : $calibratedValues[$metric];
                 } elseif ($metric === 'dissolved_oxygen' && isset($calibratedValues['raw_dissolved_oxygen'])) {
                     $calibratedFields[$metric] = $calibratedValues['raw_dissolved_oxygen'];
                 }
+            }
+
+            // Fallback for pump_status directly at root level if not inside raw_values
+            if (!isset($calibratedFields['pump_status']) && isset($data['pump_status'])) {
+                $calibratedFields['pump_status'] = (int) $data['pump_status'];
             }
 
             // Merge coordinate fields

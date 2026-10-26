@@ -269,11 +269,13 @@ class MonitoringController extends Controller
             'water_temperature' => round(26.8 + sin($angle) * 0.6 + (mt_rand(-5, 5) / 100), 2),
             'flow_rate' => round(0.30 + (mt_rand(-2, 2) / 100), 2),
             'turbidity' => round(12.1 + (mt_rand(-15, 15) / 100), 2),
-            'salinity' => 30.5,
+            'salinity' => 0.0,
             'solar_voltage' => 17.8,
             'solar_current' => 1.1,
             'battery_voltage' => 12.4,
             'battery_current' => 0.5,
+            'pump_status' => 1,
+            'altitude' => 1.2,
             'cage_code' => $node->cage->cage_code ?? 'CAGE-A01'
         ];
     }
