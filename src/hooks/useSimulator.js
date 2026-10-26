@@ -60,19 +60,21 @@ export default function useSimulator() {
     doValue: 6.2,
     turbidity: 12.0,
     flowRate: 0.35,
-    pitch: 0.5,
-    roll: -1.0,
-    yaw: 180.0
+    solarVoltage: 18.2,
+    solarCurrent: 1.45,
+    batteryVoltage: 12.6,
+    batteryCurrent: 0.65,
+    altitude: 1.2
   });
 
   // Logger
   const [logs, setLogs] = useState([]);
-  
+
   // Refs
   const clientRef = useRef(null);
   const timerRef = useRef(null);
   const simulatedTimestampRef = useRef(null);
-  
+
   // Persistent currentValues ref to apply linear interpolation (Lerp) for smooth data shift
   const currentValuesRef = useRef({
     waterTemp: 27.2,
@@ -81,7 +83,11 @@ export default function useSimulator() {
     tds: 250.0,
     doValue: 6.2,
     turbidity: 12.0,
-    flowRate: 0.35
+    flowRate: 0.35,
+    solarVoltage: 18.2,
+    solarCurrent: 1.45,
+    batteryVoltage: 12.6,
+    batteryCurrent: 0.65
   });
 
   // Helper to append logs
@@ -175,6 +181,8 @@ export default function useSimulator() {
         clientId: 'lobsense_emulator_' + Math.random().toString(16).substring(2, 8),
         reconnectPeriod: 5000,
         connectTimeout: 10000,
+        username: 'lobsense_mqtt',
+        password: 'Makerdotindo2026',
       });
 
       clientRef.current = client;
@@ -304,6 +312,10 @@ export default function useSimulator() {
     const nextDo = lerp(currentValuesRef.current.doValue, targetDo, lerpAlpha);
     const nextTurbidity = lerp(currentValuesRef.current.turbidity, targetTurbidity, lerpAlpha);
     const nextFlow = lerp(currentValuesRef.current.flowRate, targetFlow, lerpAlpha);
+    const nextSolarV = lerp(currentValuesRef.current.solarVoltage ?? 18.2, baseTarget.solarVoltage, lerpAlpha);
+    const nextSolarA = lerp(currentValuesRef.current.solarCurrent ?? 1.45, baseTarget.solarCurrent, lerpAlpha);
+    const nextBatV = lerp(currentValuesRef.current.batteryVoltage ?? 12.6, baseTarget.batteryVoltage, lerpAlpha);
+    const nextBatA = lerp(currentValuesRef.current.batteryCurrent ?? 0.65, baseTarget.batteryCurrent, lerpAlpha);
 
     // Save back to Ref for the next loop
     currentValuesRef.current = {
@@ -313,7 +325,11 @@ export default function useSimulator() {
       tds: nextTds,
       doValue: nextDo,
       turbidity: nextTurbidity,
-      flowRate: nextFlow
+      flowRate: nextFlow,
+      solarVoltage: nextSolarV,
+      solarCurrent: nextSolarA,
+      batteryVoltage: nextBatV,
+      batteryCurrent: nextBatA
     };
 
     // 5. Apply minor random jitter (noise) representing sensor electrical micro-fluctuations
@@ -324,11 +340,10 @@ export default function useSimulator() {
     const publishedDo = nextDo + getJitter(0.04);
     const publishedTurbidity = nextTurbidity + getJitter(0.2);
     const publishedFlow = Math.max(0, nextFlow + getJitter(0.005));
-
-    // Gyro calculations (jittery hovering)
-    const publishedPitch = 0.5 + getJitter(0.1);
-    const publishedRoll = -1.0 + getJitter(0.1);
-    const publishedYaw = 180.0 + getJitter(0.4);
+    const publishedSolarV = Math.max(0, nextSolarV + getJitter(0.1));
+    const publishedSolarA = Math.max(0, nextSolarA + getJitter(0.05));
+    const publishedBatV = Math.max(0, nextBatV + getJitter(0.05));
+    const publishedBatA = Math.max(0, nextBatA + getJitter(0.02));
 
     const telemetryMetrics = {
       waterTemp: publishedWaterTemp,
@@ -338,9 +353,11 @@ export default function useSimulator() {
       doValue: publishedDo,
       turbidity: publishedTurbidity,
       flowRate: publishedFlow,
-      pitch: publishedPitch,
-      roll: publishedRoll,
-      yaw: publishedYaw
+      solarVoltage: publishedSolarV,
+      solarCurrent: publishedSolarA,
+      batteryVoltage: publishedBatV,
+      batteryCurrent: publishedBatA,
+      altitude: 1.2
     };
 
     // Update UI Cockpit display values
@@ -354,6 +371,7 @@ export default function useSimulator() {
       cageCode: selectedCage.cage_code,
       latitude: selectedNode.latitude,
       longitude: selectedNode.longitude,
+      altitude: selectedNode.altitude || 1.2,
       metrics: telemetryMetrics,
       timestamp: timestampToUse
     });

@@ -529,11 +529,20 @@ function App() {
               </div>
             </div>
 
-            {/* Sub-Panel: Gyroscope Status Readouts */}
-            <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl grid grid-cols-3 gap-2 text-[10px] font-mono-tech text-slate-400">
-              <div className="text-center border-r border-slate-900">PITCH: {liveMetrics.pitch.toFixed(2)}°</div>
-              <div className="text-center border-r border-slate-900">ROLL: {liveMetrics.roll.toFixed(2)}°</div>
-              <div className="text-center">YAW: {liveMetrics.yaw.toFixed(1)}°</div>
+            {/* Sub-Panel: Power & Hardware Status Readouts */}
+            <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px] font-mono-tech text-slate-400">
+              <div className="text-center md:border-r border-slate-900">
+                <span className="text-slate-600">SOLAR:</span> {(liveMetrics.solarVoltage ?? 18.2).toFixed(1)}V / {(liveMetrics.solarCurrent ?? 1.45).toFixed(2)}A
+              </div>
+              <div className="text-center md:border-r border-slate-900">
+                <span className="text-slate-600">BATTERY:</span> {(liveMetrics.batteryVoltage ?? 12.6).toFixed(1)}V / {(liveMetrics.batteryCurrent ?? 0.65).toFixed(2)}A
+              </div>
+              <div className="text-center md:border-r border-slate-900">
+                <span className="text-slate-600">ALTITUDE:</span> {(liveMetrics.altitude ?? 1.2).toFixed(1)} m
+              </div>
+              <div className="text-center">
+                <span className="text-slate-600">PUMP:</span> <span className={liveMetrics.flowRate > 0.05 ? 'text-cyan-400 font-bold' : 'text-slate-500 font-bold'}>{liveMetrics.flowRate > 0.05 ? 'ON (1)' : 'OFF (0)'}</span>
+              </div>
             </div>
 
             {/* Trigger Anomaly Controllers */}
