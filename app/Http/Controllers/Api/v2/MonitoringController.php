@@ -264,7 +264,7 @@ class MonitoringController extends Controller
         return [
             'time' => now()->toIso8601String(),
             'ph' => round(7.45 + sin($angle) * 0.15 + (mt_rand(-10, 10) / 100), 2),
-            'tds' => round(420 + cos($angle) * 12 + mt_rand(-3, 3), 1),
+            'tds' => round(420 + cos($angle) * 12 + (mt_rand(-300, 300) / 100), 2),
             'dissolved_oxygen' => round(6.40 + cos($angle) * 0.35 + (mt_rand(-10, 10) / 100), 2),
             'water_temperature' => round(26.8 + sin($angle) * 0.6 + (mt_rand(-5, 5) / 100), 2),
             'flow_rate' => round(0.30 + (mt_rand(-2, 2) / 100), 2),
