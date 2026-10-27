@@ -997,9 +997,7 @@ export const SensorChart = ({
                         text-slate-900
                       "
                     >
-                      {points[hoveredIndex].value.toFixed(
-                        selectedMetric === 'tds' ? 0 : 2,
-                      )}
+                      {points[hoveredIndex].value.toFixed(2)}
 
                       {meta.unit && (
                         <span

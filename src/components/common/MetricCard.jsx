@@ -153,7 +153,7 @@ export const MetricCard = ({ type, value, minIdeal, maxIdeal }) => {
             {/* Value Display */}
             <div className="flex items-baseline gap-1.5 mt-1">
               <span className="text-4xl font-bold font-mono leading-none tracking-tight text-slate-900">
-                {isOff ? '--' : value.toFixed(type === 'tds' ? 0 : 2)}
+                {isOff ? '--' : value.toFixed(2)}
               </span>
               <span className="text-sm font-semibold text-slate-400 font-mono tracking-wider">{meta.unit}</span>
             </div>
