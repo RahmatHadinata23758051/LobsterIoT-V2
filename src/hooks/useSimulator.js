@@ -27,6 +27,8 @@ export default function useSimulator() {
   // MQTT Connection State
   const [mqttHost, setMqttHost] = useState('127.0.0.1');
   const [mqttPort, setMqttPort] = useState('9001'); // WebSockets port
+  const [mqttUsername, setMqttUsername] = useState('lobsense_mqtt');
+  const [mqttPassword, setMqttPassword] = useState('Lobster123!');
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [mqttClient, setMqttClient] = useState(null);
@@ -181,8 +183,8 @@ export default function useSimulator() {
         clientId: 'lobsense_emulator_' + Math.random().toString(16).substring(2, 8),
         reconnectPeriod: 5000,
         connectTimeout: 10000,
-        username: 'lobsense_mqtt',
-        password: 'Makerdotindo2026',
+        username: mqttUsername || undefined,
+        password: mqttPassword || undefined,
       });
 
       clientRef.current = client;
@@ -519,6 +521,10 @@ export default function useSimulator() {
     setMqttHost,
     mqttPort,
     setMqttPort,
+    mqttUsername,
+    setMqttUsername,
+    mqttPassword,
+    setMqttPassword,
     isConnected,
     isConnecting,
     connectMqtt,

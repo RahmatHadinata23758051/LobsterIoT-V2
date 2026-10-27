@@ -41,6 +41,10 @@ function App() {
     setMqttHost,
     mqttPort,
     setMqttPort,
+    mqttUsername,
+    setMqttUsername,
+    mqttPassword,
+    setMqttPassword,
     isConnected,
     isConnecting,
     connectMqtt,
@@ -235,21 +239,45 @@ function App() {
             
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
-                <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Host IP</label>
-                <input 
-                  type="text" 
+                <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Host IP / Domain</label>
+                <input
+                  type="text"
                   value={mqttHost}
                   onChange={(e) => setMqttHost(e.target.value)}
+                  disabled={isConnected}
+                  className="w-full mt-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono-tech text-white focus:outline-none focus:border-cyan-500 disabled:opacity-50"
+                  placeholder="127.0.0.1 / 103.67.78.91"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">WS Port</label>
+                <input
+                  type="text"
+                  value={mqttPort}
+                  onChange={(e) => setMqttPort(e.target.value)}
+                  disabled={isConnected}
+                  className="w-full mt-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono-tech text-white focus:outline-none focus:border-cyan-500 disabled:opacity-50"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">MQTT User</label>
+                <input
+                  type="text"
+                  value={mqttUsername}
+                  onChange={(e) => setMqttUsername(e.target.value)}
                   disabled={isConnected}
                   className="w-full mt-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono-tech text-white focus:outline-none focus:border-cyan-500 disabled:opacity-50"
                 />
               </div>
               <div>
-                <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">WS Port</label>
-                <input 
-                  type="text" 
-                  value={mqttPort}
-                  onChange={(e) => setMqttPort(e.target.value)}
+                <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">MQTT Password</label>
+                <input
+                  type="password"
+                  value={mqttPassword}
+                  onChange={(e) => setMqttPassword(e.target.value)}
                   disabled={isConnected}
                   className="w-full mt-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono-tech text-white focus:outline-none focus:border-cyan-500 disabled:opacity-50"
                 />
