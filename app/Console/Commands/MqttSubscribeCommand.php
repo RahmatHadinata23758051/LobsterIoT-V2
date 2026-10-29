@@ -91,20 +91,23 @@ class MqttSubscribeCommand extends Command
         // Use real-time server UTC timestamp for exact time synchronization across Website & TSDB
         $timestamp = time();
         if (isset($data['timestamp'])) {
+            $incomingTime = null;
             if (is_numeric($data['timestamp'])) {
-                $timestamp = (int) $data['timestamp'];
+                $incomingTime = (int) $data['timestamp'];
             } elseif (is_string($data['timestamp'])) {
                 try {
-                    $parsed = \Carbon\Carbon::parse($data['timestamp']);
-                    // Protect against timezone offset mismatch (e.g. 13:30 local parsed as 13:30 UTC = 20:30 WIB)
-                    if ($parsed->timestamp > (time() + 300)) {
-                        $timestamp = time();
-                    } else {
-                        $timestamp = $parsed->timestamp;
-                    }
+                    $incomingTime = \Carbon\Carbon::parse($data['timestamp'])->timestamp;
                 } catch (\Exception $e) {
-                    $timestamp = time();
+                    $incomingTime = null;
                 }
+            }
+
+            // Validasi: hanya gunakan timestamp payload jika selisihnya sinkron (maks 10 menit ke belakang & 5 menit ke depan).
+            // Melindungi TSDB dari mikrokontroler tanpa RTC/NTP yang mengirim timestamp basi (misal 2024 atau 1970)
+            if ($incomingTime !== null && $incomingTime >= (time() - 600) && $incomingTime <= (time() + 300)) {
+                $timestamp = $incomingTime;
+            } else {
+                $timestamp = time();
             }
         }
         
