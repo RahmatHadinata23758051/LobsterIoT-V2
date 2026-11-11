@@ -156,7 +156,7 @@ class MobileDashboardController extends Controller
             $latestQuery = 'from(bucket: "' . $this->bucket . '")
                 |> range(start: -30d)
                 |> filter(fn: (r) => r["_measurement"] == "telemetries")
-                |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+                |> filter(fn: (r) => r["iot_node_serial_number"] == "' . preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $serialNumber) . '")
                 |> drop(columns: ["cage_code"])
                 |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
                 |> tail(n: 1)';

@@ -162,6 +162,107 @@ class CameraApiTest extends TestCase
             ]);
     }
 
+    public function test_store_camera_saves_dvr_configuration_and_hides_password(): void
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->postJson('/api/v2/cameras', [
+            'camera_code' => 'CAM-DVR-01',
+            'iot_node_id' => $this->iotNode->id,
+            'dvr_ip' => '192.168.1.108',
+            'port' => 8554,
+            'channel_number' => 3,
+            'protocol' => 'rtsp',
+            'username' => 'camera-user',
+            'password' => 'test-secret',
+            'rtsp_url' => 'rtsp://192.168.1.108:8554/live/3',
+            'is_active' => true,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.dvr_ip', '192.168.1.108')
+            ->assertJsonPath('data.port', 8554)
+            ->assertJsonPath('data.channel_number', 3)
+            ->assertJsonPath('data.computed_stream_url', 'rtsp://192.168.1.108:8554/live/3')
+            ->assertJsonMissingPath('data.password')
+            ->assertDontSee('test-secret');
+
+        $camera = Camera::where('camera_code', 'CAM-DVR-01')->firstOrFail();
+        $this->assertSame('test-secret', $camera->password);
+        $this->assertDatabaseMissing('cameras', [
+            'id' => $camera->id,
+            'password' => 'test-secret',
+        ]);
+        $this->assertNotSame('test-secret', $camera->getRawOriginal('password'));
+    }
+
+    public function test_camera_computed_stream_url_is_built_from_dvr_fields(): void
+    {
+        $camera = Camera::create([
+            'camera_code' => 'CAM-DVR-AUTO',
+            'iot_node_id' => $this->iotNode->id,
+            'dvr_ip' => '192.168.1.109',
+            'port' => 8554,
+            'channel_number' => 2,
+            'protocol' => 'rtsp',
+            'is_active' => true,
+        ]);
+
+        $this->assertSame('rtsp://192.168.1.109:8554/ch2', $camera->computed_stream_url);
+    }
+
+    public function test_camera_dvr_validation_rejects_invalid_port_and_host(): void
+    {
+        $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->postJson('/api/v2/cameras', [
+            'camera_code' => 'CAM-DVR-BAD',
+            'iot_node_id' => $this->iotNode->id,
+            'dvr_ip' => 'rtsp://external.example/path',
+            'port' => 70000,
+        ])->assertUnprocessable()
+            ->assertJsonPath('status', 'error')
+            ->assertJsonPath('data.dvr_ip.0', fn ($message) => is_string($message))
+            ->assertJsonPath('data.port.0', fn ($message) => is_string($message));
+    }
+
+    public function test_update_camera_keeps_password_when_password_is_omitted(): void
+    {
+        $camera = Camera::create([
+            'camera_code' => 'CAM-EDIT-DVR',
+            'iot_node_id' => $this->iotNode->id,
+            'password' => 'initial-secret',
+        ]);
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->putJson('/api/v2/cameras/' . $camera->id, [
+            'channel_number' => 4,
+        ])->assertOk()->assertJsonMissingPath('data.password');
+
+        $this->assertSame('initial-secret', $camera->fresh()->password);
+    }
+
+    public function test_store_rejects_duplicate_active_dvr_channel_on_same_node(): void
+    {
+        $dvr = [
+            'iot_node_id' => $this->iotNode->id,
+            'dvr_ip' => '192.168.1.200',
+            'port' => 554,
+            'channel_number' => 1,
+            'is_active' => true,
+        ];
+
+        Camera::create(['camera_code' => 'CAM-DVR-FIRST'] + $dvr);
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->postJson('/api/v2/cameras', ['camera_code' => 'CAM-DVR-SECOND'] + $dvr)
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'error')
+            ->assertJsonPath('data.channel_number.0', fn ($m) => is_string($m));
+    }
+
     /**
      * Test show retrieves single camera details.
      */

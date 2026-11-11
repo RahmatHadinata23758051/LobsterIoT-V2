@@ -139,16 +139,18 @@ class AuthController extends Controller
                 'email',
                 Rule::unique('users')->ignore($user->id),
             ],
+            'password' => ['nullable', 'min:8', 'regex:/[a-z]/', 'regex:/[A-Z]/', 'regex:/[0-9]/'],
         ]);
 
         if ($validator->fails()) {
             return $this->error('Validasi gagal.', $validator->errors(), 422);
         }
 
-        $user->update([
+        $user->update(array_filter([
             'name' => $request->name,
             'email' => $request->email,
-        ]);
+            'password' => $request->filled('password') ? Hash::make($request->password) : null,
+        ], fn ($value) => $value !== null));
 
         return $this->success('Profile updated successfully', [
             'id' => $user->id,

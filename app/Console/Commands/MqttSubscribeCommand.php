@@ -5,13 +5,14 @@ namespace App\Console\Commands;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use App\Models\IotNode;
 use App\Services\InfluxDBService;
 use App\Services\CalibrationService;
 use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
 use Illuminate\Support\Facades\Log;
 
-#[Signature('mqtt:subscribe {topic=lobsense/telemetry/#}')]
+#[Signature('mqtt:subscribe {topic?}')]
 #[Description('Subscribe to MQTT broker and ingest telemetry data to InfluxDB')]
 class MqttSubscribeCommand extends Command
 {
@@ -20,7 +21,7 @@ class MqttSubscribeCommand extends Command
      */
     public function handle(InfluxDBService $influxDB, CalibrationService $calibration)
     {
-        $topic = $this->argument('topic');
+        $topic = $this->argument('topic') ?: config('mqtt.topic', 'lobsense/telemetry/#');
         $server = config('mqtt.host', '127.0.0.1');
         $port = config('mqtt.port', 1883);
         $clientId = 'lobsense_backend_' . uniqid();
@@ -37,31 +38,33 @@ class MqttSubscribeCommand extends Command
             $connectionSettings = $connectionSettings->setPassword($password);
         }
 
-        // Enable TLS if using port 8883
         if ($port === 8883) {
             $connectionSettings->setUseTls(true)
-                               ->setTlsVerifyPeer(false);
+                ->setTlsVerifyPeer(config('mqtt.tls_verify_peer', true));
+
+            if ($caFile = config('mqtt.tls_ca_file')) {
+                $connectionSettings->setTlsCertificateAuthorityFile($caFile);
+            }
         }
 
-        try {
-            $this->info("Connecting to MQTT broker at {$server}:{$port}...");
-            $mqtt = new MqttClient($server, $port, $clientId);
-            
+            try {
+                $this->info("Connecting to MQTT broker at {$server}:{$port}...");
+                $mqtt = new MqttClient($server, $port, $clientId);
+
             $mqtt->connect($connectionSettings, true);
             $this->info("Connected successfully. Subscribing to topic [{$topic}]...");
 
-            $topics = ['lobsense/telemetry', 'lobsense/telemetry/#'];
+            $topics = [$topic];
             foreach ($topics as $t) {
                 $mqtt->subscribe($t, function (string $topic, string $message) use ($influxDB, $calibration) {
-                    $this->info("[Raw MQTT Message] " . $message);
-                    
                     $data = json_decode($message, true);
+                    $this->info("[MQTT] Received telemetry on {$topic} for node " . ($data['serial_number'] ?? 'unknown'));
                     if (!$data) {
                         $this->warn("Received non-JSON payload: " . $message);
                         return;
                     }
 
-                    $this->processTelemetry($data, $influxDB, $calibration);
+                    $this->processTelemetry($data, $topic, $influxDB, $calibration);
                 }, 0);
             }
 
@@ -78,17 +81,46 @@ class MqttSubscribeCommand extends Command
     }
 
     /**
+     * Return a device serial when the topic is lobsense/telemetry/{serial}.
+     */
+    private function serialFromTopic(string $topic): ?string
+    {
+        $parts = explode('/', trim($topic, '/'));
+
+        return count($parts) === 3 && $parts[0] === 'lobsense' && $parts[1] === 'telemetry'
+            ? $parts[2]
+            : null;
+    }
+
+    /**
      * Process and ingest telemetry packet.
      */
-    protected function processTelemetry(array $data, InfluxDBService $influxDB, CalibrationService $calibration): void
+    protected function processTelemetry(array $data, string $topic, InfluxDBService $influxDB, CalibrationService $calibration): void
     {
-        $serialNumber = $data['serial_number'] ?? null;
-        if (!$serialNumber) {
-            $this->error("Missing serial_number in payload.");
+        $topicSerial = $this->serialFromTopic($topic);
+        $payloadSerial = $data['serial_number'] ?? null;
+
+        if ($topicSerial !== null && $payloadSerial !== null && $topicSerial !== $payloadSerial) {
+            Log::warning('[MQTT] Discarded telemetry: topic serial does not match payload serial.', [
+                'topic_serial' => $topicSerial,
+                'payload_serial' => $payloadSerial,
+            ]);
             return;
         }
 
-        // Use real-time server UTC timestamp for exact time synchronization across Website & TSDB
+        $serialNumber = $payloadSerial ?: $topicSerial;
+        if (!$serialNumber) {
+            $this->error("Missing serial_number in payload and topic.");
+            return;
+        }
+
+        $node = IotNode::with('cage')->where('serial_number', $serialNumber)->first();
+        if (!$node) {
+            Log::warning("[MQTT] Discarded telemetry for unregistered serial: {$serialNumber}");
+            return;
+        }
+
+        // Use real-time server UTC timestamp for exact time synchronization across Website & TSDB.
         $timestamp = time();
         if (isset($data['timestamp'])) {
             $incomingTime = null;
@@ -126,8 +158,9 @@ class MqttSubscribeCommand extends Command
         // Calibrate raw values
         $calibratedValues = $calibration->calibrate($serialNumber, $rawValues);
 
-        // Resolve cage code (passed in payload, or fallback)
-        $cageCode = $data['cage_code'] ?? 'CAGE-DEFAULT';
+        // Resolve cage code authoritatively from the relational DB (node may have moved cages),
+        // falling back to the payload's self-report then a generic default.
+        $cageCode = $node->cage->cage_code ?? $data['cage_code'] ?? 'CAGE-DEFAULT';
 
         // Additional physical fields that might be passed (e.g. coordinates, pitch, roll, yaw)
         $coordinateFields = [];

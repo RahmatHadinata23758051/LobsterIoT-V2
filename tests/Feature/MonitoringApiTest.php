@@ -135,7 +135,12 @@ class MonitoringApiTest extends TestCase
         $camera = Camera::create([
             'camera_code' => 'CAM-DASH-1',
             'iot_node_id' => $node->id,
-            'stream_url' => 'rtsp://127.0.0.1/dash',
+            'dvr_ip' => '192.168.1.108',
+            'port' => 554,
+            'channel_number' => 2,
+            'protocol' => 'rtsp',
+            'password' => 'dvr-secret',
+            'rtsp_url' => 'rtsp://127.0.0.1/dash',
             'is_active' => true,
         ]);
 
@@ -163,7 +168,7 @@ class MonitoringApiTest extends TestCase
 
         // Mock InfluxDB queryParsed response
         $mockLatest = [
-            'time' => '2026-06-24T10:00:00Z',
+            'time' => now()->toIso8601String(),
             'ph' => 7.2,
             'tds' => 250.0,
             'water_temperature' => 26.5
@@ -171,13 +176,13 @@ class MonitoringApiTest extends TestCase
 
         $mockSeries = [
             [
-                'time' => '2026-06-24T09:50:00Z',
+                'time' => now()->subMinutes(10)->toIso8601String(),
                 'ph' => 7.1,
                 'tds' => 245.0,
                 'water_temperature' => 26.3
             ],
             [
-                'time' => '2026-06-24T09:55:00Z',
+                'time' => now()->subMinutes(5)->toIso8601String(),
                 'ph' => 7.2,
                 'tds' => 248.0,
                 'water_temperature' => 26.4
@@ -187,7 +192,7 @@ class MonitoringApiTest extends TestCase
         $this->mock(InfluxDBService::class, function (MockInterface $mock) use ($mockLatest, $mockSeries) {
             // First call retrieves latest point
             $mock->shouldReceive('queryParsed')
-                ->with(Mockery::on(fn($q) => str_contains($q, 'tail(n: 1)')))
+                ->with(Mockery::on(fn($q) => str_contains($q, 'limit(n: 1)')))
                 ->once()
                 ->andReturn([$mockLatest]);
 
@@ -224,6 +229,9 @@ class MonitoringApiTest extends TestCase
             ->assertJsonCount(1, 'data.cameras')
             ->assertJsonCount(1, 'data.feeding_logs')
             ->assertJsonFragment(['camera_code' => 'CAM-DASH-1'])
+            ->assertJsonFragment(['dvr_ip' => '192.168.1.108'])
+            ->assertJsonMissing(['password' => 'dvr-secret'])
+            ->assertJsonMissing(['password' => 'password123'])
             ->assertJsonFragment(['feed_type' => 'Pelet Bio']);
     }
 
@@ -241,6 +249,76 @@ class MonitoringApiTest extends TestCase
                 'status' => 'error',
                 'message' => 'IoT Node tidak ditemukan.'
             ]);
+    }
+
+    /**
+     * Test dashboard returns only active cameras of the requested node.
+     */
+    public function test_get_dashboard_locks_cameras_to_active_node_and_active_flag(): void
+    {
+        $node = IotNode::create([
+            'city_id' => $this->city->id,
+            'owner_id' => $this->user->id,
+            'serial_number' => 'SN-CAM-LOCK',
+            'activated_at' => now(),
+        ]);
+
+        Camera::create([
+            'camera_code' => 'CAM-LOCK-ACTIVE',
+            'iot_node_id' => $node->id,
+            'is_active' => true,
+        ]);
+        Camera::create([
+            'camera_code' => 'CAM-LOCK-INACTIVE',
+            'iot_node_id' => $node->id,
+            'is_active' => false,
+        ]);
+
+        $this->mock(InfluxDBService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('queryParsed')->with(Mockery::on(fn($q) => str_contains($q, 'limit(n: 1)')))
+                ->once()->andReturn([['time' => now()->toIso8601String(), 'ph' => 7.1]]);
+            $mock->shouldReceive('queryParsed')->with(Mockery::on(fn($q) => str_contains($q, 'aggregateWindow')))
+                ->once()->andReturn([]);
+        });
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->getJson('/api/v2/monitoring/dashboard/SN-CAM-LOCK')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data.cameras')
+            ->assertJsonFragment(['camera_code' => 'CAM-LOCK-ACTIVE'])
+            ->assertJsonMissing(['camera_code' => 'CAM-LOCK-INACTIVE']);
+    }
+
+    /**
+     * Test dashboard strips Flux-breaking characters from the serial in queries.
+     */
+    public function test_get_dashboard_sanitizes_serial_in_flux_query(): void
+    {
+        IotNode::create([
+            'city_id' => $this->city->id,
+            'owner_id' => $this->user->id,
+            'serial_number' => 'SN"INJECT',
+            'activated_at' => now(),
+        ]);
+
+        $queries = [];
+        $this->mock(InfluxDBService::class, function (MockInterface $mock) use (&$queries) {
+            $mock->shouldReceive('queryParsed')->andReturnUsing(function ($q) use (&$queries) {
+                $queries[] = $q;
+                return [];
+            });
+        });
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->getJson('/api/v2/monitoring/dashboard/' . rawurlencode('SN"INJECT'))->assertStatus(200);
+
+        $this->assertNotEmpty($queries);
+        foreach ($queries as $q) {
+            $this->assertStringNotContainsString('SN"INJECT', $q);
+            $this->assertStringContainsString('SNINJECT', $q);
+        }
     }
 
     /**

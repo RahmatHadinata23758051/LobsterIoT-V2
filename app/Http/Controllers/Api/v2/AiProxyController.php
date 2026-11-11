@@ -55,7 +55,7 @@ class AiProxyController extends Controller
             return $this->error('Format gambar Base64 tidak valid.', null, 422);
         }
 
-        $yoloUrl = env('YOLO_INFERENCE_URL') ?: config('services.yolo.url') ?: 'http://127.0.0.1:8001/predict';
+        $yoloUrl = config('services.yolo.url') ?: 'http://127.0.0.1:8001/predict';
 
         try {
             // Forward biner data in-memory directly to FastAPI YOLOv8 server
@@ -66,7 +66,7 @@ class AiProxyController extends Controller
 
             if (!$response->successful()) {
                 Log::error("YOLO inference server at {$yoloUrl} returned status {$response->status()}");
-                return $this->error("Gagal menghubungi server inferensi AI di {$yoloUrl} (Status: {$response->status()}).", null, 502);
+                return $this->error('Gagal menghubungi server inferensi AI.', null, 502);
             }
 
             $json = $response->json();
@@ -97,27 +97,11 @@ class AiProxyController extends Controller
             ]);
 
         } catch (\Illuminate\Http\Client\ConnectionException | \GuzzleHttp\Exception\ConnectException $connEx) {
-            Log::warning("AI Inference Server at {$yoloUrl} is offline: " . $connEx->getMessage());
-            return response()->json([
-                'status' => 'offline',
-                'message' => 'Server inferensi AI (Port 8001) sedang tidak terhubung.',
-                'data' => [
-                    'total' => 0,
-                    'classes' => [],
-                    'raw_predictions' => []
-                ]
-            ], 200);
+            Log::warning("AI inference request failed at {$yoloUrl}: " . $connEx->getMessage());
+            return $this->error('Terjadi kesalahan saat memproses deteksi AI.', null, 500);
         } catch (\Exception $e) {
             Log::error('AI Proxy Inference Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'offline',
-                'message' => 'Server AI sedang tidak aktif.',
-                'data' => [
-                    'total' => 0,
-                    'classes' => [],
-                    'raw_predictions' => []
-                ]
-            ], 200);
+            return $this->error('Terjadi kesalahan saat memproses deteksi AI.', null, 500);
         }
     }
 

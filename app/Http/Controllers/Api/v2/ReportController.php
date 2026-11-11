@@ -117,7 +117,7 @@ class ReportController extends Controller
             |> filter(fn: (r) => r["_measurement"] == "telemetries")';
 
         if (!empty($serialNumber)) {
-            $flux .= ' |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")';
+            $flux .= ' |> filter(fn: (r) => r["iot_node_serial_number"] == "' . preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $serialNumber) . '")';
         }
 
         $flux .= ' |> drop(columns: ["cage_code"])

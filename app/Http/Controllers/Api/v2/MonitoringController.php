@@ -66,7 +66,9 @@ class MonitoringController extends Controller
     public function dashboard(string $serialNumber)
     {
         $node = IotNode::where('serial_number', $serialNumber)
-            ->with(['cage', 'cameras', 'feedingLogs' => function($q) {
+            ->with(['cage', 'cameras' => function($q) {
+                $q->where('is_active', true);
+            }, 'feedingLogs' => function($q) {
                 $q->latest()->limit(3);
             }, 'feedingLogs.operator'])
             ->first();
@@ -75,12 +77,15 @@ class MonitoringController extends Controller
             return $this->error('IoT Node tidak ditemukan.', null, 404);
         }
 
+        // Strip characters that would break out of the Flux string literal.
+        $fluxSerial = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $serialNumber);
+
         // 1. Fetch latest telemetry point (look back up to 30 days)
         try {
             $latestQuery = 'from(bucket: "' . $this->bucket . '")
                 |> range(start: -30d)
                 |> filter(fn: (r) => r["_measurement"] == "telemetries")
-                |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+                |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $fluxSerial . '")
                 |> drop(columns: ["cage_code"])
                 |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
                 |> sort(columns: ["_time"], desc: true)
@@ -102,7 +107,7 @@ class MonitoringController extends Controller
             $seriesQuery = 'from(bucket: "' . $this->bucket . '")
                 |> range(start: -24h)
                 |> filter(fn: (r) => r["_measurement"] == "telemetries")
-                |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+                |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $fluxSerial . '")
                 |> drop(columns: ["cage_code"])
                 |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)
                 |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")';
@@ -214,7 +219,7 @@ class MonitoringController extends Controller
         $historyQuery = 'from(bucket: "' . $this->bucket . '")
             |> range(start: ' . $startIso . ', stop: ' . $stopIso . ')
             |> filter(fn: (r) => r["_measurement"] == "telemetries")
-            |> filter(fn: (r) => r["iot_node_serial_number"] == "' . $serialNumber . '")
+            |> filter(fn: (r) => r["iot_node_serial_number"] == "' . preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $serialNumber) . '")
             |> drop(columns: ["cage_code"])
             ' . $aggregateClause . '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
             |> limit(n: ' . $limit . ')';

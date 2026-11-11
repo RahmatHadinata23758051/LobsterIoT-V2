@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 
 class AuthTest extends TestCase
 {
@@ -153,6 +154,73 @@ class AuthTest extends TestCase
             'name' => 'New Name',
             'email' => 'new@lobsense.com',
         ]);
+    }
+
+    /**
+     * Test profile update with a new password, then login using it.
+     */
+    public function test_update_profile_with_password_allows_login(): void
+    {
+        $user = User::create([
+            'name' => 'Operator Lobster',
+            'email' => 'operator@lobsense.com',
+            'password' => bcrypt('Lobsense123!'),
+            'role' => 'operator',
+        ]);
+
+        $token = $user->createToken('test_token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->putJson('/api/v2/profile', [
+            'name' => 'Operator Lobster',
+            'email' => 'operator@lobsense.com',
+            'password' => 'NewPassword99',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['status' => 'success']);
+
+        $this->assertTrue(Hash::check('NewPassword99', $user->fresh()->password));
+
+        // Old password must no longer authenticate.
+        $this->postJson('/api/v2/auth/login', [
+            'email' => 'operator@lobsense.com',
+            'password' => 'Lobsense123!',
+        ])->assertStatus(411);
+
+        // New password must authenticate.
+        $this->postJson('/api/v2/auth/login', [
+            'email' => 'operator@lobsense.com',
+            'password' => 'NewPassword99',
+        ])->assertStatus(200);
+    }
+
+    /**
+     * Test profile update rejects weak passwords.
+     */
+    public function test_update_profile_rejects_weak_password(): void
+    {
+        $user = User::create([
+            'name' => 'Operator Lobster',
+            'email' => 'operator@lobsense.com',
+            'password' => bcrypt('Lobsense123!'),
+            'role' => 'operator',
+        ]);
+
+        $token = $user->createToken('test_token')->plainTextToken;
+
+        foreach (['short1A', 'alllowercase1', 'ALLUPPERCASE1', 'NoDigitsHere'] as $weak) {
+            $this->withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+            ])->putJson('/api/v2/profile', [
+                'name' => 'Operator Lobster',
+                'email' => 'operator@lobsense.com',
+                'password' => $weak,
+            ])->assertStatus(422);
+        }
+
+        $this->assertTrue(Hash::check('Lobsense123!', $user->fresh()->password));
     }
 
     /**

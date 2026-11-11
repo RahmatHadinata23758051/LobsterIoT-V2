@@ -62,20 +62,30 @@ class CameraController extends Controller
         $validator = Validator::make($request->all(), [
             'camera_code' => 'required|string|max:50|unique:cameras,camera_code',
             'iot_node_id' => 'required|integer|exists:iot_nodes,id',
-            'stream_url' => 'nullable|url|max:255',
+            'stream_url' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
+            'dvr_ip' => ['nullable', 'string', 'max:253', 'regex:~^(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)(?:\.(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?))*$~'],
+            'port' => 'nullable|integer|between:1,65535',
+            'channel_number' => 'nullable|integer|between:1,64',
+            'protocol' => 'nullable|string|in:rtsp,hls,http,https',
+            'username' => 'nullable|string|max:100',
+            'password' => 'nullable|string|max:255',
+            'rtsp_url' => 'nullable|string|max:500',
         ]);
-
         if ($validator->fails()) {
             return $this->error('Validasi gagal.', $validator->errors(), 422);
         }
 
-        $camera = Camera::create([
-            'camera_code' => $request->camera_code,
-            'iot_node_id' => $request->iot_node_id,
-            'stream_url' => $request->stream_url,
-            'is_active' => $request->is_active ?? false,
-        ]);
+        $validated = $validator->validated();
+        $validated['is_active'] = $validated['is_active'] ?? false;
+        $validated['protocol'] = $validated['protocol'] ?? 'rtsp';
+        $validated['port'] = $validated['port'] ?? 554;
+        if ($this->hasActiveDvrConflict($validated)) {
+            return $this->error('Validasi gagal.', [
+                'channel_number' => ['Kanal DVR ini sudah digunakan kamera aktif lain pada IoT Node yang sama.'],
+            ], 422);
+        }
+        $camera = Camera::create($validated);
 
         return $this->success('Camera created successfully', $camera->load('iotNode.cage'), 201);
     }
@@ -148,22 +158,52 @@ class CameraController extends Controller
         $validator = Validator::make($request->all(), [
             'camera_code' => 'sometimes|required|string|max:50|unique:cameras,camera_code,' . $id,
             'iot_node_id' => 'sometimes|required|integer|exists:iot_nodes,id',
-            'stream_url' => 'nullable|url|max:255',
+            'stream_url' => 'sometimes|nullable|string|max:500',
             'is_active' => 'sometimes|required|boolean',
+            'dvr_ip' => ['sometimes', 'nullable', 'string', 'max:253', 'regex:~^(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)(?:\.(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?))*$~'],
+            'port' => 'sometimes|nullable|integer|between:1,65535',
+            'channel_number' => 'sometimes|nullable|integer|between:1,64',
+            'protocol' => 'sometimes|nullable|string|in:rtsp,hls,http,https',
+            'username' => 'sometimes|nullable|string|max:100',
+            'password' => 'sometimes|nullable|string|max:255',
+            'rtsp_url' => 'sometimes|nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
             return $this->error('Validasi gagal.', $validator->errors(), 422);
         }
 
-        $camera->update($request->only([
-            'camera_code',
-            'iot_node_id',
-            'stream_url',
-            'is_active',
-        ]));
+        $merged = array_merge(
+            $camera->only(['iot_node_id', 'is_active', 'dvr_ip', 'port', 'channel_number']),
+            $validator->validated()
+        );
+        if ($this->hasActiveDvrConflict($merged, $camera->id)) {
+            return $this->error('Validasi gagal.', [
+                'channel_number' => ['Kanal DVR ini sudah digunakan kamera aktif lain pada IoT Node yang sama.'],
+            ], 422);
+        }
+
+        $camera->update($validator->validated());
 
         return $this->success('Camera updated successfully', $camera->load('iotNode.cage'));
+    }
+
+    /**
+     * Reject a second active camera on the same DVR channel of one IoT node.
+     */
+    private function hasActiveDvrConflict(array $data, ?int $ignoreId = null): bool
+    {
+        if (empty($data['is_active']) || empty($data['dvr_ip']) || empty($data['channel_number'])) {
+            return false;
+        }
+
+        return Camera::where('iot_node_id', $data['iot_node_id'])
+            ->where('is_active', true)
+            ->where('dvr_ip', $data['dvr_ip'])
+            ->where('port', $data['port'] ?? 554)
+            ->where('channel_number', $data['channel_number'])
+            ->when($ignoreId, fn ($q) => $q->whereKeyNot($ignoreId))
+            ->exists();
     }
 
     /**
