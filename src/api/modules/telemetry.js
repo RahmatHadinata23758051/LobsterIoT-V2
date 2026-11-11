@@ -12,7 +12,7 @@ export const telemetryApi = (BACKEND_URL, getHeaders) => ({
   },
 
   async fetchDashboardData(token, serial) {
-    return fetch(`${BACKEND_URL}/api/v2/monitoring/dashboard/${serial}`, {
+    return fetch(`${BACKEND_URL}/api/v2/monitoring/dashboard/${encodeURIComponent(serial)}`, {
       headers: getHeaders(token),
     });
   },

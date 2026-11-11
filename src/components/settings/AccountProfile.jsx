@@ -37,8 +37,8 @@ export const AccountProfile = ({
       setLocalMsg('Konfirmasi kata sandi tidak cocok.');
       return;
     }
-    if (password && password.length < 6) {
-      setLocalMsg('Kata sandi minimal 6 karakter.');
+    if (password && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+      setLocalMsg('Kata sandi minimal 8 karakter serta memuat huruf besar, huruf kecil, dan angka.');
       return;
     }
 
@@ -134,7 +134,7 @@ export const AccountProfile = ({
                       type="password"
                       value={password}
                       onChange={(e) => { setLocalMsg(''); setPassword(e.target.value); }}
-                      placeholder="Min. 6 karakter"
+                      placeholder="Min. 8 karakter, kombinasi huruf besar/kecil & angka"
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 text-[13px] placeholder-slate-400 focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
                     />
                   </div>

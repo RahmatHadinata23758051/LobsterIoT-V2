@@ -163,6 +163,14 @@ export const masterApi = (BACKEND_URL, getHeaders) => ({
     });
   },
 
+  async updateOperator(token, id, data) {
+    return fetch(`${BACKEND_URL}/api/v2/operators/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(data),
+    });
+  },
+
   async deleteOperator(token, id) {
     return fetch(`${BACKEND_URL}/api/v2/operators/${id}`, {
       method: 'DELETE',

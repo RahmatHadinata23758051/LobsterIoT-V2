@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
 import { RotateCcw, Trash2, Anchor, MapPin, Edit } from 'lucide-react';
 
+const STRUCTURE_CONDITIONS = ['Baik', 'Perlu Perbaikan', 'Rusak Ringan', 'Rusak Berat'];
+const emptyCage = {
+  cage_code: '', latitude: '', longitude: '', volume_cubic_meters: '',
+  structure_condition: 'Baik', lobster_count: '', lobster_age_days: '', edge_gateway_id: ''
+};
+
 export const CageManagement = ({
   cagesList = [],
+  edgeGatewaysList = [],
   loadingCages,
   onAddCage,
   onUpdateCage,
   onDeleteCage,
   onRefresh
 }) => {
-  const [newCage, setNewCage] = useState({
-    cage_code: '',
-    latitude: '',
-    longitude: '',
-    volume_cubic_meters: '',
-    structure_condition: 'Baik',
-    lobster_count: '',
-    lobster_age_days: ''
-  });
+  const [newCage, setNewCage] = useState(emptyCage);
   const [editingCageId, setEditingCageId] = useState(null);
   const [detectingGps, setDetectingGps] = useState(false);
 
@@ -66,6 +65,7 @@ export const CageManagement = ({
 
     const payload = {
       cage_code: newCage.cage_code,
+      edge_gateway_id: newCage.edge_gateway_id ? parseInt(newCage.edge_gateway_id) : null,
       latitude: parseFloat(newCage.latitude),
       longitude: parseFloat(newCage.longitude),
       volume_cubic_meters: parseFloat(newCage.volume_cubic_meters),
@@ -81,15 +81,7 @@ export const CageManagement = ({
       onAddCage(payload);
     }
 
-    setNewCage({
-      cage_code: '',
-      latitude: '',
-      longitude: '',
-      volume_cubic_meters: '',
-      structure_condition: 'Baik',
-      lobster_count: '',
-      lobster_age_days: ''
-    });
+    setNewCage(emptyCage);
   };
 
   return (
@@ -118,6 +110,20 @@ export const CageManagement = ({
               onChange={(e) => setNewCage({ ...newCage, cage_code: e.target.value })}
               className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
             />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Edge Gateway Terkait</label>
+            <select
+              value={newCage.edge_gateway_id}
+              onChange={(e) => setNewCage({ ...newCage, edge_gateway_id: e.target.value })}
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
+            >
+              <option value="">-- Tanpa Gateway --</option>
+              {edgeGatewaysList.map((gateway) => (
+                <option key={gateway.id} value={gateway.id}>{gateway.serial_number}</option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -174,14 +180,16 @@ export const CageManagement = ({
             </div>
             <div>
               <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Kondisi Struktur *</label>
-              <input
-                type="text"
+              <select
                 required
-                placeholder="Contoh: Baik / Servis"
                 value={newCage.structure_condition}
                 onChange={(e) => setNewCage({ ...newCage, structure_condition: e.target.value })}
                 className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
-              />
+              >
+                {STRUCTURE_CONDITIONS.map((condition) => (
+                  <option key={condition} value={condition}>{condition}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -214,15 +222,7 @@ export const CageManagement = ({
                 type="button"
                 onClick={() => {
                   setEditingCageId(null);
-                  setNewCage({
-                    cage_code: '',
-                    latitude: '',
-                    longitude: '',
-                    volume_cubic_meters: '',
-                    structure_condition: 'Baik',
-                    lobster_count: '',
-                    lobster_age_days: ''
-                  });
+                  setNewCage(emptyCage);
                 }}
                 className="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer text-center"
               >
@@ -296,6 +296,7 @@ export const CageManagement = ({
                               cage_code: cage.cage_code,
                               latitude: cage.latitude,
                               longitude: cage.longitude,
+                              edge_gateway_id: cage.edge_gateway_id || '',
                               volume_cubic_meters: cage.volume_cubic_meters,
                               structure_condition: cage.structure_condition || 'Baik',
                               lobster_count: cage.lobster_count ?? '',

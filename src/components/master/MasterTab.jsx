@@ -27,6 +27,7 @@ export const MasterTab = ({
   onUpdateCage,
   onDeleteCage,
   onAddCamera,
+  onUpdateCamera,
   onDeleteCamera,
   onAddOperator,
   onDeleteOperator,
@@ -101,9 +102,10 @@ export const MasterTab = ({
         {masterSubTab === 'cameras' && (
           <CameraManagement
             camerasList={camerasList}
-            cagesList={cagesList}
+            iotNodesMasterList={iotNodesMasterList}
             loadingCameras={loadingCameras}
             onAddCamera={onAddCamera}
+            onUpdateCamera={onUpdateCamera}
             onDeleteCamera={onDeleteCamera}
             onRefresh={onRefreshCameras}
           />

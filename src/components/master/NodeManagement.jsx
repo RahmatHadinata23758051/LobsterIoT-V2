@@ -1,62 +1,28 @@
 import React, { useState } from 'react';
-import { RotateCcw, Trash2, Layers, MapPin, Edit } from 'lucide-react';
+import { RotateCcw, Trash2, Layers, Edit } from 'lucide-react';
+
+const emptyNode = {
+  serial_number: '',
+  ip_address: '',
+  edge_gateway_id: '',
+  cage_id: '',
+  city_id: ''
+};
 
 export const NodeManagement = ({
   iotNodesMasterList = [],
   edgeGatewaysList = [],
   citiesList = [],
+  cagesList = [],
   loadingIotNodesMaster,
   onAddIotNodeMaster,
   onUpdateIotNodeMaster,
   onDeleteIotNodeMaster,
   onRefresh
 }) => {
-  const [newNode, setNewNode] = useState({
-    serial_number: '',
-    gateway_channel_number: '',
-    ip_address: '',
-    latitude: '',
-    longitude: '',
-    edge_gateway_id: '',
-    city_id: ''
-  });
+  const [newNode, setNewNode] = useState(emptyNode);
   const [editingNodeId, setEditingNodeId] = useState(null);
-  const [detectingGps, setDetectingGps] = useState(false);
-
-  const handleDetectGps = () => {
-    if (!navigator.geolocation) {
-      alert('Browser Anda tidak mendukung deteksi lokasi GPS.');
-      return;
-    }
-    setDetectingGps(true);
-
-    const successCallback = (position) => {
-      setNewNode(prev => ({
-        ...prev,
-        latitude: position.coords.latitude.toFixed(6),
-        longitude: position.coords.longitude.toFixed(6)
-      }));
-      setDetectingGps(false);
-    };
-
-    const options = { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 };
-
-    const errorCallback = (error) => {
-      if (options.enableHighAccuracy) {
-        options.enableHighAccuracy = false;
-        options.timeout = 10000;
-        navigator.geolocation.getCurrentPosition(successCallback, (err) => {
-          alert('Gagal mengambil lokasi GPS: ' + err.message);
-          setDetectingGps(false);
-        }, options);
-      } else {
-        alert('Gagal mengambil lokasi GPS: ' + error.message);
-        setDetectingGps(false);
-      }
-    };
-
-    navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
-  };
+  const selectedCage = cagesList.find((c) => String(c.id) === String(newNode.cage_id));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -66,12 +32,14 @@ export const NodeManagement = ({
     }
 
     const payload = {
-      ...newNode,
+      serial_number: newNode.serial_number,
+      ip_address: newNode.ip_address || null,
       city_id: parseInt(newNode.city_id),
       edge_gateway_id: newNode.edge_gateway_id ? parseInt(newNode.edge_gateway_id) : null,
-      gateway_channel_number: newNode.gateway_channel_number ? parseInt(newNode.gateway_channel_number) : null,
-      latitude: newNode.latitude ? parseFloat(newNode.latitude) : null,
-      longitude: newNode.longitude ? parseFloat(newNode.longitude) : null
+      cage_id: newNode.cage_id ? parseInt(newNode.cage_id) : null,
+      // Koordinat diwariskan dari Keramba terpilih — backend memvalidasi nullable.
+      latitude: selectedCage?.latitude ?? null,
+      longitude: selectedCage?.longitude ?? null
     };
 
     if (editingNodeId) {
@@ -81,21 +49,12 @@ export const NodeManagement = ({
       onAddIotNodeMaster(payload);
     }
 
-    // Reset form
-    setNewNode({
-      serial_number: '',
-      gateway_channel_number: '',
-      ip_address: '',
-      latitude: '',
-      longitude: '',
-      edge_gateway_id: '',
-      city_id: ''
-    });
+    setNewNode(emptyNode);
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-[fadeIn_0.4s_ease-out]">
-      
+
       {/* Add Form */}
       <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-fit">
         <div className="border-b border-slate-100 pb-3 mb-4">
@@ -155,64 +114,39 @@ export const NodeManagement = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Channel No</label>
-              <input
-                type="number"
-                placeholder="Contoh: 1"
-                value={newNode.gateway_channel_number}
-                onChange={(e) => setNewNode({ ...newNode, gateway_channel_number: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">IP Address</label>
-              <input
-                type="text"
-                placeholder="192.168.1.50"
-                value={newNode.ip_address}
-                onChange={(e) => setNewNode({ ...newNode, ip_address: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
-              />
-            </div>
+          <div>
+            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Keramba (KJA)</label>
+            <select
+              value={newNode.cage_id}
+              onChange={(e) => setNewNode({ ...newNode, cage_id: e.target.value })}
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
+            >
+              <option value="">-- Belum Terhubung Keramba --</option>
+              {cagesList.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.cage_code}
+                </option>
+              ))}
+            </select>
+            {selectedCage && (
+              <p className="mt-1 text-[10px] text-slate-500">
+                Koordinat otomatis dari {selectedCage.cage_code}:{' '}
+                <span className="font-mono">
+                  {selectedCage.latitude ?? '—'}, {selectedCage.longitude ?? '—'}
+                </span>
+              </p>
+            )}
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="text-[10px] font-bold text-slate-500 uppercase">Koordinat Lokasi</label>
-              <button
-                type="button"
-                onClick={handleDetectGps}
-                disabled={detectingGps}
-                className="text-[10px] text-[#0D9D1B] hover:text-[#0A8516] font-bold flex items-center gap-1 cursor-pointer transition select-none disabled:opacity-50"
-              >
-                <MapPin className={`h-3 w-3 ${detectingGps ? 'animate-bounce' : ''}`} />
-                {detectingGps ? 'Mendeteksi...' : 'Deteksi GPS'}
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <input
-                  type="number"
-                  step="0.000001"
-                  placeholder="Latitude"
-                  value={newNode.latitude}
-                  onChange={(e) => setNewNode({ ...newNode, latitude: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  step="0.000001"
-                  placeholder="Longitude"
-                  value={newNode.longitude}
-                  onChange={(e) => setNewNode({ ...newNode, longitude: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
-                />
-              </div>
-            </div>
+            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">IP Address</label>
+            <input
+              type="text"
+              placeholder="192.168.1.50"
+              value={newNode.ip_address}
+              onChange={(e) => setNewNode({ ...newNode, ip_address: e.target.value })}
+              className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B] font-mono"
+            />
           </div>
 
           <div className="flex gap-2">
@@ -221,15 +155,7 @@ export const NodeManagement = ({
                 type="button"
                 onClick={() => {
                   setEditingNodeId(null);
-                  setNewNode({
-                    serial_number: '',
-                    gateway_channel_number: '',
-                    ip_address: '',
-                    latitude: '',
-                    longitude: '',
-                    edge_gateway_id: '',
-                    city_id: ''
-                  });
+                  setNewNode(emptyNode);
                 }}
                 className="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer text-center"
               >
@@ -274,8 +200,8 @@ export const NodeManagement = ({
                 <tr className="bg-slate-50 border-b border-slate-200 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="px-4 py-2.5">ID</th>
                   <th className="px-4 py-2.5">Nomor Seri</th>
+                  <th className="px-4 py-2.5">Keramba (KJA)</th>
                   <th className="px-4 py-2.5">Gateway</th>
-                  <th className="px-4 py-2.5">Channel No</th>
                   <th className="px-4 py-2.5">IP Address</th>
                   <th className="px-4 py-2.5">Lokasi Kota</th>
                   <th className="px-4 py-2.5 text-center">Aksi</th>
@@ -286,10 +212,10 @@ export const NodeManagement = ({
                   <tr key={node.id} className="hover:bg-slate-50/50">
                     <td className="px-4 py-3 font-mono text-slate-400">{node.id}</td>
                     <td className="px-4 py-3 font-bold text-slate-900 font-mono">{node.serial_number}</td>
+                    <td className="px-4 py-3 font-bold text-slate-750 font-mono">{node.cage?.cage_code || '—'}</td>
                     <td className="px-4 py-3 font-bold text-slate-750 font-mono">
                       {node.edge_gateway?.serial_number || '—'}
                     </td>
-                    <td className="px-4 py-3 font-mono">{node.gateway_channel_number ?? '—'}</td>
                     <td className="px-4 py-3 font-mono">{node.ip_address || '—'}</td>
                     <td className="px-4 py-3 text-slate-600 font-semibold">{node.city?.name || '—'}</td>
                     <td className="px-4 py-3 text-center">
@@ -299,11 +225,9 @@ export const NodeManagement = ({
                             setEditingNodeId(node.id);
                             setNewNode({
                               serial_number: node.serial_number,
-                              gateway_channel_number: node.gateway_channel_number ?? '',
                               ip_address: node.ip_address || '',
-                              latitude: node.latitude || '',
-                              longitude: node.longitude || '',
                               edge_gateway_id: node.edge_gateway_id || '',
+                              cage_id: node.cage_id || '',
                               city_id: node.city_id || ''
                             });
                           }}

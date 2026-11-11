@@ -66,6 +66,7 @@ export const useLobsense = () => {
   const [nodes, setNodes] = useState([]);
   const [activeNodeSerial, setActiveNodeSerial] = useState('');
   const [dashboardData, setDashboardData] = useState({ latest: null, series_24h: [], thresholds: [], cameras: [], feeding_logs: [] });
+  const dashboardRequestId = useRef(0);
   const [cameras, setCameras] = useState([]);
   const [chartMetric, setChartMetric] = useState('ph');
   
@@ -164,10 +165,17 @@ export const useLobsense = () => {
   // Fetch dashboard telemetry on node change
   useEffect(() => {
     if (token && activeNodeSerial) {
+      // Reset immediately so the previous node's sensors, charts and cameras
+      // never render under the newly selected node.
+      setDashboardData({ latest: null, series_24h: [], thresholds: [], cameras: [], feeding_logs: [] });
       fetchDashboardData(activeNodeSerial);
       const iv = setInterval(() => fetchDashboardData(activeNodeSerial, true), 10000);
-      return () => clearInterval(iv);
+      return () => {
+        clearInterval(iv);
+        dashboardRequestId.current += 1;
+      };
     }
+    dashboardRequestId.current += 1;
   }, [token, activeNodeSerial]);
 
   // Fetch feature-specific lists when tabs change
@@ -175,8 +183,8 @@ export const useLobsense = () => {
     if (!token) return;
     if (activeTab === 'feeding') {
       fetchFeedingLogs();
-      fetchCages();
       fetchOperators();
+      fetchIotNodesMaster();
     }
     if (['cages','cameras','operators','edge_computing','iot_node','sensor'].includes(activeTab)) {
       fetchMasterData();
@@ -186,6 +194,10 @@ export const useLobsense = () => {
       fetchMaintenances();
     }
   }, [activeTab, token]);
+
+  useEffect(() => {
+    if (token && activeTab === 'sensor' && activeNodeSerial) fetchThresholds();
+  }, [token, activeTab, activeNodeSerial]);
 
   // API Call wrappers
   const handleLoginSuccess = (t, u) => {
@@ -222,7 +234,13 @@ export const useLobsense = () => {
       if (nr.ok && nd.status === 'success') {
         const list = nd.data || [];
         setNodes(list);
-        if (list.length > 0) setActiveNodeSerial(list[0].serial_number);
+        // Keep the operator on the node they were viewing; only fall back
+        // to the first node when nothing valid is selected.
+        if (list.length > 0) {
+          setActiveNodeSerial((current) =>
+            list.some((n) => n.serial_number === current) ? current : list[0].serial_number
+          );
+        }
       } else {
         setConnError('Gagal memuat daftar perangkat.');
       }
@@ -230,7 +248,7 @@ export const useLobsense = () => {
         setCameras(cd.data || []);
       }
     } catch {
-      setConnError('Gagal menghubungi server backend di localhost:8000.');
+      setConnError('Gagal menghubungi server backend.');
     } finally {
       setLoadingNodes(false);
     }
@@ -295,10 +313,14 @@ export const useLobsense = () => {
   };
 
   const fetchDashboardData = async (serial, silent = false) => {
+    // Tag each request; a slower response for an older node must not
+    // overwrite the data of the node currently selected.
+    const requestId = ++dashboardRequestId.current;
     if (!silent) setLoadingDashboard(true);
     try {
       const r = await api.fetchDashboardData(token, serial);
       const result = await r.json();
+      if (requestId !== dashboardRequestId.current) return;
       if (r.ok && result.status === 'success') {
         setDashboardData({
           latest: result.data.latest || null,
@@ -310,7 +332,7 @@ export const useLobsense = () => {
 
       }
     } catch {} finally {
-      if (!silent) setLoadingDashboard(false);
+      if (!silent && requestId === dashboardRequestId.current) setLoadingDashboard(false);
     }
   };
 
@@ -322,7 +344,6 @@ export const useLobsense = () => {
     fetchIotNodesMaster();
     fetchSensorTypes();
     fetchCities();
-    fetchThresholds();
   };
 
   const fetchEdgeGateways = async () => {
@@ -572,12 +593,15 @@ export const useLobsense = () => {
       if (r.ok && data.status === 'success') {
         alert('Kamera baru berhasil terdaftar.');
         logActivity(`Mendaftarkan kamera CCTV baru: ${cameraData.camera_code}`);
-        fetchCamerasList();
-      } else {
-        alert(data.message || 'Gagal mendaftarkan kamera.');
+        await Promise.all([fetchCamerasList(), fetchNodesAndCameras()]);
+        if (activeNodeSerial) await fetchDashboardData(activeNodeSerial, true);
+        return true;
       }
+      alert(data.message || 'Gagal mendaftarkan kamera.');
+      return false;
     } catch {
       alert('Koneksi backend bermasalah.');
+      return false;
     }
   };
 
@@ -589,7 +613,8 @@ export const useLobsense = () => {
       if (r.ok && data.status === 'success') {
         alert('Kamera berhasil dihapus.');
         logActivity('Menghapus kamera CCTV');
-        fetchCamerasList();
+        await Promise.all([fetchCamerasList(), fetchNodesAndCameras()]);
+        if (activeNodeSerial) await fetchDashboardData(activeNodeSerial, true);
       } else {
         alert(data.message || 'Gagal menghapus kamera.');
       }
@@ -605,12 +630,15 @@ export const useLobsense = () => {
       if (r.ok && data.status === 'success') {
         alert('Data kamera berhasil diperbarui.');
         logActivity(`Memperbarui kamera CCTV: ${cameraData.camera_code}`);
-        fetchCamerasList();
-      } else {
-        alert(data.message || 'Gagal memperbarui kamera.');
+        await Promise.all([fetchCamerasList(), fetchNodesAndCameras()]);
+        if (activeNodeSerial) await fetchDashboardData(activeNodeSerial, true);
+        return true;
       }
+      alert(data.message || 'Gagal memperbarui kamera.');
+      return false;
     } catch {
       alert('Koneksi backend bermasalah.');
+      return false;
     }
   };
 
@@ -627,6 +655,24 @@ export const useLobsense = () => {
       }
     } catch {
       alert('Koneksi backend bermasalah.');
+    }
+  };
+
+  const handleUpdateOperator = async (id, opData) => {
+    try {
+      const r = await api.updateOperator(token, id, opData);
+      const data = await r.json();
+      if (r.ok && data.status === 'success') {
+        alert('Data operator berhasil diperbarui.');
+        logActivity(`Memperbarui operator lapangan: ${opData.full_name}`);
+        fetchOperators();
+        return true;
+      }
+      alert(data.message || 'Gagal memperbarui operator.');
+      return false;
+    } catch {
+      alert('Koneksi backend bermasalah.');
+      return false;
     }
   };
 
@@ -655,11 +701,13 @@ export const useLobsense = () => {
         fetchFeedingLogs();
         logActivity('Mencatat data pemberian pakan lobster');
         alert('Log pemberian pakan berhasil disimpan.');
-      } else {
-        alert(data.message || 'Gagal menyimpan log pakan.');
+        return true;
       }
+      alert(data.message || 'Gagal menyimpan log pakan.');
+      return false;
     } catch {
       alert('Koneksi ke backend gagal.');
+      return false;
     }
   };
 
@@ -868,7 +916,7 @@ export const useLobsense = () => {
     handleAddIotNodeMaster, handleUpdateIotNodeMaster, handleDeleteIotNodeMaster,
     handleAddCage, handleUpdateCage, handleDeleteCage,
     handleAddCamera, handleUpdateCamera, handleDeleteCamera,
-    handleAddOperator, handleDeleteOperator,
+    handleAddOperator, handleUpdateOperator, handleDeleteOperator,
     handleAddFeedingLog, handleDeleteFeedingLog,
     handleUpdateThresholds, handleValidateSerial, handleActivateNode,
     handleSubmitMaintenance, handleUpdateProfile,

@@ -1,40 +1,52 @@
 import React, { useState } from 'react';
-import { RotateCcw, Trash2, User } from 'lucide-react';
+import { RotateCcw, Trash2, User, Edit } from 'lucide-react';
+
+const emptyOperator = {
+  full_name: '',
+  phone_number: '',
+  address: ''
+};
 
 export const OperatorManagement = ({
   operatorsList = [],
   loadingOperators,
   onAddOperator,
+  onUpdateOperator,
   onDeleteOperator,
   onRefresh
 }) => {
-  const [newOperator, setNewOperator] = useState({
-    full_name: '',
-    phone_number: '',
-    address: ''
-  });
+  const [newOperator, setNewOperator] = useState(emptyOperator);
+  const [editingOperatorId, setEditingOperatorId] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newOperator.full_name || !newOperator.phone_number || !newOperator.address) {
       alert('Seluruh kolom wajib diisi.');
       return;
     }
-    onAddOperator(newOperator);
-    setNewOperator({ full_name: '', phone_number: '', address: '' });
+    if (editingOperatorId) {
+      const updated = await onUpdateOperator(editingOperatorId, newOperator);
+      if (updated === false) return;
+      setEditingOperatorId(null);
+    } else {
+      onAddOperator(newOperator);
+    }
+    setNewOperator(emptyOperator);
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-[fadeIn_0.4s_ease-out]">
-      
+
       {/* Add Form */}
       <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-fit">
         <div className="border-b border-slate-100 pb-3 mb-4">
           <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <User className="h-4 w-4 text-[#0D9D1B]" />
-            Tambah Operator Baru
+            {editingOperatorId ? 'Edit Data Operator' : 'Tambah Operator Baru'}
           </h3>
-          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Daftarkan petugas lapangan baru</p>
+          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+            {editingOperatorId ? 'Perbarui data petugas lapangan' : 'Daftarkan petugas lapangan baru'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -74,12 +86,26 @@ export const OperatorManagement = ({
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10"
-          >
-            Simpan Operator
-          </button>
+          <div className="flex gap-2">
+            {editingOperatorId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingOperatorId(null);
+                  setNewOperator(emptyOperator);
+                }}
+                className="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer text-center"
+              >
+                Batal
+              </button>
+            )}
+            <button
+              type="submit"
+              className={`${editingOperatorId ? 'w-2/3' : 'w-full'} py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-sm shadow-green-500/10`}
+            >
+              {editingOperatorId ? 'Perbarui' : 'Simpan'} Operator
+            </button>
+          </div>
         </form>
       </div>
 
@@ -126,12 +152,29 @@ export const OperatorManagement = ({
                       {op.address}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => onDeleteOperator(op.id)}
-                        className="p-1 rounded text-red-500 hover:bg-red-50 transition cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setEditingOperatorId(op.id);
+                            setNewOperator({
+                              full_name: op.full_name,
+                              phone_number: op.phone_number,
+                              address: op.address
+                            });
+                          }}
+                          title="Edit Operator"
+                          className="p-1 rounded text-[#0D9D1B] hover:bg-green-50 transition cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => onDeleteOperator(op.id)}
+                          title="Hapus Operator"
+                          className="p-1 rounded text-red-500 hover:bg-red-50 transition cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

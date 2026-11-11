@@ -12,7 +12,7 @@ export const SystemSettings = ({
   token,
   api
 }) => {
-  const isAdmin = user?.role === 'admin' || user?.role === 'su';
+  const isAdmin = user?.role === 'admin' || user?.role === 'management' || user?.role === 'su';
 
   // Branding States
   const [tempLogo, setTempLogo] = useState(logoText);
@@ -441,14 +441,31 @@ export const SystemSettings = ({
     }));
   };
 
+  // Pilih kota → fokuskan peta ke wilayahnya (fallback koordinat pusat daerah via Nominatim bila tersedia).
+  const focusCityOnMap = async (cityName) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(cityName + ', Indonesia')}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0].lat && data[0].lon) {
+        const lat = parseFloat(data[0].lat).toFixed(6);
+        const lng = parseFloat(data[0].lon).toFixed(6);
+        setCoords(prev => ({ ...prev, system_latitude: lat, system_longitude: lng }));
+      }
+    } catch {}
+  };
+
   const handleCityChange = (e) => {
     const code = e.target.value;
+    const selectedCity = cities.find(c => c.code === code);
     setCoords(prev => ({
       ...prev,
       system_city_code: code,
       system_district_code: '',
-      system_city_name: ''
+      // Fallback lokal: kecamatan menyusul akan menimpanya jika dipilih.
+      system_city_name: selectedCity ? selectedCity.name : ''
     }));
+    if (selectedCity) focusCityOnMap(selectedCity.name);
   };
 
   const handleDistrictChange = (e) => {
@@ -464,8 +481,8 @@ export const SystemSettings = ({
 
   const handleCoordsSubmit = async (e) => {
     e.preventDefault();
-    if (!coords.system_latitude || !coords.system_longitude || !coords.system_city_name) {
-      alert('Seluruh kolom koordinat dan lokasi administratif wajib diisi.');
+    if (!coords.system_latitude || !coords.system_longitude || !coords.system_province_code || !coords.system_city_code || !coords.system_city_name) {
+      alert('Pilih wilayah dan tentukan titik lokasi melalui peta atau GPS.');
       return;
     }
     setSavingCoords(true);
@@ -745,7 +762,7 @@ export const SystemSettings = ({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <div className="flex justify-between items-center mb-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase block">Garis Lintang (Latitude) *</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase block">Koordinat Tambak *</label>
                       <button
                         type="button"
                         onClick={handleGetCurrentLocation}
@@ -754,28 +771,17 @@ export const SystemSettings = ({
                         <MapPin className="h-3 w-3" /> Deteksi GPS Saya
                       </button>
                     </div>
-                    <input
-                      type="number"
-                      step="0.000001"
-                      required
-                      placeholder="e.g. -8.723300"
-                      value={coords.system_latitude}
-                      onChange={(e) => setCoords({ ...coords, system_latitude: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-900 font-mono focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1.5">Garis Bujur (Longitude) *</label>
-                    <input
-                      type="number"
-                      step="0.000001"
-                      required
-                      placeholder="e.g. 115.908300"
-                      value={coords.system_longitude}
-                      onChange={(e) => setCoords({ ...coords, system_longitude: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-900 font-mono focus:outline-none focus:border-[#0D9D1B] focus:bg-white transition"
-                    />
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-4 py-2.5">
+                      <MapPin className="h-3.5 w-3.5 shrink-0 text-[#0D9D1B]" />
+                      <span className="truncate font-mono text-[12px] font-semibold text-slate-800">
+                        {coords.system_latitude && coords.system_longitude
+                          ? `${coords.system_latitude}, ${coords.system_longitude}`
+                          : 'Geser pin marker atau klik peta'}
+                      </span>
+                    </div>
+                    <p className="text-[9px] text-slate-400 mt-1">
+                      Otomatis dari pin peta, GPS, atau pilihan wilayah — tidak perlu input manual.
+                    </p>
                   </div>
                 </div>
 

@@ -1,7 +1,8 @@
 import React from 'react';
 import { 
   Cpu, 
-  Video, 
+  Video,
+  CameraOff,
   AlertCircle, 
   AlertTriangle, 
   CheckCircle, 
@@ -37,7 +38,7 @@ export const DashboardTab = ({
   activeNode,
   activeNodeSerial,
   dashboardData,
-  cameras,
+  setActiveTab,
   chartMetric,
   setChartMetric,
   weatherData,
@@ -167,29 +168,13 @@ export const DashboardTab = ({
     );
   }
 
-  const getCameraStreamUrl = () => {
-    // 1. Prioritaskan kamera yang dikembalikan langsung dari dashboardData (terikat dengan IoT Node aktif)
-    const activeNodeCameras = dashboardData?.cameras || [];
-    if (activeNodeCameras.length > 0 && activeNodeCameras[0]?.stream_url) {
-      return activeNodeCameras[0].stream_url;
-    }
-
-    // 2. Fallback: Cari dari daftar prop cameras global berdasarkan iot_node_id
-    const cam = (cameras || []).find((c) => c.iot_node_id === activeNode?.id);
-    if (cam && cam.stream_url) {
-      return cam.stream_url;
-    }
-
-    // 3. Fallback video lobster asli (catbox.moe)
-    const cageCode = dashboardData.latest?.cage_code || activeNode?.cage?.cage_code || '';
-    const fallbackVideos = {
-      'CAGE-A01': 'https://files.catbox.moe/g5214q.mp4',
-      'CAGE-A02': 'https://files.catbox.moe/qqt2fo.mp4',
-      'CAGE-A03': 'https://files.catbox.moe/m9yd36.mp4',
-      'CAGE-B01': 'https://files.catbox.moe/h26lry.mp4'
-    };
-    return fallbackVideos[cageCode] || 'https://files.catbox.moe/g5214q.mp4';
-  };
+  // Camera lock: only the ACTIVE cameras owned by the selected node.
+  // No cross-node fallback and no inactive fallback.
+  const activeNodeCameras = (dashboardData?.cameras || []).filter(
+    (c) => c.is_active && activeNode?.id != null && String(c.iot_node_id) === String(activeNode.id)
+  );
+  const activeCamera = activeNodeCameras[0] || null;
+  const cameraStreamUrl = activeCamera?.computed_stream_url || activeCamera?.stream_url || activeCamera?.rtsp_url || '';
 
 
   const getThreshold = (code) => {
@@ -368,6 +353,8 @@ export const DashboardTab = ({
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Kamera:</span>
+              {activeCamera && (activeCamera.dvr_ip || activeCamera.rtsp_url) && <span className="rounded border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-700">DVR CH-{activeCamera.channel_number || '—'} · {String(activeCamera.protocol || 'rtsp').toUpperCase()}</span>}
+                {!activeCamera && <span className="flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[9px] font-bold text-slate-500"><CameraOff className="h-3 w-3" /> Tanpa Kamera</span>}
                 <button
                   onClick={() => setIsCameraOnline(!isCameraOnline)}
                   className={`relative inline-flex h-4.5 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${
@@ -395,7 +382,28 @@ export const DashboardTab = ({
             </div>
           </div>
           <div className="bg-slate-950 aspect-video w-full ring-1 ring-slate-800 rounded-lg overflow-hidden shadow-inner">
-            <CctvView token={token} streamUrl={getCameraStreamUrl()} isCameraOnline={isCameraOnline} />
+            {activeCamera ? (
+              <CctvView token={token} streamUrl={cameraStreamUrl} isCameraOnline={isCameraOnline} />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-white p-6 text-center">
+                <CameraOff className="h-8 w-8 text-slate-300" />
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-600">Tidak ada kamera aktif</p>
+                  <p className="mx-auto mt-1 max-w-xs text-[10px] leading-relaxed text-slate-400">
+                    IoT Node ini belum memiliki kamera aktif. Tambahkan dan aktifkan kamera pada menu Data Master.
+                  </p>
+                </div>
+                {setActiveTab && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('cameras')}
+                    className="rounded-lg bg-[#0D9D1B] px-3 py-1.5 text-[10px] font-semibold text-white hover:bg-[#0B8A17]"
+                  >
+                    Tambah Kamera
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

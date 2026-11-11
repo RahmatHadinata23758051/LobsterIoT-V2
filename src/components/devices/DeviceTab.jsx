@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  RotateCcw, AlertTriangle, CheckCircle, WifiOff, MapPin, Upload, 
-  FileSignature, Cpu, ShieldCheck, Wrench, ListFilter, Search, PlusCircle,
-  Radio, Info, ArrowRight, CheckCircle2, AlertCircle
+import {
+  RotateCcw, MapPin, Upload, FileSignature, Cpu, ShieldCheck, Wrench,
+  Search, Radio, Info, ArrowRight, CheckCircle2, AlertCircle
 } from 'lucide-react';
 
 export const DeviceTab = ({
   nodes = [],
-  citiesList = [],
   maintenancesList = [],
   loadingMaintenances,
   loadingValidation,
@@ -34,7 +32,6 @@ export const DeviceTab = ({
     category: 'iot_node',
     id: '',
     serial_number: '',
-    city_id: '',
     latitude: '',
     longitude: ''
   });
@@ -120,8 +117,8 @@ export const DeviceTab = ({
 
   const handleActivationSubmit = (e) => {
     e.preventDefault();
-    if (!activation.id || !activation.category || !activation.city_id || !activation.latitude || !activation.longitude) {
-      alert('Silakan lengkapi data kota penempatan dan koordinat lokasi.');
+    if (!activation.id || !activation.category || !activation.latitude || !activation.longitude) {
+      alert('Silakan lengkapi koordinat lokasi penempatan.');
       return;
     }
     if (!actPicture || !actSignature) {
@@ -134,7 +131,7 @@ export const DeviceTab = ({
       signature: actSignature
     });
     // Reset form states
-    setActivation({ category: 'iot_node', id: '', serial_number: '', city_id: '', latitude: '', longitude: '' });
+    setActivation({ category: 'iot_node', id: '', serial_number: '', latitude: '', longitude: '' });
     setActPicture(null);
     setActSignature(null);
     setActivationStep(1);
@@ -162,6 +159,24 @@ export const DeviceTab = ({
     setMaintSignature(null);
   };
 
+  // Auto-fill maintenance coordinates from the selected node's registered location
+  const handleMaintenanceNodeChange = (nodeId) => {
+    const node = nodes.find((n) => String(n.id) === String(nodeId));
+    setMaintenance((prev) => ({
+      ...prev,
+      iot_node_id: nodeId,
+      latitude: node?.latitude ?? '',
+      longitude: node?.longitude ?? ''
+    }));
+  };
+
+  useEffect(() => {
+    const selectedNode = nodes.find((node) => String(node.id) === String(maintenance.iot_node_id));
+    if (selectedNode && (!selectedNode.latitude || !selectedNode.longitude)) {
+      setMaintenance((prev) => ({ ...prev, latitude: '', longitude: '' }));
+    }
+  }, [nodes, maintenance.iot_node_id]);
+
   // Filtered maintenance list
   const filteredMaintenances = maintenancesList.filter(m => {
     const serial = (m.iot_node?.serial_number || m.iot_node_serial_number || '').toLowerCase();
@@ -186,7 +201,7 @@ export const DeviceTab = ({
             <span>Kelola Perangkat & Pemeliharaan</span>
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Panduan aktivasi nomor seri perangkat tambak dan pencatatan riwayat pemeliharaan rutin teknisi
+            Aktivasi perangkat dengan GPS dan pencatatan riwayat pemeliharaan teknisi
           </p>
         </div>
 
@@ -416,57 +431,48 @@ export const DeviceTab = ({
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Kota Penempatan *</label>
-                      <select
-                        required
-                        value={activation.city_id}
-                        onChange={(e) => setActivation({ ...activation, city_id: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-semibold focus:outline-none focus:border-[#0D9D1B] focus:bg-white"
-                      >
-                        <option value="">-- Pilih Kota --</option>
-                        {citiesList.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Unit Perangkat</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={`${activation.category === 'edge_gateway' ? 'Edge Gateway' : 'IoT Node'} #${activation.id || '—'}`}
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-slate-700 font-semibold focus:outline-none"
+                      />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase block">Lintang (Latitude) *</label>
-                        <button
-                          type="button"
-                          onClick={getActivationLocation}
-                          className="text-[9px] text-[#0D9D1B] hover:text-[#0A8516] font-bold flex items-center gap-0.5 cursor-pointer bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100"
-                        >
-                          <MapPin className="h-3 w-3" /> Ambil GPS
-                        </button>
-                      </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Titik Lokasi Pemasangan *</label>
+                      <button
+                        type="button"
+                        onClick={getActivationLocation}
+                        className="text-[9px] text-[#0D9D1B] hover:text-[#0A8516] font-bold flex items-center gap-0.5 cursor-pointer bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100"
+                      >
+                        <MapPin className="h-3 w-3" /> Ambil GPS
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
                       <input
-                        type="number"
-                        step="0.000001"
+                        type="text"
+                        readOnly
                         required
-                        placeholder="-8.652900"
+                        aria-label="Latitude pemasangan"
+                        placeholder="Latitude dari GPS"
                         value={activation.latitude}
-                        onChange={(e) => setActivation({ ...activation, latitude: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-mono font-bold focus:outline-none focus:border-[#0D9D1B] focus:bg-white"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-slate-700 font-mono font-bold focus:outline-none"
                       />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Bujur (Longitude) *</label>
                       <input
-                        type="number"
-                        step="0.000001"
+                        type="text"
+                        readOnly
                         required
-                        placeholder="116.319500"
+                        aria-label="Longitude pemasangan"
+                        placeholder="Longitude dari GPS"
                         value={activation.longitude}
-                        onChange={(e) => setActivation({ ...activation, longitude: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-mono font-bold focus:outline-none focus:border-[#0D9D1B] focus:bg-white"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-slate-700 font-mono font-bold focus:outline-none"
                       />
                     </div>
+                    <p className="text-[10px] text-slate-400 mt-1">Koordinat diambil dari GPS perangkat ini, bukan diketik manual.</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
@@ -532,7 +538,7 @@ export const DeviceTab = ({
                   <select
                     required
                     value={maintenance.iot_node_id}
-                    onChange={(e) => setMaintenance({ ...maintenance, iot_node_id: e.target.value })}
+                    onChange={(e) => handleMaintenanceNodeChange(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-semibold focus:outline-none focus:border-[#0D9D1B] focus:bg-white"
                   >
                     <option value="">-- Pilih Perangkat IoT --</option>
@@ -542,6 +548,12 @@ export const DeviceTab = ({
                       </option>
                     ))}
                   </select>
+                  {maintenance.iot_node_id && (
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      Koordinat lokasi otomatis dari posisi terdaftar node
+                      {maintenance.latitude ? `: ${maintenance.latitude}, ${maintenance.longitude}` : ' (belum tersedia — gunakan GPS)'}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -570,40 +582,49 @@ export const DeviceTab = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                {!maintenance.latitude || !maintenance.longitude ? (
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase block">Latitude *</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase block">Koordinat Lokasi *</label>
                       <button
                         type="button"
                         onClick={getMaintenanceLocation}
                         className="text-[9px] text-[#0D9D1B] font-bold cursor-pointer"
                       >
-                        GPS
+                        Ambil GPS
                       </button>
                     </div>
-                    <input
-                      type="number"
-                      step="0.000001"
-                      required
-                      placeholder="-8.652900"
-                      value={maintenance.latitude}
-                      onChange={(e) => setMaintenance({ ...maintenance, latitude: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-900 font-mono focus:outline-none"
-                    />
+                    <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                      Node ini belum memiliki koordinat terdaftar. Ambil titik GPS aktual untuk mencatat lokasi servis.
+                    </p>
                   </div>
+                ) : (
                   <div>
-                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Longitude *</label>
-                    <input
-                      type="number"
-                      step="0.000001"
-                      required
-                      placeholder="116.319500"
-                      value={maintenance.longitude}
-                      onChange={(e) => setMaintenance({ ...maintenance, longitude: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-900 font-mono focus:outline-none"
-                    />
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase block">Koordinat Lokasi</label>
+                      <button
+                        type="button"
+                        onClick={getMaintenanceLocation}
+                        className="text-[9px] text-[#0D9D1B] font-bold cursor-pointer"
+                      >
+                        Pakai GPS saat ini
+                      </button>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                      <p className="font-mono text-xs text-slate-800">{maintenance.latitude}, {maintenance.longitude}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Otomatis dari posisi IoT Node terdaftar</p>
+                    </div>
                   </div>
+                )}
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Foto Kondisi Setelah Servis (Opsional)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setMaintPicture(e.target.files?.[0] || null)}
+                    className="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-emerald-50 file:text-[#0D9D1B] cursor-pointer border border-slate-200 rounded-xl bg-slate-50 p-1"
+                  />
                 </div>
 
                 <div>

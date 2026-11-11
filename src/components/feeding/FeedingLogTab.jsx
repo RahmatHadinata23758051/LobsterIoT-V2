@@ -1,42 +1,40 @@
 import React, { useState } from 'react';
-import { RotateCcw, Trash2, Calendar, User, Clock, Plus, Filter, Tag, Zap, Droplets, Layers } from 'lucide-react';
-import { HardwareControlPanel } from './HardwareControlPanel';
+import { RotateCcw, Trash2, Calendar, Layers } from 'lucide-react';
 
 export const FeedingLogTab = ({
-  token,
-  selectedSerial = 'DEMO-NODE-001',
-  cagesList = [],
+  iotNodesList = [],
   operatorsList = [],
   feedingLogs = [],
   loadingFeeding,
   onAddFeedingLog,
   onDeleteFeedingLog,
-  onRefresh,
-  activityLogs = []
+  onRefresh
 }) => {
   const [newFeed, setNewFeed] = useState({
-    cage_id: '',
+    iot_node_id: '',
     operator_id: '',
     feed_session: 'morning',
     feed_type: '',
     weight_kg: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newFeed.cage_id || !newFeed.operator_id || !newFeed.weight_kg || !newFeed.feed_type) {
-      alert('Seluruh kolom bertanda bintang (*) wajib diisi.');
+    const weight = Number(newFeed.weight_kg);
+    if (!newFeed.iot_node_id || !newFeed.operator_id || !newFeed.feed_type.trim() || !Number.isFinite(weight) || weight < 0.01) {
+      alert('Pilih node dan petugas, isi jenis pakan, serta masukkan berat minimal 0,01 kg.');
       return;
     }
-    onAddFeedingLog({
-      cage_id: parseInt(newFeed.cage_id),
-      operator_id: parseInt(newFeed.operator_id),
+    const saved = await onAddFeedingLog({
+      iot_node_id: Number(newFeed.iot_node_id),
+      operator_id: Number(newFeed.operator_id),
       feed_session: newFeed.feed_session,
-      feed_type: newFeed.feed_type,
-      weight_kg: parseFloat(newFeed.weight_kg)
+      feed_type: newFeed.feed_type.trim(),
+      weight_kg: weight
     });
+    if (saved === false) return;
     setNewFeed({
-      cage_id: '',
+      iot_node_id: '',
       operator_id: '',
       feed_session: 'morning',
       feed_type: '',
@@ -98,20 +96,26 @@ export const FeedingLogTab = ({
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Pilih Keramba (KJA) *</label>
+              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Pilih IoT Node *</label>
               <select
                 required
-                value={newFeed.cage_id}
-                onChange={(e) => setNewFeed({ ...newFeed, cage_id: e.target.value })}
+                disabled={iotNodesList.length === 0}
+                value={newFeed.iot_node_id}
+                onChange={(e) => setNewFeed({ ...newFeed, iot_node_id: e.target.value })}
                 className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:border-[#0D9D1B]"
               >
-                <option value="">-- Pilih Keramba --</option>
-                {cagesList.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.cage_code}
+                <option value="">-- Pilih Node --</option>
+                {iotNodesList.map((node) => (
+                  <option key={node.id} value={node.id}>
+                    {node.serial_number}{node.cage ? ` — ${node.cage.cage_code}` : ''}
                   </option>
                 ))}
               </select>
+              {iotNodesList.length === 0 && (
+                <p className="text-[10px] text-amber-600 mt-1 font-medium">
+                  Belum ada IoT Node terdaftar. Daftarkan node terlebih dahulu di menu Data Master.
+                </p>
+              )}
             </div>
 
             <div>
@@ -172,6 +176,7 @@ export const FeedingLogTab = ({
 
             <button
               type="submit"
+              disabled={iotNodesList.length === 0}
               className="w-full py-2.5 bg-[#0D9D1B] hover:bg-[#0A8516] text-white font-semibold rounded-lg tracking-wider uppercase transition cursor-pointer shadow-xs shadow-green-500/10"
             >
               Simpan Log Pakan
@@ -222,7 +227,7 @@ export const FeedingLogTab = ({
                       <td className="px-4 py-3 font-mono text-slate-550 whitespace-nowrap">
                         {new Date(log.created_at).toLocaleString('id-ID')}
                       </td>
-                      <td className="px-4 py-3 font-bold text-slate-900">{log.cage?.cage_code || 'DEMO-NODE-001'}</td>
+                      <td className="px-4 py-3 font-bold text-slate-900">{log.iot_node?.cage?.cage_code || log.iot_node?.serial_number || '—'}</td>
                       <td className="px-4 py-3 text-slate-600 font-medium">{log.operator?.full_name || log.user?.name || 'Sistem Otomatis'}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {getTriggerBadge(log.notes || '')}

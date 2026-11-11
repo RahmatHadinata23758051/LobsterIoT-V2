@@ -120,7 +120,7 @@ export default function App() {
     handleAddIotNodeMaster, handleUpdateIotNodeMaster, handleDeleteIotNodeMaster,
     handleAddCage, handleUpdateCage, handleDeleteCage,
     handleAddCamera, handleUpdateCamera, handleDeleteCamera,
-    handleAddOperator, handleDeleteOperator,
+    handleAddOperator, handleUpdateOperator, handleDeleteOperator,
     handleAddFeedingLog, handleDeleteFeedingLog,
     handleUpdateThresholds, handleValidateSerial, handleActivateNode,
     handleSubmitMaintenance, handleUpdateProfile,
@@ -400,7 +400,7 @@ export default function App() {
               activeNode={activeNode}
               activeNodeSerial={activeNodeSerial}
               dashboardData={dashboardData}
-              cameras={cameras}
+              setActiveTab={setActiveTab}
               chartMetric={chartMetric}
               setChartMetric={setChartMetric}
               weatherData={weatherData}
@@ -410,9 +410,7 @@ export default function App() {
 
           {activeTab === 'feeding' && (
             <FeedingLogTab
-              token={token}
-              selectedSerial={activeNodeSerial}
-              cagesList={cagesList}
+              iotNodesList={iotNodesMasterList}
               operatorsList={operatorsList}
               feedingLogs={feedingLogs}
               loadingFeeding={loadingFeeding}
@@ -450,6 +448,7 @@ export default function App() {
           {activeTab === 'cages' && (
             <CageManagement
               cagesList={cagesList}
+              edgeGatewaysList={edgeGatewaysList}
               loadingCages={loadingCages}
               onAddCage={handleAddCage}
               onUpdateCage={handleUpdateCage}
@@ -475,6 +474,7 @@ export default function App() {
               operatorsList={operatorsList}
               loadingOperators={loadingOperators}
               onAddOperator={handleAddOperator}
+              onUpdateOperator={handleUpdateOperator}
               onDeleteOperator={handleDeleteOperator}
               onRefresh={fetchOperators}
             />
@@ -498,6 +498,7 @@ export default function App() {
               loadingIotNodesMaster={loadingIotNodesMaster}
               citiesList={citiesList}
               edgeGatewaysList={edgeGatewaysList}
+              cagesList={cagesList}
               onAddIotNodeMaster={handleAddIotNodeMaster}
               onUpdateIotNodeMaster={handleUpdateIotNodeMaster}
               onDeleteIotNodeMaster={handleDeleteIotNodeMaster}
@@ -508,6 +509,7 @@ export default function App() {
           {activeTab === 'sensor' && (
             <SensorTypeManagement
               sensorTypesList={sensorTypesList}
+              activeNode={activeNode}
               loadingSensorTypes={loadingSensorTypes}
               thresholdsList={thresholdsList}
               loadingThresholds={loadingThresholds}
@@ -520,7 +522,6 @@ export default function App() {
           {activeTab === 'devices' && (
             <DeviceTab
               nodes={nodes}
-              citiesList={citiesList}
               maintenancesList={maintenancesList}
               loadingMaintenances={loadingMaintenances}
               loadingValidation={loadingValidation}

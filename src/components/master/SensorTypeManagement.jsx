@@ -1,5 +1,6 @@
 import React from 'react';
 import { RotateCcw, Droplet, Thermometer, Wind, Eye, Layers, Activity } from 'lucide-react';
+import { updateThresholdValue } from './thresholds.js';
 
 const ICON_MAP = {
   ph: Droplet,
@@ -19,8 +20,18 @@ const LABEL_MAP = {
   turbidity: 'Kekeruhan (Turbidity)',
 };
 
+const UNIT_MAP = {
+  ph: 'pH',
+  tds: 'ppm',
+  dissolved_oxygen: 'mg/L',
+  water_temperature: '°C',
+  flow_rate: 'm/s',
+  turbidity: 'NTU',
+};
+
 export const SensorTypeManagement = ({
   sensorTypesList = [],
+  activeNode,
   loadingSensorTypes,
   onRefresh,
   
@@ -30,9 +41,12 @@ export const SensorTypeManagement = ({
   onUpdateThresholds,
   setThresholdsList
 }) => {
-
   const handleThresholdSubmit = (e) => {
     e.preventDefault();
+    if (!activeNode?.serial_number) {
+      alert('Tidak ada IoT Node aktif terpilih.');
+      return;
+    }
     onUpdateThresholds(thresholdsList);
   };
 
@@ -71,8 +85,8 @@ export const SensorTypeManagement = ({
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="text-xs leading-normal">
-                    <h4 className="font-semibold text-slate-900 text-[13px]">{st.name || st.sensor_code.toUpperCase()}</h4>
-                    <p className="text-[10px] text-slate-400 font-mono font-bold mt-0.5">KODE: {st.sensor_code} · SATUAN: {st.unit || '—'}</p>
+                    <h4 className="font-semibold text-slate-900 text-[13px]">{st.name || LABEL_MAP[st.sensor_code] || String(st.sensor_code || 'Sensor').toUpperCase()}</h4>
+                    <p className="text-[10px] text-slate-400 font-mono font-bold mt-0.5">KODE: {st.sensor_code || '—'} · SATUAN: {st.unit || UNIT_MAP[st.sensor_code] || '—'}</p>
                     <p className="text-slate-500 mt-1.5 leading-relaxed">{st.description || 'Tidak ada deskripsi sensor.'}</p>
                   </div>
                 </div>
@@ -87,22 +101,29 @@ export const SensorTypeManagement = ({
         <div className="border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Pengaturan Ambang Batas Sensor</h2>
-            <p className="text-[10px] text-slate-455 mt-0.5">Sesuaikan ambang batas nilai ideal pemicu peringatan sensor kualitas air</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Sesuaikan batas peringatan untuk sensor kualitas air</p>
+            <p className="text-[10px] text-slate-500 mt-1">
+              Node aktif: <span className="font-mono font-semibold text-slate-700">{activeNode?.serial_number || 'Tidak ada node aktif'}</span>
+            </p>
           </div>
         </div>
 
-        {loadingThresholds ? (
+        {!activeNode?.serial_number ? (
+          <div className="py-12 text-center text-xs text-slate-500 border border-dashed border-slate-200 rounded-xl">
+            Pilih IoT Node dari menu atas untuk melihat dan mengubah ambang batasnya.
+          </div>
+        ) : loadingThresholds ? (
           <div className="py-12 text-center text-xs text-slate-400 font-medium">Memuat data thresholds...</div>
         ) : thresholdsList.length === 0 ? (
           <div className="py-12 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
-            Tidak ada konfigurasi sensor yang tersimpan di backend.
+            Tidak ada konfigurasi sensor untuk node ini.
           </div>
         ) : (
           <form onSubmit={handleThresholdSubmit} className="space-y-5 text-xs">
             <div className="divide-y divide-slate-100 border border-slate-200/60 rounded-xl overflow-hidden bg-slate-50/20">
               {thresholdsList.map((th, index) => {
                 const Icon = ICON_MAP[th.sensor_code] || Droplet;
-                const label = LABEL_MAP[th.sensor_code] || th.sensor_code.toUpperCase();
+                const label = LABEL_MAP[th.sensor_code] || String(th.sensor_code || 'Sensor').toUpperCase();
 
                 return (
                   <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-slate-50/55 transition-colors">
@@ -112,7 +133,7 @@ export const SensorTypeManagement = ({
                       </div>
                       <div>
                         <p className="font-semibold text-slate-800">{label}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">ID: {th.sensor_code}</p>
+                        <p className="text-[10px] text-slate-400 font-mono">ID: {th.sensor_code || '—'}</p>
                       </div>
                     </div>
 
@@ -123,11 +144,9 @@ export const SensorTypeManagement = ({
                           type="number"
                           step="0.01"
                           value={th.value_min}
-                          onChange={(e) => {
-                            const copy = [...thresholdsList];
-                            copy[index].value_min = e.target.value;
-                            setThresholdsList(copy);
-                          }}
+                          onChange={(e) => setThresholdsList((prev) =>
+                            updateThresholdValue(prev, index, 'value_min', e.target.value)
+                          )}
                           className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#0D9D1B]"
                         />
                       </div>
@@ -140,11 +159,9 @@ export const SensorTypeManagement = ({
                           type="number"
                           step="0.01"
                           value={th.value_max}
-                          onChange={(e) => {
-                            const copy = [...thresholdsList];
-                            copy[index].value_max = e.target.value;
-                            setThresholdsList(copy);
-                          }}
+                          onChange={(e) => setThresholdsList((prev) =>
+                            updateThresholdValue(prev, index, 'value_max', e.target.value)
+                          )}
                           className="w-24 bg-white border border-slate-200 rounded-lg p-2 text-slate-900 font-mono font-bold text-center focus:outline-none focus:border-[#0D9D1B]"
                         />
                       </div>

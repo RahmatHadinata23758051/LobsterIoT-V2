@@ -8,7 +8,7 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
   const canvasRef = useRef(null);
   const hlsRef = useRef(null);
   
-  const [status, setStatus] = useState('idle'); // idle | loading | playing | error
+  const [status, setStatus] = useState('idle'); // idle | loading | playing | error | unsupported | standby
   const [predictions, setPredictions] = useState([]);
   const [aiStatusText, setAiStatusText] = useState('YOLOv8 CONNECTING...');
   const [isAiConnected, setIsAiConnected] = useState(false);
@@ -18,9 +18,18 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
     const video = videoRef.current;
     if (!video) return;
 
-    setStatus('idle');
+    setStatus(streamUrl ? 'idle' : 'standby');
     setPredictions([]);
+    video.onloadeddata = null;
+    video.onerror = null;
+    video.removeAttribute('src');
+    video.load();
     if (!streamUrl) return;
+
+    if (/^rtsps?:\/\//i.test(streamUrl)) {
+      setStatus('unsupported');
+      return;
+    }
 
     setStatus('loading');
 
@@ -416,15 +425,27 @@ export const CctvView = ({ token, streamUrl, isCameraOnline = true }) => {
       )}
 
       {/* ─── IDLE STATE / OFFLINE TOGGLE ─────────────────────────── */}
-      {(status === 'idle' || !isCameraOnline) && (
+      {(status === 'idle' || status === 'standby' || !isCameraOnline) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-20 p-6">
           <WifiOff className="h-8 w-8 text-slate-350 mb-2" />
           <div className="text-center">
-            <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Camera OFF</p>
+            <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              {status === 'standby' ? 'Tidak ada stream' : 'Camera OFF'}
+            </p>
             <p className="text-[10px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
-              Kamera tidak aktif. Aktifkan koneksi kamera pada panel kontrol di atas untuk melihat siaran langsung.
+              {status === 'standby'
+                ? 'Stream kamera belum dikonfigurasi. Periksa alamat DVR dan channel pada Data Master.'
+                : 'Kamera tidak aktif. Aktifkan koneksi kamera pada panel kontrol di atas untuk melihat siaran langsung.'}
             </p>
           </div>
+        </div>
+      )}
+
+      {status === 'unsupported' && (
+        <div role="status" className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950 p-6 text-center">
+          <CameraOff className="mb-3 h-8 w-8 text-amber-400" />
+          <p className="text-sm font-semibold text-white">RTSP tidak dapat diputar di browser</p>
+          <p className="mt-1 max-w-sm text-[11px] leading-relaxed text-slate-300">DVR tersimpan, tetapi stream RTSP memerlukan media gateway yang mengubahnya ke HLS atau WebRTC.</p>
         </div>
       )}
 
